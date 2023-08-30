@@ -1,28 +1,35 @@
 .navigation {
-  background: $gray-2;
+  background: $gray-1;
   display: flex;
   flex-direction: column;
-  min-width: 190px;
-  padding: 20px 0;
+  font-size: 0.9rem;
+  min-width: 165px;
+  padding: 0.5rem 0;
   user-select: none;
-  width: 190px;
+  width: 165px;
 
   &__link {
     align-items: center;
     color: $gray-3;
     cursor: pointer;
     display: flex;
-    height: 40px;
-    padding: 0 20px;
+    gap: 0.5rem;
+    height: 45px;
+    padding: 0 1rem;
     position: relative;
 
     &.active {
-      background-color: $gray-2;
-      font-weight: 800;
+      font-weight: 700;
     }
 
     &:hover {
       background-color: $gray-2;
+      font-weight: 700;
+    }
+
+    .image-icon {
+      display: flex;
+      flex: 0 0 25px;
     }
   }
 }

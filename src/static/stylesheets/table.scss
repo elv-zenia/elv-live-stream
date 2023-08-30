@@ -1,0 +1,15 @@
+.table {
+  width: 100%;
+
+  &__header {
+    border-bottom: 1px solid $black;
+    display: table-header-group;
+  }
+
+  &__header-cell {
+    display: table-cell;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    text-align: left;
+  }
+}

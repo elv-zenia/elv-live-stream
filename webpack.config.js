@@ -1,6 +1,7 @@
 const Path = require("path");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = {
   target: "web",
@@ -37,11 +38,15 @@ module.exports = {
       title: "Eluvio Live Stream",
       cache: false,
       filename: "index.html",
-      favicon: "./src/static/icons/favicon.png",
+      favicon: "./src/static/images/favicon.png",
+    }),
+    new webpack.ProvidePlugin({
+      process: "process/browser"
     })
   ],
   resolve: {
     alias: {
+      "browser": "process/browser",
       Assets: Path.resolve(__dirname, "src/static"),
       Components: Path.resolve(__dirname, "src/components"),
       Pages: Path.resolve(__dirname, "/src/pages")
@@ -49,7 +54,8 @@ module.exports = {
     fallback: {
       "fs": false,
       "stream": require.resolve("stream-browserify"),
-      "crypto": require.resolve("crypto-browserify")
+      "crypto": require.resolve("crypto-browserify"),
+      "process/browser": require.resolve("process/browser")
     },
     extensions: [".js", ".jsx", ".scss", ".png", ".svg"]
   },
@@ -80,7 +86,7 @@ module.exports = {
         loader: "svg-inline-loader"
       },
       {
-        test: /\.(woff2?|ttf)$/i,
+        test: /\.(woff2?|ttf|json)$/i,
         loader: "file-loader",
         type: "javascript/auto"
       },
