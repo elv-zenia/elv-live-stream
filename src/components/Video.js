@@ -19,12 +19,7 @@ const Video = observer(({
   }, [player]);
 
   if(!versionHash) {
-    if(
-      videoMetadata.sources &&
-      videoMetadata.sources.default &&
-      videoMetadata.sources.default["."] &&
-      videoMetadata.sources.default["."].container
-    ) {
+    if(videoMetadata.sources?.default?.["."]?.container) {
       versionHash = videoMetadata.sources.default["."].container;
     }
   }

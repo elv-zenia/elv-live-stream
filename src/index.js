@@ -8,11 +8,10 @@ import LeftNavigation from "Components/LeftNavigation";
 import {PageLoader} from "Components/Loader";
 import Create from "./pages/create/Create";
 import Streams from "./pages/streams/Streams";
-import StreamItem from "./pages/stream-item/StreamItem";
-import Manage from "./pages/manage/Manage";
+import Monitor from "./pages/monitor/Monitor";
 
 import "Assets/stylesheets/app.scss";
-import GearIcon from "Assets/icons/gear.svg";
+import MediaIcon from "Assets/icons/media.svg";
 import VideoPlusIcon from "Assets/icons/video-plus.svg";
 import StreamIcon from "Assets/icons/stream.svg";
 
@@ -22,8 +21,7 @@ export const appRoutes = [
   {path: "/", element: <Create />, exact: true},
   {path: "/create", element: <Create />, label: "Create", icon: VideoPlusIcon},
   {path: "/streams", element: <Streams />, label: "Streams", icon: StreamIcon},
-  {path: "/manage", element: <Manage />, label: "Manage", icon: GearIcon},
-  {path: "/manage/:id", element: <StreamItem />}
+  {path: "/monitor", element: <Monitor />, label: "Monitor", icon: MediaIcon}
 ];
 
 const App = observer(() => {

@@ -4,21 +4,25 @@ const Table = ({headers=[], rows=[]}) => {
   return (
     <table className="table">
       <thead className="table__header">
-        <tr>
+        <tr className="table__header-row">
           {
             headers.map(cell => (
-              <th key={`table-header-cell-${cell.id || cell.label}`} className="table__header-cell">{ cell.label }</th>
+              <th key={`table-header-cell-${cell.id || cell.label}`} className="table__cell">
+                { cell.label }
+              </th>
             ))
           }
         </tr>
       </thead>
-      <tbody>
+      <tbody className="table__body">
         {
           rows.map(row => (
-            <tr key={`table-row-${row.id || row.label}`}>
+            <tr key={`table-row-${row.id || row.label}`} className="table__body-row">
               {
                 row.cells.map(cell => (
-                  <td key={`table-row-cell-${cell.id || cell.label}`}>{ cell.label }</td>
+                  <td key={`table-row-cell-${cell.id || cell.label}`} className="table__cell">
+                    { cell.label }
+                  </td>
                 ))
               }
             </tr>

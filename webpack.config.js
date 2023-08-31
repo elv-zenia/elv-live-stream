@@ -53,6 +53,11 @@ module.exports = {
     },
     fallback: {
       "fs": false,
+      "https": false,
+      "http": false,
+      "url": false,
+      "zlib": false,
+      "os": false,
       "stream": require.resolve("stream-browserify"),
       "crypto": require.resolve("crypto-browserify"),
       "process/browser": require.resolve("process/browser")
@@ -62,7 +67,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(js|mjs|jsx)$/,
         use: {
           loader: "babel-loader",
           options: {

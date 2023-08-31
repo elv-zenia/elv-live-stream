@@ -36,7 +36,7 @@ class RootStore {
       window.client = this.client;
 
       this.networkInfo = yield this.client.NetworkInfo();
-      yield this.streamStore.LoadSites();
+      yield this.streamStore.LoadData();
     } catch(error) {
       console.error("Failed to initialize application");
       console.error(error);

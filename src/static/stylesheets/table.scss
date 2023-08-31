@@ -2,14 +2,26 @@
   width: 100%;
 
   &__header {
-    border-bottom: 1px solid $black;
     display: table-header-group;
+    font-weight: 500;
   }
 
-  &__header-cell {
+  &__header-row {
+    background-color: $gray-1;
+    display: table-row;
+  }
+
+  &__body {
+    display: table-row-group;
+  }
+
+  &__body-row {
+    display: table-row;
+  }
+
+  &__cell {
     display: table-cell;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 1rem;
     text-align: left;
   }
 }
