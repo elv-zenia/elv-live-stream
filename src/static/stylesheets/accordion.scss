@@ -39,7 +39,7 @@
     line-height: 1rem;
 
     &:hover {
-      background-color: $gray-2;
+      background-color: $gray-4;
     }
   }
 
@@ -67,7 +67,6 @@
 
   &__content-text {
     padding-bottom: calc(1.5rem + 8px);
-    padding-right: 25%;
     padding-top: 0.5rem;
   }
 }

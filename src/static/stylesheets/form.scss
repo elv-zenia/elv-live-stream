@@ -2,6 +2,12 @@
   line-height: 1.5;
   width: 700px;
 
+  &__section-header {
+    font-size: 1.25rem;
+    font-weight: 400;
+    padding-bottom: 1rem;
+  }
+
   &__input-label-container {
     margin-bottom: 0.5rem;
   }
@@ -42,7 +48,14 @@
     }
   }
 
+  &__input-error-text {
+    color: $red;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+
   input[type="text"],
+  input[type="number"],
   textarea,
   select {
     width: 100%;
@@ -50,8 +63,17 @@
 
   input[type="text"],
   textarea,
+  &__radio-container,
   select:not(:last-child) {
     margin-bottom: 1rem;
+  }
+
+  &__field-wrapper {
+    margin-bottom: 1rem;
+
+    input[data-invalid] {
+      outline: 1px solid $red;
+    }
   }
 
   &__tooltip-item {
@@ -67,5 +89,9 @@
     &__encryption-title {
       flex: 0 0 35%;
     }
+  }
+
+  &__actions {
+    margin: 2rem 0 2.5rem;
   }
 }

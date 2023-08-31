@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import InfoIcon from "Assets/icons/circle-info";
 import Tooltip from "Components/Tooltip";
 
@@ -70,7 +70,7 @@ export const Select = ({
   );
 };
 
-export const Input = ({
+export const TextInput = ({
   label,
   labelDescription,
   required,
@@ -78,9 +78,8 @@ export const Input = ({
   formName,
   onChange,
   placeholder,
-  type="text",
   disabled,
-  hidden
+  ...rest
 }) => {
   return (
     <>
@@ -95,26 +94,108 @@ export const Input = ({
         }
       </div>
       <input
-        type={type}
+        type="text"
         name={formName}
         required={required}
         value={value || ""}
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
-        hidden={hidden}
+        {...rest}
       />
     </>
+  );
+};
+
+export const NumberInput = ({
+  label,
+  labelDescription,
+  required,
+  value,
+  formName,
+  onChange,
+  placeholder,
+  disabled,
+  min=0,
+  max,
+  pattern="[0-9]*",
+  ...rest
+}) => {
+  const [errorMessage, setErrorMessage] = useState("");
+  const ValidInput = (event) => {
+    let valid = true;
+
+    if(event.key && !/^(ArrowDown|ArrowUp|\d)$/.test(event.key)) {
+      valid = false;
+    }
+
+    if(event.target?.value === "") {
+      valid = false;
+    }
+
+    if(event.target?.value > max || event.target?.value < min) {
+      valid = false;
+    }
+
+    if(valid) {
+      setErrorMessage("");
+    } else {
+      setErrorMessage("Please enter a valid number.");
+    }
+  };
+
+  return (
+    <div className="form__field-wrapper">
+      <div className="form__input-label-container">
+        <label className={`form__input-label${disabled ? " form__input-label--disabled" : ""}`} htmlFor={formName}>
+          { label }
+          <span className="form__input-label--required">{ required ? " *" : ""}</span>
+        </label>
+        {
+          labelDescription &&
+          <div className="form__input-description">{labelDescription}</div>
+        }
+      </div>
+      <input
+        type="number"
+        name={formName}
+        required={required}
+        value={value || ""}
+        onKeyUp={(event) => {
+          ValidInput(event);
+        }}
+        onChange={(event) => {
+          onChange(event);
+          ValidInput(event);
+        }}
+        placeholder={placeholder}
+        disabled={disabled}
+        min={min}
+        max={max}
+        pattern={pattern}
+        data-invalid={errorMessage ? true : undefined}
+        aria-invalid={!!errorMessage}
+        {...rest}
+      />
+      {
+        errorMessage &&
+        <div className="form__input-error-text">
+          { errorMessage }
+        </div>
+      }
+    </div>
   );
 };
 
 export const Radio = ({label, formName, required, options=[]}) => {
   return (
     <div className="form__radio-container">
-      <p className="form__input-label">
-        { label }
-        <span className="form__input-label--required">{ required ? " *" : ""}</span>
-      </p>
+      <div className="form__input-label-container">
+        <p className="form__input-label">
+          { label }
+          <span className="form__input-label--required">{ required ? " *" : ""}</span>
+        </p>
+      </div>
       {
         options.map(({optionLabel, id, value, checked, onChange}) => (
           <div key={`radio-option-${id}`}>

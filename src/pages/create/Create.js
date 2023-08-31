@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Input, Radio, Select} from "Components/Inputs";
+import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import {streamStore} from "../../stores";
 import {observer} from "mobx-react";
 import Accordion from "Components/Accordion";
@@ -54,7 +54,6 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
       label="Playback Encryption"
       labelDescription="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
       formName="playbackEncryption"
-      required={true}
       options={options}
       defaultOption={{
         value: "",
@@ -75,12 +74,14 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
 });
 
 const AdvancedSection = observer(({
-  // outputFormData,
-  // OutputUpdateCallback,
-  // inputFormData,
-  // InputUpdateCallback,
+  outputFormData,
+  OutputUpdateCallback,
+  inputFormData,
+  InputUpdateCallback,
   advancedData,
-  AdvancedUpdateCallback
+  AdvancedUpdateCallback,
+  drmFormData,
+  DrmUpdateCallback
 }) => {
   return (
     <Accordion
@@ -112,6 +113,113 @@ const AdvancedSection = observer(({
           }
         ]}
       />
+
+      {
+        advancedData.avProperties === "CUSTOM" &&
+        <>
+          <TextInput
+            label="Retention"
+            value={advancedData.retention}
+            onChange={(event) => AdvancedUpdateCallback({
+              key: "avProperties",
+              event
+            })}
+          />
+          <PlaybackEncryption
+            drmFormData={drmFormData}
+            UpdateCallback={({event, key}) => DrmUpdateCallback({
+              key,
+              event
+            })}
+          />
+
+          {/* Output */}
+          <div className="form__section-header">Video Output</div>
+          <NumberInput
+            label="Height"
+            value={outputFormData.videoHeight}
+            onChange={(event) => OutputUpdateCallback({
+              key: "videoHeight",
+              event
+            })}
+          />
+          <NumberInput
+            label="Width"
+            value={outputFormData.videoWidth}
+            onChange={(event) => OutputUpdateCallback({
+              key: "videoWidth",
+              event
+            })}
+          />
+          <NumberInput
+            label="Bitrate"
+            value={outputFormData.videoBitrate}
+            onChange={(event) => OutputUpdateCallback({
+              key: "videoBitrate",
+              event
+            })}
+          />
+
+          <div className="form__section-header">Audio Output</div>
+          <Select
+            label="Channel Layout"
+            options={[
+              {label: "Stereo (2)", value: "Stereo (2)"},
+              {label: "Surround (5.1)", value: "Surround (5.1)"}
+            ]}
+            onChange={(event) => OutputUpdateCallback({
+              key: "audioChannelLayout",
+              event
+            })}
+          />
+          <NumberInput
+            label="Bitrate"
+            value={outputFormData.audioBitrate}
+            onChange={(event) => OutputUpdateCallback({
+              key: "audioBitrate",
+              event
+            })}
+          />
+
+          {/* Input */}
+          <div className="form__section-header">Video Input</div>
+          <NumberInput
+            label="Stream ID"
+            value={inputFormData.videoStreamId}
+            onChange={(event) => InputUpdateCallback({
+              key: "videoStreamId",
+              event
+            })}
+          />
+          <NumberInput
+            label="Stream Index"
+            value={inputFormData.videoStreamIndex}
+            onChange={(event) => InputUpdateCallback({
+              key: "videoStreamIndex",
+              event
+            })}
+          />
+
+          <div className="form__section-header">Audio Input</div>
+          <NumberInput
+            label="Stream ID"
+            value={inputFormData.audioStreamId}
+            onChange={(event) => InputUpdateCallback({
+              key: "audioStreamId",
+              event
+            })}
+          />
+          <NumberInput
+            label="Stream Index"
+            min={0}
+            value={inputFormData.audioStreamIndex}
+            onChange={(event) => InputUpdateCallback({
+              key: "audioStreamIndex",
+              event
+            })}
+          />
+        </>
+      }
     </Accordion>
   );
 });
@@ -129,22 +237,18 @@ const Create = observer(() => {
   });
 
   const [outputFormData, setOutputFormData] = useState({
-    videoQuality: "default",
     videoHeight: "",
     videoWidth: "",
     videoBitrate: "",
-    audioQuality: "default",
     audioChannelLayout: "",
     audioBitrate: ""
   });
 
   const [inputFormData, setInputFormData] = useState({
-    videoStream: "default",
-    videoStreamId: "",
-    videoStreamIndex: "",
-    audioStream: "default",
-    audioStreamId: "",
-    audioStreamIndex: ""
+    videoStreamId: "0",
+    videoStreamIndex: "0",
+    audioStreamId: "0",
+    audioStreamIndex: "0"
   });
 
   const [advancedData, setAdvancedData] = useState({
@@ -187,10 +291,12 @@ const Create = observer(() => {
     callback(newData);
   };
 
+  const HandleSubmit = () => {};
+
   return (
     <div>
       <div className="page-header">Create Live Stream</div>
-      <form className="form">
+      <form className="form" onSubmit={HandleSubmit}>
         <Select
           label="Stream Type"
           options={[
@@ -205,7 +311,7 @@ const Create = observer(() => {
             formKey: formKeys.BASIC
           })}
         />
-        <Input
+        <TextInput
           label="URL"
           required={true}
           value={basicFormData.url}
@@ -215,7 +321,7 @@ const Create = observer(() => {
             formKey: formKeys.BASIC
           })}
         />
-        <Input
+        <TextInput
           label="Name"
           required={true}
           value={basicFormData.name}
@@ -225,7 +331,7 @@ const Create = observer(() => {
             formKey: formKeys.BASIC
           })}
         />
-        <Input
+        <TextInput
           label="Description"
           value={basicFormData.description}
           onChange={event => UpdateFormData({
@@ -234,7 +340,7 @@ const Create = observer(() => {
             formKey: formKeys.BASIC
           })}
         />
-        <Input
+        <TextInput
           label="Display Name"
           value={basicFormData.displayName}
           onChange={event => UpdateFormData({
@@ -299,19 +405,16 @@ const Create = observer(() => {
           })}
         />
 
-        <PlaybackEncryption
-          drmFormData={drmFormData}
-          UpdateCallback={({event, key}) => UpdateFormData({
-            key,
-            value: event.target.value,
-            formKey: formKeys.DRM
-          })}
-        />
-
         <AdvancedSection
           inputFormData={inputFormData}
           outputFormData={outputFormData}
           advancedData={advancedData}
+          drmFormData={drmFormData}
+          DrmUpdateCallback={({event, key}) => UpdateFormData({
+            key,
+            value: event.target.value,
+            formKey: formKeys.DRM
+          })}
           InputUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
@@ -328,6 +431,10 @@ const Create = observer(() => {
             formKey: formKeys.ADVANCED
           })}
         />
+
+        <div className="form__actions">
+          <input type="submit" value="Create" />
+        </div>
       </form>
     </div>
   );

@@ -38,7 +38,7 @@ body,
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
   max-width: 100%;
   width: 100%;
 }
@@ -48,6 +48,8 @@ body,
 }
 
 main {
+  height: 100%;
+  overflow-y: auto;
   padding: 2rem;
   width: 100%;
 }
@@ -81,12 +83,14 @@ textarea {
 }
 
 input[type="text"],
+input[type="number"],
 input[type="password"],
 select {
   height: 35px;
 }
 
 input[type="text"],
+input[type="number"],
 input[type="password"],
 select,
 textarea {
@@ -98,5 +102,25 @@ textarea {
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+}
+
+input[type="submit"] {
+  background-color: $blue-1;
+  border: 1px solid $blue-2;
+  color: $white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  min-height: 35px;
+  min-width: 7.5rem;
+  padding: 3px 10px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.8;
   }
 }
