@@ -1,0 +1,71 @@
+.form {
+  line-height: 1.5;
+  width: 700px;
+
+  &__input-label-container {
+    margin-bottom: 0.5rem;
+  }
+
+  &__input-label {
+    display: flex;
+    font-size: 0.95rem;
+    gap: 5px;
+
+    &--required {
+      color: $red;
+      font-size: 1.2rem;
+      font-weight: 500;
+      vertical-align: middle;
+    }
+
+    &--disabled {
+      opacity: 0.5;
+    }
+  }
+
+  &__input-label-tooltip {
+    display: inline-flex;
+
+    .tooltip__icon {
+      color: $gray-3;
+      width: 1rem;
+    }
+  }
+
+  &__input-description {
+    color: $gray-3;
+    font-size: 0.8rem;
+    font-weight: 400;
+
+    &--disabled {
+      opacity: 0.5;
+    }
+  }
+
+  input[type="text"],
+  textarea,
+  select {
+    width: 100%;
+  }
+
+  input[type="text"],
+  textarea,
+  select:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+
+  &__tooltip-item {
+    display: flex;
+    gap: 1rem;
+    line-height: 1.25;
+    padding-bottom: 5px;
+
+    &__permission-title {
+      flex: 0 0 25%;
+    }
+
+    &__encryption-title {
+      flex: 0 0 35%;
+    }
+  }
+}
