@@ -3,6 +3,7 @@ $gray-1: #f5f5f5;
 $gray-2: #eee;
 $gray-3: #404040;
 $gray-4: #ccc;
+$gray-5: #7b7b7b;
 
 $black: #000;
 
@@ -11,6 +12,10 @@ $blue-1: #1a65d6;
 $blue-2: #436cde;
 $red: #e10707;
 
+$dark-opacity: rgb(0 0 0 / 30%);
+
 $dark-gradient-1: rgb(50 50 50 / 100%) 0%, rgb(0 0 0 / 100%) 100%;
+$dark-gradient-2: rgb(14 18 22 / 35%) 0 10px 38px -10px, rgb(14 18 22 / 20%) 0 10px 20px -15px;
+
 $disabled-text: #bdbdbd;
 /* stylelint-enable scss/dollar-variable-empty-line-before */

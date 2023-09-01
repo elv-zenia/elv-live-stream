@@ -286,7 +286,6 @@ const Create = observer(() => {
     const {data, callback} = formMap[formKey];
     const newData = Object.assign({}, data);
     newData[key] = value;
-    console.log("newData", newData);
 
     callback(newData);
   };

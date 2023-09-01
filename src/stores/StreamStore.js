@@ -8,7 +8,8 @@ configure({
 
 class StreamStore {
   rootStore;
-  streams = {};
+  loaded = false;
+  streams;
   libraries;
   accessGroups;
 
@@ -16,7 +17,8 @@ class StreamStore {
     makeObservable(this, {
       streams: observable,
       libraries: observable,
-      accessGroups: observable
+      accessGroups: observable,
+      loaded: observable
     });
 
     this.rootStore = rootStore;
@@ -26,16 +28,20 @@ class StreamStore {
     return this.rootStore.client;
   }
 
-  UpdateStream = ({slug, value}) => {
-    this.streams[slug] = value;
-  };
+  UpdateStreams = ({streams}) => {
+    this.streams = streams;
+  }
 
   LoadData = flow(function * () {
-    const tenantContractId = yield this.LoadTenantInfo();
-    const sites = yield this.LoadSites({tenantContractId});
-    yield this.LoadStreams({sites});
-    yield this.LoadLibraries();
-    yield this.LoadAccessGroups();
+    try {
+      const tenantContractId = yield this.LoadTenantInfo();
+      const sites = yield this.LoadSites({tenantContractId});
+      yield this.LoadStreams({sites});
+      yield this.LoadLibraries();
+      yield this.LoadAccessGroups();
+    } finally {
+      this.loaded = true;
+    }
   });
 
   LoadTenantInfo = flow(function * () {
@@ -82,11 +88,13 @@ class StreamStore {
     for(const slug of Object.keys(streamMetadata).sort((a, b) => a.localeCompare(b))) {
       if(streamMetadata[slug]?.sources?.default?.["."]?.container) {
         streamMetadata[slug].versionHash = streamMetadata[slug].sources.default["."].container;
-        streamMetadata[slug].objectId = this.client.utils.DecodeVersionHash(streamMetadata[slug].versionHash).objectId;
+        const objectId = this.client.utils.DecodeVersionHash(streamMetadata[slug].versionHash).objectId;
+        streamMetadata[slug].objectId = objectId;
+        streamMetadata[slug].libraryId = yield this.client.ContentObjectLibraryId({objectId});
       }
-
-      this.UpdateStream({slug, value: streamMetadata[slug]});
     }
+
+    this.UpdateStreams({streams: streamMetadata});
   });
 
   LoadLibraries = flow(function * () {
@@ -138,6 +146,16 @@ class StreamStore {
       console.error("Failed to load access groups", error);
     }
   });
+
+  DeleteStream = ({objectId}) => {
+    const streams = Object.assign({}, this.streams);
+    const slug = Object.keys(streams).find(streamSlug => {
+      return streams[streamSlug].objectId === objectId;
+    });
+
+    delete streams[slug];
+    this.UpdateStreams({streams});
+  };
 }
 
 export default StreamStore;

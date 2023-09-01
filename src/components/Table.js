@@ -1,6 +1,49 @@
 import React from "react";
+import ImageIcon from "Components/ImageIcon";
 
-const Table = ({headers=[], rows=[]}) => {
+const TableCell = ({
+  label,
+  onClick,
+  type,
+  items=[]
+}) => {
+  let contents;
+
+  if(type === "button") {
+    contents = (
+      <button className="button__secondary" onClick={onClick}>
+        { label }
+      </button>
+    );
+  } else if(type === "iconButtonGroup") {
+    contents = (
+      <div className="table__icon-button-group">
+        {
+          items.map((item) => (
+            <button
+              key={item.id}
+              className="button__icon"
+              onClick={item.onClick}
+              title={item.label}
+            >
+              <ImageIcon icon={item.icon} label={item.label} />
+            </button>
+          ))
+        }
+      </div>
+    );
+  } else {
+    contents = label;
+  }
+
+  return (
+    <td className="table__cell">
+      { contents }
+    </td>
+  );
+};
+
+const Table = (({headers=[], rows=[]}) => {
   return (
     <table className="table">
       <thead className="table__header">
@@ -20,9 +63,14 @@ const Table = ({headers=[], rows=[]}) => {
             <tr key={`table-row-${row.id || row.label}`} className="table__body-row">
               {
                 row.cells.map(cell => (
-                  <td key={`table-row-cell-${cell.id || cell.label}`} className="table__cell">
-                    { cell.label }
-                  </td>
+                  <TableCell
+                    key={`table-row-cell-${cell.id || cell.label}`}
+                    label={cell.label}
+                    onClick={cell.onClick}
+                    type={cell.type}
+                    icon={cell.icon}
+                    items={cell.items}
+                  />
                 ))
               }
             </tr>
@@ -31,6 +79,6 @@ const Table = ({headers=[], rows=[]}) => {
       </tbody>
     </table>
   );
-};
+});
 
 export default Table;

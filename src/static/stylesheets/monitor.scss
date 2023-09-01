@@ -2,23 +2,39 @@
   &__grid-items {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   &__grid-item-container {
     display: flex;
     flex-direction: column;
+    height: 300px;
+    width: 300px;
   }
 
   &__video-wrapper {
     background-color: $black;
-    width: 300px;
   }
 
   &__grid-item-details {
     background: linear-gradient(0deg, $dark-gradient-1);
     color: $white;
+    display: flex;
+    flex: 1;
+    padding: 1.5rem;
+  }
+
+  &__grid-item-details-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+
+  &__grid-item-title {
     font-weight: 700;
-    padding: 1rem;
+  }
+
+  &__grid-item-id {
+    font-size: 0.8rem;
   }
 }

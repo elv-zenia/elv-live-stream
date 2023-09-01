@@ -105,12 +105,18 @@ textarea {
   }
 }
 
-input[type="submit"] {
+input[type="submit"],
+.button__primary,
+.button__secondary {
+  font-size: 0.85rem;
+}
+
+input[type="submit"],
+.button__primary {
   background-color: $blue-1;
   border: 1px solid $blue-2;
   color: $white;
   cursor: pointer;
-  font-size: 0.85rem;
   min-height: 35px;
   min-width: 7.5rem;
   padding: 3px 10px;
@@ -122,5 +128,24 @@ input[type="submit"] {
 
   &:hover:not(:disabled) {
     opacity: 0.8;
+  }
+}
+
+.button__secondary {
+  background-color: $white;
+  border: 1px solid $gray-4;
+  color: $black;
+  cursor: pointer;
+  min-height: 35px;
+  min-width: 7.5rem;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: $gray-5;
+    color: $white;
   }
 }

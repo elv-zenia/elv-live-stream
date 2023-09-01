@@ -31,8 +31,6 @@ class RootStore {
         timeout: 30
       });
 
-      // const tenantContractId = yield this.client.userProfileClient.UserMetadata({metadataSubtree: "tenantContractId"});
-
       window.client = this.client;
 
       this.networkInfo = yield this.client.NetworkInfo();

@@ -3,10 +3,8 @@ import {observer} from "mobx-react";
 import {streamStore} from "../../stores";
 import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
-import {toJS} from "mobx";
 
 const Monitor = observer(() => {
-  console.log("streams", toJS(streamStore.streams));
   return (
     <div className="monitor">
       <div className="page-header">Streams</div>
@@ -21,7 +19,14 @@ const Monitor = observer(() => {
                   </AspectRatio>
                 </div>
                 <div className="monitor__grid-item-details">
-                  {streamStore.streams[slug].display_title || streamStore.streams[slug].title}
+                  <div className="monitor__grid-item-details-content">
+                    <div className="monitor__grid-item-title">
+                      { streamStore.streams[slug].display_title || streamStore.streams[slug].title }
+                    </div>
+                    <div className="monitor__grid-item-id">
+                      { streamStore.streams[slug].objectId || "" }
+                    </div>
+                  </div>
                 </div>
               </div>
             ))
