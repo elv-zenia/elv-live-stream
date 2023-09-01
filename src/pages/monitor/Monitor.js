@@ -23,11 +23,21 @@ const Monitor = observer(() => {
                     <div className="monitor__grid-item-details">
                       <div className="monitor__grid-item-details-content">
                         <div className="monitor__grid-item-title">
-                          {streamStore.streams[slug].display_title || streamStore.streams[slug].title}
+                          { streamStore.streams[slug].display_title || streamStore.streams[slug].title }
                         </div>
                         <div className="monitor__grid-item-id">
-                          {streamStore.streams[slug].objectId || ""}
+                          { streamStore.streams[slug].objectId || "" }
                         </div>
+                        {
+                          streamStore.streams[slug].embedUrl &&
+                          <a
+                            className="monitor__grid-item-link"
+                            href={streamStore.streams[slug].embedUrl}
+                            target="_blank"
+                          >
+                            {streamStore.streams[slug].embedUrl}
+                          </a>
+                        }
                       </div>
                     </div>
                   </div>

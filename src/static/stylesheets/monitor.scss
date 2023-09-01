@@ -21,7 +21,7 @@
     color: $white;
     display: flex;
     flex: 1;
-    padding: 1.5rem;
+    padding: 0.5rem 0.75rem;
   }
 
   &__grid-item-details-content {
@@ -36,5 +36,14 @@
 
   &__grid-item-id {
     font-size: 0.8rem;
+  }
+
+  &__grid-item-link {
+    font-size: 0.6rem;
+    text-decoration: underline;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+    width: 100%;
+    word-break: break-word;
   }
 }
