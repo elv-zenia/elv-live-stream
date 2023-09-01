@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeObservable, observable} from "mobx";
-// const LiveStream = require("@eluvio/elv-live-js/src/LiveStream");
+// const {LiveStream} = require("@eluvio/elv-live-js/src/LiveStream");
 
 configure({
   enforceActions: "always"

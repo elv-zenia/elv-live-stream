@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {HashRouter, Route, Routes} from "react-router-dom";
+import {HashRouter, Route, Routes, Navigate} from "react-router-dom";
 import {observer, Provider} from "mobx-react";
 
 import * as Stores from "./stores";
@@ -18,7 +18,7 @@ import StreamIcon from "Assets/icons/stream.svg";
 const rootElement = ReactDOM.createRoot(document.getElementById("app"));
 
 export const appRoutes = [
-  {path: "/", element: <Create />, exact: true},
+  {path: "/", element: <Navigate replace to="/create" />},
   {path: "/create", element: <Create />, label: "Create", icon: VideoPlusIcon},
   {path: "/streams", element: <Streams />, label: "Streams", icon: StreamIcon},
   {path: "/monitor", element: <Monitor />, label: "Monitor", icon: MediaIcon}

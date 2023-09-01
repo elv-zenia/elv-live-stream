@@ -71,7 +71,7 @@ const Streams = observer(() => {
                 {label: "", id: "header-restart"},
                 {label: "", id: "header-actions"}
               ]}
-              rows={(Object.keys(streamStore.streams) || []).map(slug => (
+              rows={(Object.keys(streamStore.streams || {})).map(slug => (
                 {
                   id: streamStore.streams[slug].objectId,
                   cells: [

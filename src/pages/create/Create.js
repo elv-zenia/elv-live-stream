@@ -30,7 +30,7 @@ const Permissions = observer(({permission, UpdateCallback}) => {
       value={permission}
       onChange={UpdateCallback}
       options={
-        Object.keys(permissionLevels || []).map(permissionName => (
+        Object.keys(permissionLevels || {}).map(permissionName => (
           {
             label: permissionLevels[permissionName].short,
             value: permissionName
