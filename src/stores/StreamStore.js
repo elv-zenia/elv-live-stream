@@ -1,6 +1,5 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeObservable, observable} from "mobx";
-// const {LiveStream} = require("@eluvio/elv-live-js/src/LiveStream");
 
 configure({
   enforceActions: "always"
@@ -12,13 +11,15 @@ class StreamStore {
   streams;
   libraries;
   accessGroups;
+  contentTypes;
 
   constructor(rootStore) {
     makeObservable(this, {
       streams: observable,
       libraries: observable,
       accessGroups: observable,
-      loaded: observable
+      loaded: observable,
+      contentTypes: observable
     });
 
     this.rootStore = rootStore;
@@ -35,7 +36,7 @@ class StreamStore {
   LoadData = flow(function * () {
     try {
       const tenantContractId = yield this.LoadTenantInfo();
-      const sites = yield this.LoadSites({tenantContractId});
+      const sites = yield this.LoadTenantData({tenantContractId});
       yield this.LoadStreams({sites});
       yield this.LoadLibraries();
       yield this.LoadAccessGroups();
@@ -52,19 +53,29 @@ class StreamStore {
     }
   });
 
-  LoadSites = flow(function * ({tenantContractId}) {
+  LoadTenantData = flow(function * ({tenantContractId}) {
     try {
-      return yield this.client.ContentObjectMetadata({
+      const response = yield this.client.ContentObjectMetadata({
         libraryId: tenantContractId.replace("iten", "ilib"),
         objectId: tenantContractId.replace("iten", "iq__"),
-        metadataSubtree: "public/sites"
+        metadataSubtree: "public",
+        select: [
+          "sites/live_streams",
+          "content_types/live_stream"
+        ]
       });
+      const {sites, content_types} = response;
+
+      if(content_types?.live_stream) { this.contentTypes = content_types.live_stream;
+      }
+
+      return [sites?.live_streams] || [];
     } catch(error) {
       throw Error(`Unable to load sites for tenant ${tenantContractId}.`);
     }
   });
 
-  LoadStreams = flow(function * ({sites}) {
+  LoadStreams = flow(function * ({sites=[]}) {
     let streamMetadata = {};
     for(let siteId of sites) {
       let siteStreams;
@@ -73,7 +84,8 @@ class StreamStore {
           libraryId: yield this.client.ContentObjectLibraryId({objectId: siteId}),
           objectId: siteId,
           metadataSubtree: "public/asset_metadata/live_streams",
-          resolveLinks: true
+          resolveLinks: true,
+          resolveIgnoreErrors: true
         });
 
         streamMetadata = {
@@ -84,13 +96,16 @@ class StreamStore {
         throw Error(`Unable to load live streams for site ${siteId}.`);
       }
     }
+    console.log("streamMeta", streamMetadata);
 
     for(const slug of Object.keys(streamMetadata).sort((a, b) => a.localeCompare(b))) {
       if(streamMetadata[slug]?.sources?.default?.["."]?.container) {
         streamMetadata[slug].versionHash = streamMetadata[slug].sources.default["."].container;
+        console.log("streamMeta", streamMetadata);
         const objectId = this.client.utils.DecodeVersionHash(streamMetadata[slug].versionHash).objectId;
         streamMetadata[slug].objectId = objectId;
         streamMetadata[slug].libraryId = yield this.client.ContentObjectLibraryId({objectId});
+        streamMetadata[slug].embedUrl = yield this.EmbedUrl({objectId});
       }
     }
 
@@ -156,6 +171,17 @@ class StreamStore {
     delete streams[slug];
     this.UpdateStreams({streams});
   };
+
+  EmbedUrl = flow(function * ({
+    objectId
+  }) {
+    try {
+      return yield this.client.EmbedUrl({objectId});
+    } catch(error) {
+      console.error(error);
+      return "";
+    }
+  });
 }
 
 export default StreamStore;

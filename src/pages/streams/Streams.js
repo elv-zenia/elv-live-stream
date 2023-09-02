@@ -5,7 +5,6 @@ import Table from "Components/Table";
 import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
-import {toJS} from "mobx";
 
 const StreamModal = observer(({
   open,
@@ -54,7 +53,6 @@ const Streams = observer(() => {
   };
 
   if(!streamStore.loaded) { return null; }
-  console.log("", toJS(streamStore.streams));
 
   return (
     <div className="streams">
