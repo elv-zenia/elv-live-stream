@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
-import {streamStore} from "../../stores";
+import {dataStore} from "../../stores";
 import Table from "Components/Table";
 import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
@@ -52,13 +52,11 @@ const Streams = observer(() => {
     });
   };
 
-  if(!streamStore.loaded) { return null; }
-
   return (
     <div className="streams">
       <div className="page-header">Streams</div>
       {
-        Object.keys(streamStore.streams || {}).length > 0 ?
+        Object.keys(dataStore.streams || {}).length > 0 ?
           <div className="streams__list-items">
             <Table
               headers={[
@@ -69,65 +67,65 @@ const Streams = observer(() => {
                 {label: "", id: "header-restart"},
                 {label: "", id: "header-actions"}
               ]}
-              rows={(Object.keys(streamStore.streams || {})).map(slug => (
+              rows={(Object.keys(dataStore.streams || {})).map(slug => (
                 {
-                  id: streamStore.streams[slug].objectId,
+                  id: dataStore.streams[slug].objectId,
                   cells: [
                     {
-                      label: streamStore.streams[slug].display_title || streamStore.streams[slug].title,
-                      id: `${streamStore.streams[slug].objectId}-title`
+                      label: dataStore.streams[slug].display_title || dataStore.streams[slug].title,
+                      id: `${dataStore.streams[slug].objectId}-title`
                     },
                     {
-                      label: streamStore.streams[slug].objectId || "",
-                      id: `${streamStore.streams[slug].objectId}-id`
+                      label: dataStore.streams[slug].objectId || "",
+                      id: `${dataStore.streams[slug].objectId}-id`
                     },
                     {
-                      label: StatusText(streamStore.streams[slug]),
-                      id: `${streamStore.streams[slug].objectId}-status`
+                      label: StatusText(dataStore.streams[slug]),
+                      id: `${dataStore.streams[slug].objectId}-status`
                     },
                     {
                       type: "button",
-                      id: `${streamStore.streams[slug].objectId}-view-button`,
+                      id: `${dataStore.streams[slug].objectId}-view-button`,
                       label: "View",
                       onClick: () => {
                       }
                     },
                     {
                       type: "button",
-                      id: `${streamStore.streams[slug].objectId}-stream-action`,
+                      id: `${dataStore.streams[slug].objectId}-stream-action`,
                       label: "Restart",
                       onClick: () => {
                       }
                     },
                     {
                       type: "iconButtonGroup",
-                      id: `${streamStore.streams[slug].objectId}-actions`,
+                      id: `${dataStore.streams[slug].objectId}-actions`,
                       items: [
                         {
-                          id: `${streamStore.streams[slug].objectId}-external-link-action`,
+                          id: `${dataStore.streams[slug].objectId}-external-link-action`,
                           icon: ExternalLinkIcon,
                           label: "Open in Fabric Browser",
-                          onClick: () => streamStore.client.SendMessage({
+                          onClick: () => dataStore.client.SendMessage({
                             options: {
                               operation: "OpenLink",
-                              libraryId: streamStore.streams[slug].libraryId,
-                              objectId: streamStore.streams[slug].objectId
+                              libraryId: dataStore.streams[slug].libraryId,
+                              objectId: dataStore.streams[slug].objectId
                             },
                             noResponse: true
                           })
                         },
                         {
-                          id: `${streamStore.streams[slug].objectId}-delete-action`,
+                          id: `${dataStore.streams[slug].objectId}-delete-action`,
                           icon: TrashIcon,
                           label: "Delete Stream",
                           onClick: () => {
                             setModalData({
-                              objectId: streamStore.streams[slug].objectId,
+                              objectId: dataStore.streams[slug].objectId,
                               showModal: true,
                               title: "Delete Stream",
                               description: "Are you sure you want to delete the stream? This action cannot be undone.",
                               ConfirmCallback: () => {
-                                streamStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
+                                dataStore.DeleteStream({objectId: dataStore.streams[slug].objectId});
                                 ResetModal();
                               }
                             });

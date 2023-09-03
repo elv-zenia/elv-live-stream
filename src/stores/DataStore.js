@@ -1,26 +1,21 @@
 // Force strict mode so mutations are only allowed within actions.
-import {configure, flow, makeObservable, observable} from "mobx";
+import {configure, flow, makeAutoObservable} from "mobx";
 
 configure({
   enforceActions: "always"
 });
 
-class StreamStore {
+// Store for loading all the initial data
+class DataStore {
   rootStore;
-  loaded = false;
   streams;
+  activeStreams;
   libraries;
   accessGroups;
-  contentTypes;
+  contentType;
 
   constructor(rootStore) {
-    makeObservable(this, {
-      streams: observable,
-      libraries: observable,
-      accessGroups: observable,
-      loaded: observable,
-      contentTypes: observable
-    });
+    makeAutoObservable(this);
 
     this.rootStore = rootStore;
   }
@@ -29,21 +24,17 @@ class StreamStore {
     return this.rootStore.client;
   }
 
+  Initialize = flow(function * () {
+    const tenantContractId = yield this.LoadTenantInfo();
+    const sites = yield this.LoadTenantData({tenantContractId});
+    yield this.LoadStreams({sites});
+    yield this.LoadLibraries();
+    yield this.LoadAccessGroups();
+  });
+
   UpdateStreams = ({streams}) => {
     this.streams = streams;
   }
-
-  LoadData = flow(function * () {
-    try {
-      const tenantContractId = yield this.LoadTenantInfo();
-      const sites = yield this.LoadTenantData({tenantContractId});
-      yield this.LoadStreams({sites});
-      yield this.LoadLibraries();
-      yield this.LoadAccessGroups();
-    } finally {
-      this.loaded = true;
-    }
-  });
 
   LoadTenantInfo = flow(function * () {
     try {
@@ -66,7 +57,7 @@ class StreamStore {
       });
       const {sites, content_types} = response;
 
-      if(content_types?.live_stream) { this.contentTypes = content_types.live_stream;
+      if(content_types?.live_stream) { this.contentType = content_types.live_stream;
       }
 
       return [sites?.live_streams] || [];
@@ -176,6 +167,7 @@ class StreamStore {
     objectId
   }) {
     try {
+      console.log("client", this.client);
       return yield this.client.EmbedUrl({objectId});
     } catch(error) {
       console.error(error);
@@ -184,4 +176,4 @@ class StreamStore {
   });
 }
 
-export default StreamStore;
+export default DataStore;

@@ -1,6 +1,6 @@
 import React from "react";
 import {NavLink} from "react-router-dom";
-import {appRoutes} from "../index";
+import {appRoutes} from "../App";
 import ImageIcon from "Components/ImageIcon";
 
 const LeftNavigation = () => {

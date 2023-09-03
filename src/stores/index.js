@@ -1,6 +1,7 @@
-import {makeObservable, configure, observable, flow} from "mobx";
+import {configure, flow, makeAutoObservable} from "mobx";
 import {FrameClient} from "@eluvio/elv-client-js/src/FrameClient";
-import StreamStore from "./StreamStore";
+import DataStore from "Stores/DataStore";
+import EditStore from "Stores/EditStore";
 
 // Force strict mode so mutations are only allowed within actions.
 configure({
@@ -13,13 +14,10 @@ class RootStore {
   networkInfo;
 
   constructor() {
-    makeObservable(this, {
-      client: observable,
-      loaded: observable,
-      networkInfo: observable
-    });
+    makeAutoObservable(this);
 
-    this.streamStore = new StreamStore(this);
+    this.dataStore = new DataStore(this);
+    this.editStore = new EditStore(this);
 
     this.Initialize();
   }
@@ -32,9 +30,9 @@ class RootStore {
       });
 
       window.client = this.client;
-
       this.networkInfo = yield this.client.NetworkInfo();
-      yield this.streamStore.LoadData();
+
+      yield this.dataStore.Initialize();
     } catch(error) {
       console.error("Failed to initialize application");
       console.error(error);
@@ -45,6 +43,7 @@ class RootStore {
 }
 
 export const rootStore = new RootStore();
-export const streamStore = rootStore.streamStore;
+export const dataStore = rootStore.dataStore;
+export const editStore = rootStore.editStore;
 
 window.rootStore = rootStore;

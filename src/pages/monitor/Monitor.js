@@ -1,6 +1,6 @@
 import React from "react";
 import {observer} from "mobx-react";
-import {streamStore} from "../../stores";
+import {dataStore} from "../../stores";
 import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
 
@@ -9,33 +9,33 @@ const Monitor = observer(() => {
     <div className="monitor">
       <div className="page-header">Monitor</div>
       {
-        Object.keys(streamStore.streams || {}).length > 0 ?
+        Object.keys(dataStore.streams || {}).length > 0 ?
           <div className="monitor__grid-items">
             {
-              (Object.keys(streamStore.streams || {}) || [])
+              (Object.keys(dataStore.streams || {}) || [])
                 .map((slug) => (
                   <div key={slug} className="monitor__grid-item-container">
                     <div className="monitor__video-wrapper">
                       <AspectRatio>
-                        <Video versionHash={streamStore.streams[slug].versionHash} videoMetadata={streamStore.streams[slug]}/>
+                        <Video versionHash={dataStore.streams[slug].versionHash} videoMetadata={dataStore.streams[slug]}/>
                       </AspectRatio>
                     </div>
                     <div className="monitor__grid-item-details">
                       <div className="monitor__grid-item-details-content">
                         <div className="monitor__grid-item-title">
-                          { streamStore.streams[slug].display_title || streamStore.streams[slug].title }
+                          { dataStore.streams[slug].display_title || dataStore.streams[slug].title }
                         </div>
                         <div className="monitor__grid-item-id">
-                          { streamStore.streams[slug].objectId || "" }
+                          { dataStore.streams[slug].objectId || "" }
                         </div>
                         {
-                          streamStore.streams[slug].embedUrl &&
+                          dataStore.streams[slug].embedUrl &&
                           <a
                             className="monitor__grid-item-link"
-                            href={streamStore.streams[slug].embedUrl}
+                            href={dataStore.streams[slug].embedUrl}
                             target="_blank"
                           >
-                            {streamStore.streams[slug].embedUrl}
+                            {dataStore.streams[slug].embedUrl}
                           </a>
                         }
                       </div>

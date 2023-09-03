@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
-import {streamStore} from "../../stores";
+import {dataStore} from "Stores";
 import {observer} from "mobx-react";
 import Accordion from "Components/Accordion";
 
@@ -353,7 +353,7 @@ const Create = observer(() => {
           label="Access Group"
           labelDescription="This is the Access Group that will manage your live stream object."
           options={
-            Object.keys(streamStore.accessGroups || {}).map(accessGroupName => (
+            Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
               {
                 label: accessGroupName,
                 value: accessGroupName
@@ -385,9 +385,9 @@ const Create = observer(() => {
           labelDescription="This is the library where your live stream object will be created."
           required={true}
           options={
-            Object.keys(streamStore.libraries || {}).map(libraryId => (
+            Object.keys(dataStore.libraries || {}).map(libraryId => (
               {
-                label: streamStore.libraries[libraryId].name || "",
+                label: dataStore.libraries[libraryId].name || "",
                 value: libraryId
               }
             ))
