@@ -167,7 +167,6 @@ class DataStore {
     objectId
   }) {
     try {
-      console.log("client", this.client);
       return yield this.client.EmbedUrl({objectId});
     } catch(error) {
       console.error(error);

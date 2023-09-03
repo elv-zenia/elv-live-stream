@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
-import {dataStore} from "Stores";
+import {dataStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import Accordion from "Components/Accordion";
 
@@ -164,8 +164,8 @@ const AdvancedSection = observer(({
           <Select
             label="Channel Layout"
             options={[
-              {label: "Stereo (2)", value: "Stereo (2)"},
-              {label: "Surround (5.1)", value: "Surround (5.1)"}
+              {label: "Stereo (2)", value: "stereo-2"},
+              {label: "Surround (5.1)", value: "surround-5"}
             ]}
             onChange={(event) => OutputUpdateCallback({
               key: "audioChannelLayout",
@@ -290,7 +290,15 @@ const Create = observer(() => {
     callback(newData);
   };
 
-  const HandleSubmit = () => {};
+  const HandleSubmit = () => {
+    editStore.InitLiveStreamObject({
+      basicFormData,
+      inputFormData,
+      outputFormData,
+      advancedData,
+      drmFormData
+    });
+  };
 
   return (
     <div>
