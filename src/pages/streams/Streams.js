@@ -6,7 +6,8 @@ import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
 
-const statusKeys = {
+const STATUS_KEYS = {
+  INITIALIZING: "Initializing",
   CHECKING: "Checking",
   READY: "Ready",
   STARTING: "Starting | Running",
@@ -49,11 +50,16 @@ const Streams = observer(() => {
     description: "",
     objectId: "",
     ConfirmCallback: null,
-    CloseCallback: () => ResetModal
+    CloseCallback: null
   });
 
-  const StatusText = () => {
-    return statusKeys.STREAM_CHECK_FAILED;
+  const StatusText = ({slug}) => {
+    const status = streamStore.streams[slug]?.status;
+    if(status) {
+      return STATUS_KEYS[status];
+    } else {
+      return "--";
+    }
   };
 
   return (
@@ -67,8 +73,7 @@ const Streams = observer(() => {
                 {label: "Name", id: "header-name"},
                 {label: "Object ID", id: "header-id"},
                 {label: "Status", id: "header-status"},
-                {label: "", id: "header-view"},
-                {label: "", id: "header-restart"},
+                {label: "", id: "header-stream-actions"},
                 {label: "", id: "header-actions"}
               ]}
               rows={(Object.keys(streamStore.streams || {})).map(slug => (
@@ -88,18 +93,21 @@ const Streams = observer(() => {
                       id: `${streamStore.streams[slug].objectId}-status`
                     },
                     {
-                      type: "button",
-                      id: `${streamStore.streams[slug].objectId}-view-button`,
-                      label: "View",
-                      onClick: () => {
-                      }
-                    },
-                    {
-                      type: "button",
-                      id: `${streamStore.streams[slug].objectId}-stream-action`,
-                      label: "Restart",
-                      onClick: () => {
-                      }
+                      type: "buttonGroup",
+                      items: [
+                        {
+                          id: `${streamStore.streams[slug].objectId}-view-button`,
+                          label: "View",
+                          onClick: () => {
+                          }
+                        },
+                        {
+                          id: `${streamStore.streams[slug].objectId}-stream-action`,
+                          label: "Restart",
+                          onClick: () => {
+                          }
+                        }
+                      ]
                     },
                     {
                       type: "iconButtonGroup",
@@ -130,6 +138,9 @@ const Streams = observer(() => {
                               description: "Are you sure you want to delete the stream? This action cannot be undone.",
                               ConfirmCallback: () => {
                                 streamStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
+                                ResetModal();
+                              },
+                              CloseCallback: () => {
                                 ResetModal();
                               }
                             });

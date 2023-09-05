@@ -12,6 +12,7 @@ class DataStore {
   libraries;
   accessGroups;
   contentType;
+  siteId;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -25,8 +26,8 @@ class DataStore {
 
   Initialize = flow(function * () {
     const tenantContractId = yield this.LoadTenantInfo();
-    const sites = yield this.LoadTenantData({tenantContractId});
-    yield this.LoadStreams({sites});
+    this.siteId = yield this.LoadTenantData({tenantContractId});
+    yield this.LoadStreams();
     yield this.LoadLibraries();
     yield this.LoadAccessGroups();
   });
@@ -52,34 +53,34 @@ class DataStore {
       });
       const {sites, content_types} = response;
 
-      if(content_types?.live_stream) {this.contentType = content_types.live_stream;}
+      if(content_types?.live_stream) {
+        this.contentType = content_types.live_stream;
+      }
 
-      return [sites?.live_streams] || [];
+      return sites?.live_streams;
     } catch(error) {
       throw Error(`Unable to load sites for tenant ${tenantContractId}.`);
     }
   });
 
-  LoadStreams = flow(function * ({sites=[]}) {
+  LoadStreams = flow(function * () {
     let streamMetadata = {};
-    for(let siteId of sites) {
-      let siteStreams;
-      try {
-        siteStreams = yield this.client.ContentObjectMetadata({
-          libraryId: yield this.client.ContentObjectLibraryId({objectId: siteId}),
-          objectId: siteId,
-          metadataSubtree: "public/asset_metadata/live_streams",
-          resolveLinks: true,
-          resolveIgnoreErrors: true
-        });
+    let siteStreams;
+    try {
+      siteStreams = yield this.client.ContentObjectMetadata({
+        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
+        objectId: this.siteId,
+        metadataSubtree: "public/asset_metadata/live_streams",
+        resolveLinks: true,
+        resolveIgnoreErrors: true
+      });
 
-        streamMetadata = {
-          ...streamMetadata,
-          ...siteStreams
-        };
-      } catch(error) {
-        throw Error(`Unable to load live streams for site ${siteId}.`);
-      }
+      streamMetadata = {
+        ...streamMetadata,
+        ...siteStreams
+      };
+    } catch(error) {
+      throw Error(`Unable to load live streams for site ${this.siteId}.`);
     }
 
     for(const slug of Object.keys(streamMetadata).sort((a, b) => a.localeCompare(b))) {

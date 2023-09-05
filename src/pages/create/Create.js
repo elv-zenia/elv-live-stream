@@ -6,7 +6,7 @@ import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {toJS} from "mobx";
 
-const formKeys = {
+const FORM_KEYS = {
   BASIC: "BASIC",
   OUTPUT: "OUTPUT",
   INPUT: "INPUT",
@@ -265,7 +265,7 @@ const Create = observer(() => {
   const [isCreating, setIsCreating] = useState(false);
 
   const UpdateFormData = ({formKey, key, value}) => {
-    const formMap = {
+    const FORM_MAP = {
       "BASIC": {
         data: basicFormData,
         callback: setBasicFormData
@@ -287,7 +287,7 @@ const Create = observer(() => {
         callback: setDrmFormData
       }
     };
-    const {data, callback} = formMap[formKey];
+    const {data, callback} = FORM_MAP[formKey];
     const newData = Object.assign({}, data);
     newData[key] = value;
 
@@ -329,7 +329,7 @@ const Create = observer(() => {
           onChange={event => UpdateFormData({
             key: "url",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
         <TextInput
@@ -339,7 +339,7 @@ const Create = observer(() => {
           onChange={event => UpdateFormData({
             key: "name",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
         <TextInput
@@ -348,7 +348,7 @@ const Create = observer(() => {
           onChange={event => UpdateFormData({
             key: "description",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
         <TextInput
@@ -357,7 +357,7 @@ const Create = observer(() => {
           onChange={event => UpdateFormData({
             key: "displayName",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
 
@@ -379,7 +379,7 @@ const Create = observer(() => {
           onChange={event => UpdateFormData({
             key: "accessGroup",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
 
@@ -388,7 +388,7 @@ const Create = observer(() => {
           UpdateCallback={(event) => UpdateFormData({
             key: "permission",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
 
@@ -412,7 +412,7 @@ const Create = observer(() => {
           onChange={event => UpdateFormData({
             key: "libraryId",
             value: event.target.value,
-            formKey: formKeys.BASIC
+            formKey: FORM_KEYS.BASIC
           })}
         />
 
@@ -424,22 +424,22 @@ const Create = observer(() => {
           DrmUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
-            formKey: formKeys.DRM
+            formKey: FORM_KEYS.DRM
           })}
           InputUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
-            formKey: formKeys.INPUT
+            formKey: FORM_KEYS.INPUT
           })}
           OutputUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
-            formKey: formKeys.OUTPUT
+            formKey: FORM_KEYS.OUTPUT
           })}
           AdvancedUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
-            formKey: formKeys.ADVANCED
+            formKey: FORM_KEYS.ADVANCED
           })}
         />
 

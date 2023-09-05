@@ -15,6 +15,23 @@ const TableCell = ({
         { label }
       </button>
     );
+  } else if(type === "buttonGroup") {
+    contents = (
+      <div className="table__button-group">
+        {
+          items.map((item) => (
+            <button
+              key={item.id}
+              className="button__secondary"
+              onClick={item.onClick}
+              title={item.label}
+            >
+              { item.label }
+            </button>
+          ))
+        }
+      </div>
+    );
   } else if(type === "iconButtonGroup") {
     contents = (
       <div className="table__icon-button-group">
