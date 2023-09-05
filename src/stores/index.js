@@ -2,6 +2,7 @@ import {configure, flow, makeAutoObservable} from "mobx";
 import {FrameClient} from "@eluvio/elv-client-js/src/FrameClient";
 import DataStore from "Stores/DataStore";
 import EditStore from "Stores/EditStore";
+import StreamStore from "Stores/StreamStore";
 
 // Force strict mode so mutations are only allowed within actions.
 configure({
@@ -18,6 +19,7 @@ class RootStore {
 
     this.dataStore = new DataStore(this);
     this.editStore = new EditStore(this);
+    this.streamStore = new StreamStore(this);
 
     this.Initialize();
   }
@@ -26,7 +28,7 @@ class RootStore {
     try {
       this.client = new FrameClient({
         target: window.parent,
-        timeout: 30
+        timeout: 240
       });
 
       window.client = this.client;
@@ -45,5 +47,6 @@ class RootStore {
 export const rootStore = new RootStore();
 export const dataStore = rootStore.dataStore;
 export const editStore = rootStore.editStore;
+export const streamStore = rootStore.streamStore;
 
 window.rootStore = rootStore;

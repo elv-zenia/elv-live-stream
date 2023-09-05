@@ -1,7 +1,6 @@
 export const ParseLiveConfigData = ({
   inputFormData,
   outputFormData,
-  streamType,
   url,
   encryption,
   avProperties
@@ -12,11 +11,6 @@ export const ParseLiveConfigData = ({
   const AV_STREAM = {
     DEFAULT: "default",
     CUSTOM: "specific"
-  };
-
-  const STREAM_TYPES = {
-    RTMP: "RTMP",
-    MPEG_TS: "MPEG-TS"
   };
 
   const ENCRYPTION_TYPES = {
@@ -34,32 +28,39 @@ export const ParseLiveConfigData = ({
     input: {
       audio: {
         stream: AV_STREAM[avProperties],
-        stream_id: audioStreamId,
-        stream_index: audioStreamIndex
+        stream_id: parseInt(audioStreamId) || 0,
+        stream_index: parseInt(audioStreamIndex) || 0
       },
       video: {
         stream: AV_STREAM[avProperties],
-        stream_id: videoStreamId,
-        stream_index: videoStreamIndex
+        stream_id: parseInt(videoStreamId) || 0,
+        stream_index: parseInt(videoStreamIndex) || 0
       }
     },
     output: {
       audio: {
-        bitrate: audioBitrate,
+        bitrate: parseInt(audioBitrate) || 0,
         channel_layout: CHANNEL_LAYOUTS[audioChannelLayout],
         quality: AV_STREAM[avProperties]
       },
       video: {
-        bitrate: videoBitrate,
-        height: videoHeight,
+        bitrate: parseInt(videoBitrate) || 0,
+        height: parseInt(videoHeight) || 0,
         quality: AV_STREAM[avProperties],
-        width: videoWidth
+        width: parseInt(videoWidth) || 0
       }
     },
     part_ttl: 3600,
-    stream_type: STREAM_TYPES[streamType],
     url
   };
 
   return config;
+};
+
+export const Slugify = (string) => {
+  return (string || "")
+    .toLowerCase()
+    .replace(/ /g, "-")
+    .replace(/[^a-z0-9\-]/g, "")
+    .replace(/-+/g, "-");
 };

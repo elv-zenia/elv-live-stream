@@ -3,6 +3,8 @@ import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import {dataStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import Accordion from "Components/Accordion";
+import {useNavigate} from "react-router-dom";
+import {toJS} from "mobx";
 
 const formKeys = {
   BASIC: "BASIC",
@@ -226,14 +228,13 @@ const AdvancedSection = observer(({
 
 const Create = observer(() => {
   const [basicFormData, setBasicFormData] = useState({
-    streamType: "RTMP",
     url: "",
     name: "",
     description: "",
     displayName: "",
     libraryId: "",
     accessGroup: "",
-    permission: ""
+    permission: "editable"
   });
 
   const [outputFormData, setOutputFormData] = useState({
@@ -259,6 +260,9 @@ const Create = observer(() => {
   const [drmFormData, setDrmFormData] = useState({
     encryption: "DRM"
   });
+
+  const navigate = useNavigate();
+  const [isCreating, setIsCreating] = useState(false);
 
   const UpdateFormData = ({formKey, key, value}) => {
     const formMap = {
@@ -290,34 +294,34 @@ const Create = observer(() => {
     callback(newData);
   };
 
-  const HandleSubmit = () => {
-    editStore.InitLiveStreamObject({
-      basicFormData,
+  const HandleSubmit = async (event) => {
+    event.preventDefault();
+    setIsCreating(true);
+
+    console.log("data", toJS({basicFormData,
       inputFormData,
       outputFormData,
       advancedData,
-      drmFormData
-    });
+      drmFormData}));
+    try {
+      await editStore.InitLiveStreamObject({
+        basicFormData,
+        inputFormData,
+        outputFormData,
+        advancedData,
+        drmFormData
+      });
+
+      navigate("/streams");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
     <div>
       <div className="page-header">Create Live Stream</div>
       <form className="form" onSubmit={HandleSubmit}>
-        <Select
-          label="Stream Type"
-          options={[
-            {
-              label: "RTMP",
-              value: "RTMP"
-            }
-          ]}
-          onChange={event => UpdateFormData({
-            key: "streamType",
-            value: event.target.value,
-            formKey: formKeys.BASIC
-          })}
-        />
         <TextInput
           label="URL"
           required={true}
@@ -440,7 +444,7 @@ const Create = observer(() => {
         />
 
         <div className="form__actions">
-          <input type="submit" value="Create" />
+          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Create"} />
         </div>
       </form>
     </div>

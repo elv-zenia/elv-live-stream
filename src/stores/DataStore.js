@@ -1,5 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable} from "mobx";
+import {streamStore} from "./index";
 
 configure({
   enforceActions: "always"
@@ -8,8 +9,6 @@ configure({
 // Store for loading all the initial data
 class DataStore {
   rootStore;
-  streams;
-  activeStreams;
   libraries;
   accessGroups;
   contentType;
@@ -32,10 +31,6 @@ class DataStore {
     yield this.LoadAccessGroups();
   });
 
-  UpdateStreams = ({streams}) => {
-    this.streams = streams;
-  }
-
   LoadTenantInfo = flow(function * () {
     try {
       return yield this.client.userProfileClient.TenantContractId();
@@ -57,8 +52,7 @@ class DataStore {
       });
       const {sites, content_types} = response;
 
-      if(content_types?.live_stream) { this.contentType = content_types.live_stream;
-      }
+      if(content_types?.live_stream) {this.contentType = content_types.live_stream;}
 
       return [sites?.live_streams] || [];
     } catch(error) {
@@ -87,12 +81,10 @@ class DataStore {
         throw Error(`Unable to load live streams for site ${siteId}.`);
       }
     }
-    console.log("streamMeta", streamMetadata);
 
     for(const slug of Object.keys(streamMetadata).sort((a, b) => a.localeCompare(b))) {
       if(streamMetadata[slug]?.sources?.default?.["."]?.container) {
         streamMetadata[slug].versionHash = streamMetadata[slug].sources.default["."].container;
-        console.log("streamMeta", streamMetadata);
         const objectId = this.client.utils.DecodeVersionHash(streamMetadata[slug].versionHash).objectId;
         streamMetadata[slug].objectId = objectId;
         streamMetadata[slug].libraryId = yield this.client.ContentObjectLibraryId({objectId});
@@ -100,7 +92,7 @@ class DataStore {
       }
     }
 
-    this.UpdateStreams({streams: streamMetadata});
+    streamStore.UpdateStreams({streams: streamMetadata});
   });
 
   LoadLibraries = flow(function * () {
@@ -152,16 +144,6 @@ class DataStore {
       console.error("Failed to load access groups", error);
     }
   });
-
-  DeleteStream = ({objectId}) => {
-    const streams = Object.assign({}, this.streams);
-    const slug = Object.keys(streams).find(streamSlug => {
-      return streams[streamSlug].objectId === objectId;
-    });
-
-    delete streams[slug];
-    this.UpdateStreams({streams});
-  };
 
   EmbedUrl = flow(function * ({
     objectId

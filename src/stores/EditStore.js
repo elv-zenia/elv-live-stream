@@ -1,6 +1,7 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable} from "mobx";
-import {ParseLiveConfigData} from "Stores/helpers/Helpers";
+import {ParseLiveConfigData, Slugify} from "Stores/helpers/Helpers";
+import {dataStore, streamStore} from "./index";
 
 configure({
   enforceActions: "always"
@@ -9,8 +10,6 @@ configure({
 // Store for handling writing content
 class EditStore {
   rootStore;
-  streams;
-  activeStreams;
   libraries;
   accessGroups;
   contentType;
@@ -32,8 +31,8 @@ class EditStore {
     advancedData,
     drmFormData
   }) {
-    const {libraryId, streamType, url, name, description, displayName, accessGroup, permission} = basicFormData;
-    const {retention, avProperties} = advancedData;
+    const {libraryId, url, name, description, displayName, accessGroup, permission} = basicFormData;
+    const {avProperties} = advancedData;
     const {encryption} = drmFormData;
 
     const response = yield this.CreateContentObject({
@@ -41,7 +40,7 @@ class EditStore {
       permission
     });
 
-    const {objectId} = response;
+    const {objectId, write_token} = response;
 
     if(accessGroup) {
       this.AddAccessGroupPermission({
@@ -50,15 +49,10 @@ class EditStore {
       });
     }
 
-    const {writeToken} = yield this.client.EditContentObject({
-      libraryId,
-      objectId
-    });
-
     yield this.AddDescriptiveMetadata({
       libraryId,
       objectId,
-      writeToken,
+      writeToken: write_token,
       name,
       description,
       displayName
@@ -67,7 +61,6 @@ class EditStore {
     const config = ParseLiveConfigData({
       inputFormData,
       outputFormData,
-      streamType,
       url,
       encryption,
       avProperties
@@ -76,9 +69,20 @@ class EditStore {
     yield this.AddLiveRecordingMetadata({
       libraryId,
       objectId,
-      writeToken,
+      writeToken: write_token,
       config
     });
+
+    streamStore.UpdateStream({
+      key: Slugify(name),
+      value: {
+        objectId,
+        title: name
+      },
+      active: true
+    });
+
+    return objectId;
   });
 
   CreateContentObject = flow(function * ({
@@ -89,7 +93,7 @@ class EditStore {
     try {
       response = yield this.client.CreateContentObject({
         libraryId,
-        options: this.contentType
+        options: { type: dataStore.contentType }
       });
     } catch(error) {
       console.error("Failed to create content object.", error);
@@ -116,7 +120,7 @@ class EditStore {
     displayName
   }) {
     try {
-      yield this.client.ReplaceMetadata({
+      yield this.client.MergeMetadata({
         libraryId,
         objectId,
         writeToken,
@@ -156,20 +160,23 @@ class EditStore {
     writeToken,
     config
   }) {
-
     yield this.client.ReplaceMetadata({
       libraryId,
       objectId,
       writeToken,
-      metadataSubtree: "live_recording_config",
+      metadataSubtree: "/live_recording_config",
       metadata: config
     });
 
     yield this.client.FinalizeContentObject({
       libraryId,
       objectId,
-      writeToken
+      writeToken,
+      commitMessage: "Add live_recording_config",
+      awaitCommitConfirmation: true
     });
+
+    yield new Promise(resolve => setTimeout(resolve, 2000));
   });
 }
 

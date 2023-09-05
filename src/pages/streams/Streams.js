@@ -1,10 +1,18 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
-import {dataStore} from "../../stores";
+import {dataStore, streamStore} from "../../stores";
 import Table from "Components/Table";
 import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
+
+const statusKeys = {
+  CHECKING: "Checking",
+  READY: "Ready",
+  STARTING: "Starting | Running",
+  STALLING: "Stalling",
+  STREAM_CHECK_FAILED: "Stream Check Failed"
+};
 
 const StreamModal = observer(({
   open,
@@ -25,23 +33,6 @@ const StreamModal = observer(({
 });
 
 const Streams = observer(() => {
-  const [modalData, setModalData] = useState({
-    showModal: false,
-    title: "",
-    description: "",
-    objectId: "",
-    ConfirmCallback: null
-  });
-
-  const StatusText = () => {
-    // Checking
-    // Ready
-    // Starting | Running
-    // Stalled
-    // Stream Check Failed
-    return "Stream Check Failed";
-  };
-
   const ResetModal = () => {
     setModalData({
       showModal: false,
@@ -52,80 +43,93 @@ const Streams = observer(() => {
     });
   };
 
+  const [modalData, setModalData] = useState({
+    showModal: false,
+    title: "",
+    description: "",
+    objectId: "",
+    ConfirmCallback: null,
+    CloseCallback: () => ResetModal
+  });
+
+  const StatusText = () => {
+    return statusKeys.STREAM_CHECK_FAILED;
+  };
+
   return (
     <div className="streams">
       <div className="page-header">Streams</div>
       {
-        Object.keys(dataStore.streams || {}).length > 0 ?
+        Object.keys(streamStore.streams || {}).length > 0 ?
           <div className="streams__list-items">
             <Table
               headers={[
-                {label: "Title", id: "header-title"},
+                {label: "Name", id: "header-name"},
                 {label: "Object ID", id: "header-id"},
                 {label: "Status", id: "header-status"},
                 {label: "", id: "header-view"},
                 {label: "", id: "header-restart"},
                 {label: "", id: "header-actions"}
               ]}
-              rows={(Object.keys(dataStore.streams || {})).map(slug => (
+              rows={(Object.keys(streamStore.streams || {})).map(slug => (
                 {
-                  id: dataStore.streams[slug].objectId,
+                  id: streamStore.streams[slug].objectId,
                   cells: [
                     {
-                      label: dataStore.streams[slug].display_title || dataStore.streams[slug].title,
-                      id: `${dataStore.streams[slug].objectId}-title`
+                      label: streamStore.streams[slug].display_title || streamStore.streams[slug].title,
+                      id: `${streamStore.streams[slug].objectId}-name`
                     },
                     {
-                      label: dataStore.streams[slug].objectId || "",
-                      id: `${dataStore.streams[slug].objectId}-id`
+                      label: streamStore.streams[slug].objectId || "",
+                      id: `${streamStore.streams[slug].objectId}-id`
                     },
                     {
-                      label: StatusText(dataStore.streams[slug]),
-                      id: `${dataStore.streams[slug].objectId}-status`
+                      label: StatusText(streamStore.streams[slug]),
+                      id: `${streamStore.streams[slug].objectId}-status`
                     },
                     {
                       type: "button",
-                      id: `${dataStore.streams[slug].objectId}-view-button`,
+                      id: `${streamStore.streams[slug].objectId}-view-button`,
                       label: "View",
                       onClick: () => {
                       }
                     },
                     {
                       type: "button",
-                      id: `${dataStore.streams[slug].objectId}-stream-action`,
+                      id: `${streamStore.streams[slug].objectId}-stream-action`,
                       label: "Restart",
                       onClick: () => {
                       }
                     },
                     {
                       type: "iconButtonGroup",
-                      id: `${dataStore.streams[slug].objectId}-actions`,
+                      id: `${streamStore.streams[slug].objectId}-actions`,
                       items: [
                         {
-                          id: `${dataStore.streams[slug].objectId}-external-link-action`,
+                          id: `${streamStore.streams[slug].objectId}-external-link-action`,
                           icon: ExternalLinkIcon,
                           label: "Open in Fabric Browser",
                           onClick: () => dataStore.client.SendMessage({
                             options: {
                               operation: "OpenLink",
-                              libraryId: dataStore.streams[slug].libraryId,
-                              objectId: dataStore.streams[slug].objectId
+                              libraryId: streamStore.streams[slug].libraryId,
+                              objectId: streamStore.streams[slug].objectId
                             },
                             noResponse: true
                           })
                         },
                         {
-                          id: `${dataStore.streams[slug].objectId}-delete-action`,
+                          id: `${streamStore.streams[slug].objectId}-delete-action`,
                           icon: TrashIcon,
                           label: "Delete Stream",
                           onClick: () => {
                             setModalData({
-                              objectId: dataStore.streams[slug].objectId,
+                              objectId: streamStore.streams[slug].objectId,
                               showModal: true,
                               title: "Delete Stream",
                               description: "Are you sure you want to delete the stream? This action cannot be undone.",
                               ConfirmCallback: () => {
-                                dataStore.DeleteStream({objectId: dataStore.streams[slug].objectId});
+                                streamStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
                                 ResetModal();
                               }
                             });
@@ -143,7 +147,7 @@ const Streams = observer(() => {
         title={modalData.title}
         description={modalData.description}
         open={modalData.showModal}
-        onOpenChange={() => setShowDeleteModal(false)}
+        onOpenChange={modalData.CloseCallback}
         ConfirmCallback={modalData.ConfirmCallback}
       />
     </div>
