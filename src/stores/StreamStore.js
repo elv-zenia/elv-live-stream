@@ -1,5 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable} from "mobx";
+import {editStore} from "./index";
 
 configure({
   enforceActions: "always"
@@ -40,23 +41,13 @@ class StreamStore {
     objectId
   }) {
     try {
-      const response = yield this.client.StreamConfig({name: objectId});
-
-      console.log("Configure response", response);
+      yield this.client.StreamConfig({name: objectId});
+      yield editStore.CreateSiteLinks({objectId});
+      yield editStore.AddStreamToSite({objectId});
     } catch(error) {
       console.error("Unable to apply configuration.", error);
     }
   });
-
-  DeleteStream = ({objectId}) => {
-    const streams = Object.assign({}, this.streams);
-    const slug = Object.keys(streams).find(streamSlug => {
-      return streams[streamSlug].objectId === objectId;
-    });
-
-    delete streams[slug];
-    this.UpdateStreams({streams});
-  };
 
   CheckStatus = flow(function * ({
     objectId,

@@ -1,18 +1,73 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
-import {dataStore, streamStore} from "../../stores";
+import {editStore, streamStore} from "Stores";
 import Table from "Components/Table";
 import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
 
-const STATUS_KEYS = {
-  INITIALIZING: "Initializing",
-  CHECKING: "Checking",
-  READY: "Ready",
-  STARTING: "Starting | Running",
-  STALLING: "Stalling",
-  STREAM_CHECK_FAILED: "Stream Check Failed"
+const BUTTON_MAP = {
+  VIEW: {
+    id: "view-button",
+    label: "View",
+    onClick: () => {}
+  },
+  RESTART: {
+    id: "restart-button",
+    label: "Restart",
+    onClick: () => {}
+  },
+  START: {
+    id: "start-button",
+    label: "Start",
+    onClick: () => {}
+  },
+  STOP: {
+    id: "stop-button",
+    label: "Stop",
+    onClick: () => {}
+  },
+  RECHECK: {
+    id: "re-check-button",
+    label: "Re-check",
+    onClick: () => {}
+  }
+};
+
+const STATUS_MAP = {
+  INITIALIZING: {
+    title: "Initializing"
+  },
+  CHECKING: {
+    title: "Checking",
+    buttonItems: [
+      BUTTON_MAP.RESTART
+    ]
+  },
+  READY: {
+    title: "Ready",
+    buttonItems: [
+      BUTTON_MAP.START
+    ]
+  },
+  STARTING: {
+    title: "Starting | Running",
+    buttonItems: [
+      BUTTON_MAP.STOP
+    ]
+  },
+  STALLING: {
+    title: "Stalling",
+    buttonItems: [
+      BUTTON_MAP.STOP
+    ]
+  },
+  STREAM_CHECK_FAILED: {
+    title: "Stream Check Failed",
+    buttonItems: [
+      BUTTON_MAP.RECHECK
+    ]
+  }
 };
 
 const StreamModal = observer(({
@@ -53,15 +108,6 @@ const Streams = observer(() => {
     CloseCallback: null
   });
 
-  const StatusText = ({slug}) => {
-    const status = streamStore.streams[slug]?.status;
-    if(status) {
-      return STATUS_KEYS[status];
-    } else {
-      return "--";
-    }
-  };
-
   return (
     <div className="streams">
       <div className="page-header">Streams</div>
@@ -89,25 +135,26 @@ const Streams = observer(() => {
                       id: `${streamStore.streams[slug].objectId}-id`
                     },
                     {
-                      label: StatusText(streamStore.streams[slug]),
+                      label: STATUS_MAP[streamStore.streams[slug].status]?.title || "--",
                       id: `${streamStore.streams[slug].objectId}-status`
                     },
                     {
                       type: "buttonGroup",
-                      items: [
-                        {
-                          id: `${streamStore.streams[slug].objectId}-view-button`,
-                          label: "View",
-                          onClick: () => {
-                          }
-                        },
-                        {
-                          id: `${streamStore.streams[slug].objectId}-stream-action`,
-                          label: "Restart",
-                          onClick: () => {
-                          }
-                        }
-                      ]
+                      items: STATUS_MAP[streamStore.streams[slug].status]?.buttonItems || []
+                      // items: [
+                      //   {
+                      //     id: `${streamStore.streams[slug].objectId}-view-button`,
+                      //     label: "View",
+                      //     onClick: () => {
+                      //     }
+                      //   },
+                      //   {
+                      //     id: `${streamStore.streams[slug].objectId}-stream-action`,
+                      //     label: "Restart",
+                      //     onClick: () => {
+                      //     }
+                      //   }
+                      // ]
                     },
                     {
                       type: "iconButtonGroup",
@@ -117,7 +164,7 @@ const Streams = observer(() => {
                           id: `${streamStore.streams[slug].objectId}-external-link-action`,
                           icon: ExternalLinkIcon,
                           label: "Open in Fabric Browser",
-                          onClick: () => dataStore.client.SendMessage({
+                          onClick: () => editStore.client.SendMessage({
                             options: {
                               operation: "OpenLink",
                               libraryId: streamStore.streams[slug].libraryId,
@@ -137,7 +184,7 @@ const Streams = observer(() => {
                               title: "Delete Stream",
                               description: "Are you sure you want to delete the stream? This action cannot be undone.",
                               ConfirmCallback: () => {
-                                streamStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
+                                editStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
                                 ResetModal();
                               },
                               CloseCallback: () => {

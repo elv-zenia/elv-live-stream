@@ -1,5 +1,5 @@
 // Force strict mode so mutations are only allowed within actions.
-import {configure, flow, makeAutoObservable} from "mobx";
+import {configure, flow, makeAutoObservable, toJS} from "mobx";
 import {ParseLiveConfigData, Slugify} from "Stores/helpers/Helpers";
 import {dataStore, streamStore} from "./index";
 
@@ -77,7 +77,8 @@ class EditStore {
       key: Slugify(name),
       value: {
         objectId,
-        title: name
+        title: name,
+        status: "created"
       },
       active: true
     });
@@ -129,7 +130,10 @@ class EditStore {
             name,
             description,
             asset_metadata: {
-              display_title: displayName
+              display_title: displayName || name,
+              title: displayName || name,
+              title_type: "live_stream",
+              video_type: "live"
             }
           }
         }
@@ -177,6 +181,142 @@ class EditStore {
     });
 
     yield new Promise(resolve => setTimeout(resolve, 2000));
+  });
+
+  CreateSiteLinks = flow(function * ({objectId}) {
+    const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    const {writeToken} = yield this.client.EditContentObject({
+      libraryId,
+      objectId
+    });
+
+    yield this.client.CreateLinks({
+      libraryId,
+      objectId,
+      writeToken,
+      links: [{
+        type: "rep",
+        path: "public/asset_metadata/sources/default",
+        target: "playout/default/options.json"
+      }]
+    });
+    console.log("links")
+
+    yield this.client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      awaitCommitConfirmation: true
+    });
+  });
+
+  CreateLink = ({
+    targetHash,
+    linkTarget="meta/public/asset_metadata",
+    options={},
+    autoUpdate=true
+  }) => {
+    return {
+      ...options,
+      ".": {
+        ...(options["."] || {}),
+        ...autoUpdate ? {"auto_update": {"tag": "latest"}} : undefined
+      },
+      "/": `/qfab/${targetHash}/${linkTarget}`
+    };
+  }
+
+  AddStreamToSite = flow(function * ({objectId}) {
+    try {
+      const streamMetadata = yield this.client.ContentObjectMetadata({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId,
+        metadataSubtree: "public/asset_metadata/live_streams",
+      });
+
+      const objectName = yield this.client.ContentObjectMetadata({
+        libraryId: yield this.client.ContentObjectLibraryId({objectId}),
+        objectId,
+        metadataSubtree: "public/name"
+      });
+
+      const streamData = {
+        ...this.CreateLink({
+          targetHash: yield this.client.LatestVersionHash({objectId}),
+          options: {
+            ".": {
+              container: yield this.client.LatestVersionHash({objectId: dataStore.siteId})
+            }
+          }
+        }),
+        order: Object.keys(streamMetadata).length,
+      };
+
+      const {writeToken} = yield this.client.EditContentObject({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId
+      });
+
+      yield this.client.ReplaceMetadata({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId,
+        writeToken,
+        metadataSubtree: "public/asset_metadata/live_streams",
+        metadata: {
+          ...toJS(streamMetadata),
+          [Slugify(objectName)]: streamData
+        }
+      });
+
+      yield this.client.FinalizeContentObject({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId,
+        writeToken,
+        commitMessage: "Add live stream"
+      });
+    } catch(error) {
+      console.error("Failed to replace meta", error)
+    }
+  });
+
+  DeleteStream = flow(function * ({objectId}) {
+    const streams = Object.assign({}, streamStore.streams);
+    const slug = Object.keys(streams).find(streamSlug => {
+      return streams[streamSlug].objectId === objectId;
+    });
+    console.log("slug", slug)
+
+    const streamMetadata = yield this.client.ContentObjectMetadata({
+      libraryId: dataStore.siteLibraryId,
+      objectId: dataStore.siteId,
+      metadataSubtree: "public/asset_metadata/live_streams",
+    });
+    console.log("streamMeta", streamMetadata)
+    delete streamMetadata[slug];
+    console.log("Stream meta after", streamMetadata)
+
+    const {writeToken} = yield this.client.EditContentObject({
+      libraryId: dataStore.siteLibraryId,
+      objectId: dataStore.siteId
+    });
+
+    yield this.client.ReplaceMetadata({
+      libraryId: dataStore.siteLibraryId,
+      objectId: dataStore.siteId,
+      writeToken,
+      metadataSubtree: "public/asset_metadata/live_streams",
+      metadata: streamMetadata
+    });
+
+    yield this.client.FinalizeContentObject({
+      libraryId: dataStore.siteLibraryId,
+      objectId: dataStore.siteId,
+      writeToken,
+      commitMessage: "Delete live stream"
+    });
+
+    delete streams[slug];
+    streamStore.UpdateStreams({streams});
   });
 }
 

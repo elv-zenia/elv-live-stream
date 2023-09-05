@@ -13,6 +13,7 @@ class DataStore {
   accessGroups;
   contentType;
   siteId;
+  siteLibraryId;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -24,9 +25,18 @@ class DataStore {
     return this.rootStore.client;
   }
 
+  get siteId() {
+    return this.siteId;
+  }
+
+  get siteLibraryId() {
+    return this.siteLibraryId;
+  }
+
   Initialize = flow(function * () {
     const tenantContractId = yield this.LoadTenantInfo();
     this.siteId = yield this.LoadTenantData({tenantContractId});
+    this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
     yield this.LoadStreams();
     yield this.LoadLibraries();
     yield this.LoadAccessGroups();
