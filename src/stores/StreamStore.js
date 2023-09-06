@@ -29,7 +29,7 @@ class StreamStore {
       [key]: value,
       ...this.streams || {}
     };
-    console.log("UPDATE", streams)
+    console.log("UPDATE", streams);
 
     this.UpdateStreams({streams});
   };
@@ -86,7 +86,7 @@ class StreamStore {
       metadataSubtree: "live_recording/fabric_config/edge_write_token"
     });
     let tokenMeta;
-    console.log("edgeWriteToken", edgeWriteToken)
+    console.log("edgeWriteToken", edgeWriteToken);
 
     if(edgeWriteToken) {
       tokenMeta = yield this.client.ContentObjectMetadata({
@@ -98,7 +98,7 @@ class StreamStore {
 
     if(!tokenMeta) {
       const createResponse = yield this.client.StreamCreate({name: objectId, start});
-      console.log("craete stream resp", createResponse)
+      console.log("craete stream resp", createResponse);
     }
 
     yield this.OperateLRO({
@@ -125,7 +125,7 @@ class StreamStore {
       });
 
       this.UpdateStatus({slug, status: response.state});
-      console.log("resp", response)
+      console.log("resp", response);
     } catch(error) {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }

@@ -14,7 +14,6 @@ const DataWrapper = observer(({children}) => {
           slug
         }));
 
-
       // CheckStreamStatus();
       HandleStreamSetup({streams: activeStreams});
     }
