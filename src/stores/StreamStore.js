@@ -29,6 +29,7 @@ class StreamStore {
       [key]: value,
       ...this.streams || {}
     };
+    console.log("UPDATE", streams)
 
     this.UpdateStreams({streams});
   };
@@ -37,13 +38,25 @@ class StreamStore {
     this.streams = streams;
   };
 
+  UpdateStatus = ({slug, status}) => {
+    const streamObject = this.streams[slug];
+    streamObject.status = status;
+    this.UpdateStream({
+      key: slug,
+      value: streamObject
+    });
+  }
+
   ConfigureStream = flow(function * ({
-    objectId
+    objectId,
+    slug
   }) {
     try {
       yield this.client.StreamConfig({name: objectId});
       yield editStore.CreateSiteLinks({objectId});
       yield editStore.AddStreamToSite({objectId});
+
+      this.UpdateStatus({slug, status: "ready"});
     } catch(error) {
       console.error("Unable to apply configuration.", error);
     }
@@ -61,22 +74,61 @@ class StreamStore {
     });
   });
 
-  CreateStream = flow(function * ({
-    objectId,
+  StartStream = flow(function * ({
+    slug,
     start=false
   }) {
-    return yield this.client.StreamCreate({name: objectId, start});
+    const objectId = this.streams[slug].objectId;
+    const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    const edgeWriteToken = yield this.client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: "live_recording/fabric_config/edge_write_token"
+    });
+    let tokenMeta;
+    console.log("edgeWriteToken", edgeWriteToken)
+
+    if(edgeWriteToken) {
+      tokenMeta = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: `/q/${edgeWriteToken}/meta`
+      });
+    }
+
+    if(!tokenMeta) {
+      const createResponse = yield this.client.StreamCreate({name: objectId, start});
+      console.log("craete stream resp", createResponse)
+    }
+
+    yield this.OperateLRO({
+      objectId,
+      operation: "START"
+    });
   });
 
   OperateLRO = flow(function * ({
     objectId,
+    slug,
     operation
   }) {
-    // start | reset | stop
-    return yield this.client.StreamStartOrStopOrReset({
-      name: objectId,
-      op: operation
-    });
+    const OP_MAP = {
+      START: "start",
+      RESET: "reset",
+      STOP: "stop"
+    };
+
+    try {
+      const response = yield this.client.StreamStartOrStopOrReset({
+        name: objectId,
+        op: OP_MAP[operation]
+      });
+
+      this.UpdateStatus({slug, status: response.state});
+      console.log("resp", response)
+    } catch(error) {
+      console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
+    }
   });
 }
 

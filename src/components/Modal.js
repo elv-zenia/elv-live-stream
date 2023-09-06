@@ -1,5 +1,6 @@
-import React from "react";
-import {Root, Trigger, Overlay, Content, Title, Description, Close} from "@radix-ui/react-dialog";
+import React, {useState} from "react";
+import {Root, Overlay, Content, Title, Description, Close} from "@radix-ui/react-dialog";
+import {Loader} from "Components/Loader";
 
 const modalSizes = {
   "XS": "xs",
@@ -9,7 +10,6 @@ const modalSizes = {
 };
 
 const Modal = ({
-  trigger,
   title,
   description,
   ConfirmCallback,
@@ -22,10 +22,11 @@ const Modal = ({
   children,
   size="SM"
 }) => {
+  const [loading, setLoading] = useState(false);
+
   return (
     <div className="modal">
       <Root open={open} onOpenChange={onOpenChange}>
-        <Trigger asChild>{ trigger }</Trigger>
         <Overlay className="modal__overlay">
           <Content className={`modal__content modal__content--${modalSizes[size]}`}>
             <Title className="modal__content__body__title">{ title }</Title>
@@ -45,11 +46,19 @@ const Modal = ({
                   </button>
                 </Close>
               }
-              <Close asChild>
-                <button type="button" className="button__primary" onClick={ConfirmCallback}>
-                  { confirmText }
-                </button>
-              </Close>
+              <button
+                type="button"
+                disabled={loading}
+                className="button__primary"
+                onClick={async () => {
+                  setLoading(true);
+                  await ConfirmCallback();
+                  setLoading(false);
+                  onOpenChange(false);
+                }}
+              >
+                { loading ? <Loader loader="inline" className="modal__loader" /> : confirmText }
+              </button>
             </div>
           </Content>
         </Overlay>

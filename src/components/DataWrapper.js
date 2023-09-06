@@ -9,16 +9,29 @@ const DataWrapper = observer(({children}) => {
     if(streamStore.streams) {
       const activeStreams = Object.keys(streamStore.streams)
         .filter(slug => streamStore.streams[slug].active && streamStore.streams[slug].status === "created")
-        .map(slug => streamStore.streams[slug].objectId);
+        .map(slug => ({
+          objectId: streamStore.streams[slug].objectId,
+          slug
+        }));
 
+
+      // CheckStreamStatus();
       HandleStreamSetup({streams: activeStreams});
     }
   }, [streamStore.streams]);
 
+  // const CheckStreamStatus = async () => {
+  //   for(let slug of Object.keys(streamStore.streams)) {
+  //     const status = await streamStore.CheckStatus({objectId: streamStore.streams[slug].objectId});
+  //     console.log("status", status)
+  //   }
+  // };
+
   const HandleStreamSetup = async ({streams}) => {
     for(let i = 0; i < streams.length; i++) {
       await streamStore.ConfigureStream({
-        objectId: streams[i]
+        objectId: streams[i].objectId,
+        slug: streams[i].slug
       });
     }
   };

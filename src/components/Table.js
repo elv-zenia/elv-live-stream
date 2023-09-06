@@ -8,6 +8,7 @@ const TableCell = ({
   items=[]
 }) => {
   let contents;
+  items = items.filter(item => !item.hidden);
 
   if(type === "button") {
     contents = (

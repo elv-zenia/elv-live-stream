@@ -200,7 +200,6 @@ class EditStore {
         target: "playout/default/options.json"
       }]
     });
-    console.log("links")
 
     yield this.client.FinalizeContentObject({
       libraryId,
@@ -275,7 +274,7 @@ class EditStore {
         commitMessage: "Add live stream"
       });
     } catch(error) {
-      console.error("Failed to replace meta", error)
+      console.error("Failed to replace meta", error);
     }
   });
 
@@ -284,16 +283,14 @@ class EditStore {
     const slug = Object.keys(streams).find(streamSlug => {
       return streams[streamSlug].objectId === objectId;
     });
-    console.log("slug", slug)
 
     const streamMetadata = yield this.client.ContentObjectMetadata({
       libraryId: dataStore.siteLibraryId,
       objectId: dataStore.siteId,
       metadataSubtree: "public/asset_metadata/live_streams",
     });
-    console.log("streamMeta", streamMetadata)
+
     delete streamMetadata[slug];
-    console.log("Stream meta after", streamMetadata)
 
     const {writeToken} = yield this.client.EditContentObject({
       libraryId: dataStore.siteLibraryId,

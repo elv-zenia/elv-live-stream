@@ -6,68 +6,14 @@ import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
 
-const BUTTON_MAP = {
-  VIEW: {
-    id: "view-button",
-    label: "View",
-    onClick: () => {}
-  },
-  RESTART: {
-    id: "restart-button",
-    label: "Restart",
-    onClick: () => {}
-  },
-  START: {
-    id: "start-button",
-    label: "Start",
-    onClick: () => {}
-  },
-  STOP: {
-    id: "stop-button",
-    label: "Stop",
-    onClick: () => {}
-  },
-  RECHECK: {
-    id: "re-check-button",
-    label: "Re-check",
-    onClick: () => {}
-  }
-};
-
-const STATUS_MAP = {
-  INITIALIZING: {
-    title: "Initializing"
-  },
-  CHECKING: {
-    title: "Checking",
-    buttonItems: [
-      BUTTON_MAP.RESTART
-    ]
-  },
-  READY: {
-    title: "Ready",
-    buttonItems: [
-      BUTTON_MAP.START
-    ]
-  },
-  STARTING: {
-    title: "Starting | Running",
-    buttonItems: [
-      BUTTON_MAP.STOP
-    ]
-  },
-  STALLING: {
-    title: "Stalling",
-    buttonItems: [
-      BUTTON_MAP.STOP
-    ]
-  },
-  STREAM_CHECK_FAILED: {
-    title: "Stream Check Failed",
-    buttonItems: [
-      BUTTON_MAP.RECHECK
-    ]
-  }
+const STATUS_KEYS = {
+  created: "Initializing",
+  checking: "Checking",
+  ready: "Ready",
+  starting: "Starting",
+  stalled: "Stalled",
+  checkFailed: "Stream Check Failed",
+  inactive: "Inactive"
 };
 
 const StreamModal = observer(({
@@ -135,26 +81,78 @@ const Streams = observer(() => {
                       id: `${streamStore.streams[slug].objectId}-id`
                     },
                     {
-                      label: STATUS_MAP[streamStore.streams[slug].status]?.title || "--",
+                      label: STATUS_KEYS[streamStore.streams[slug].status] || "--",
                       id: `${streamStore.streams[slug].objectId}-status`
                     },
                     {
                       type: "buttonGroup",
-                      items: STATUS_MAP[streamStore.streams[slug].status]?.buttonItems || []
-                      // items: [
-                      //   {
-                      //     id: `${streamStore.streams[slug].objectId}-view-button`,
-                      //     label: "View",
-                      //     onClick: () => {
-                      //     }
-                      //   },
-                      //   {
-                      //     id: `${streamStore.streams[slug].objectId}-stream-action`,
-                      //     label: "Restart",
-                      //     onClick: () => {
-                      //     }
-                      //   }
-                      // ]
+                      items: [
+                        {
+                          id: `${streamStore.streams[slug].objectId}-view-button`,
+                          label: "View",
+                          onClick: () => {
+                          }
+                        },
+                        {
+                          id: `${streamStore.streams[slug].objectId}-start-button`,
+                          label: "Start",
+                          hidden: streamStore.streams[slug].status !== "ready",
+                          onClick: () => {
+                            setModalData({
+                              objectId: streamStore.streams[slug].objectId,
+                              showModal: true,
+                              title: "Start Stream",
+                              description: "Are you sure you want to start the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.StartStream({slug});
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }
+                        },
+                        {
+                          id: `${streamStore.streams[slug].objectId}-stop-button`,
+                          label: "Stop",
+                          hidden: !["starting", "running"].includes(streamStore.streams[slug].status),
+                          onClick: () => {
+                            setModalData({
+                              objectId: streamStore.streams[slug].objectId,
+                              showModal: true,
+                              title: "Stop Stream",
+                              description: "Are you sure you want to stop the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.OperateLRO({
+                                  objectId: streamStore.streams[slug].objectId,
+                                  slug,
+                                  operation: "STOP"
+                                });
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }
+                        },
+                        {
+                          id: `${streamStore.streams[slug].objectId}-restart-button`,
+                          label: "Restart",
+                          hidden: streamStore.streams[slug].status !== "checkFailed",
+                          onClick: () => {
+                            setModalData({
+                              objectId: streamStore.streams[slug].objectId,
+                              showModal: true,
+                              title: "Restart Stream",
+                              description: "Are you sure you want to restart the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.OperateLRO({
+                                  objectId: streamStore.streams[slug].objectId,
+                                  slug,
+                                  operation: "RESET"
+                                });
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }
+                        }
+                      ]
                     },
                     {
                       type: "iconButtonGroup",
@@ -177,19 +175,17 @@ const Streams = observer(() => {
                           id: `${streamStore.streams[slug].objectId}-delete-action`,
                           icon: TrashIcon,
                           label: "Delete Stream",
+                          hidden: streamStore.streams[slug].status === "starting",
                           onClick: () => {
                             setModalData({
                               objectId: streamStore.streams[slug].objectId,
                               showModal: true,
                               title: "Delete Stream",
                               description: "Are you sure you want to delete the stream? This action cannot be undone.",
-                              ConfirmCallback: () => {
-                                editStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
-                                ResetModal();
+                              ConfirmCallback: async () => {
+                                await editStore.DeleteStream({objectId: streamStore.streams[slug].objectId});
                               },
-                              CloseCallback: () => {
-                                ResetModal();
-                              }
+                              CloseCallback: () => ResetModal()
                             });
                           }
                         }

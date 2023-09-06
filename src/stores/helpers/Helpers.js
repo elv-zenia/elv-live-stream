@@ -28,26 +28,26 @@ export const ParseLiveConfigData = ({
     input: {
       audio: {
         stream: AV_STREAM[avProperties],
-        stream_id: parseInt(audioStreamId) || 0,
-        stream_index: parseInt(audioStreamIndex) || 0
+        stream_id: parseInt(audioStreamId),
+        stream_index: parseInt(audioStreamIndex)
       },
       video: {
         stream: AV_STREAM[avProperties],
-        stream_id: parseInt(videoStreamId) || 0,
-        stream_index: parseInt(videoStreamIndex) || 0
+        stream_id: parseInt(videoStreamId),
+        stream_index: parseInt(videoStreamIndex)
       }
     },
     output: {
       audio: {
-        bitrate: parseInt(audioBitrate) || 0,
+        bitrate: parseInt(audioBitrate),
         channel_layout: CHANNEL_LAYOUTS[audioChannelLayout],
         quality: AV_STREAM[avProperties]
       },
       video: {
-        bitrate: parseInt(videoBitrate) || 0,
-        height: parseInt(videoHeight) || 0,
+        bitrate: parseInt(videoBitrate),
+        height: parseInt(videoHeight),
         quality: AV_STREAM[avProperties],
-        width: parseInt(videoWidth) || 0
+        width: parseInt(videoWidth)
       }
     },
     part_ttl: 3600,
