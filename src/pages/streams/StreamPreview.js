@@ -9,7 +9,6 @@ const StreamPreview = observer(() => {
     streamStore.streams[slug].objectId === id
   ));
   const streamObject = streamStore.streams[streamSlug];
-  console.log("streamObject", streamObject);
 
   return (
     <div className="stream-preview">

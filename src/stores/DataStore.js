@@ -94,8 +94,9 @@ class DataStore {
     }
 
     for(const slug of Object.keys(streamMetadata)) {
-      if(streamMetadata[slug]?.sources?.default?.["."]?.container) {
-        const versionHash = streamMetadata[slug].sources.default["."].container;
+      const versionHash = streamMetadata[slug]?.sources?.default?.["."]?.container;
+
+      if(versionHash) {
         const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
         const libraryId = yield this.client.ContentObjectLibraryId({objectId});
 
@@ -107,7 +108,6 @@ class DataStore {
         streamMetadata[slug].versionHash = versionHash;
         streamMetadata[slug].libraryId = libraryId;
         streamMetadata[slug].embedUrl = yield this.EmbedUrl({objectId});
-
         streamMetadata[slug].status = statusResponse.state;
       }
     }

@@ -150,7 +150,7 @@ class EditStore {
     try {
       yield this.client.AddContentObjectGroupPermission({
         objectId,
-        groupAddress: accessGroup,
+        groupAddress: dataStore.accessGroups[accessGroup]?.address,
         permission: "manage"
       });
     } catch(error) {

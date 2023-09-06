@@ -1,11 +1,23 @@
 import {useEffect} from "react";
 import {streamStore} from "Stores";
 import {observer} from "mobx-react";
-import {toJS} from "mobx";
 
 const DataWrapper = observer(({children}) => {
   useEffect(() => {
-    console.log("all streams", toJS(streamStore.streams));
+    let intervalId = setInterval(async () => {
+      try {
+        await streamStore.AllStreamsStatus();
+      } catch(error) {
+        console.error("Polling error:", error);
+      }
+    }, 15000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  useEffect(() => {
     if(streamStore.streams) {
       const activeStreams = Object.keys(streamStore.streams)
         .filter(slug => streamStore.streams[slug].active && streamStore.streams[slug].status === "created")
@@ -14,24 +26,9 @@ const DataWrapper = observer(({children}) => {
           slug
         }));
 
-      // CheckStreamStatus();
       HandleStreamSetup({streams: activeStreams});
     }
   }, [streamStore.streams]);
-
-  // const CheckStreamStatus = async () => {
-  //   const promises = [];
-  //   for(let slug of Object.keys(streamStore.streams)) {
-  //     promises.push(
-  //       streamStore.CheckStatus({
-  //         slug,
-  //         objectId: streamStore.streams[slug].objectId
-  //       })
-  //     );
-  //   }
-  //
-  //   await Promise.all(promises);
-  // };
 
   const HandleStreamSetup = async ({streams}) => {
     for(let i = 0; i < streams.length; i++) {

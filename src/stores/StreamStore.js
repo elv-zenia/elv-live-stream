@@ -87,7 +87,6 @@ class StreamStore {
       metadataSubtree: "live_recording/fabric_config/edge_write_token"
     });
     let tokenMeta;
-    console.log("edgeWriteToken", edgeWriteToken);
 
     if(edgeWriteToken) {
       tokenMeta = yield this.client.ContentObjectMetadata({
@@ -129,6 +128,25 @@ class StreamStore {
     } catch(error) {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }
+  });
+
+  AllStreamsStatus = flow(function * () {
+    const streams = {
+      ...this.streams
+    };
+
+    for(let slug of Object.keys(this.streams || {})) {
+      try {
+        const response = yield this.CheckStatus({
+          objectId: this.streams[slug].objectId
+        });
+        streams[slug].status = response.state;
+      } catch(error) {
+        console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
+      }
+    }
+
+    this.UpdateStreams({streams});
   });
 }
 
