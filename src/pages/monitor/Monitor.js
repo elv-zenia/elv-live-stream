@@ -12,7 +12,7 @@ const Monitor = observer(() => {
         Object.keys(streamStore.streams || {}).length > 0 ?
           <div className="monitor__grid-items">
             {
-              (Object.keys(streamStore.streams || {}) || [])
+              (Object.keys(streamStore.streams || {}).sort((a, b) => a.localeCompare(b)) || [])
                 .map((slug) => (
                   <div key={slug} className="monitor__grid-item-container">
                     <div className="monitor__video-wrapper">
@@ -35,7 +35,9 @@ const Monitor = observer(() => {
                             href={streamStore.streams[slug].embedUrl}
                             target="_blank"
                           >
-                            {streamStore.streams[slug].embedUrl}
+                            <div className="monitor__grid-item-link-text">
+                              { streamStore.streams[slug].embedUrl }
+                            </div>
                           </a>
                         }
                       </div>

@@ -40,10 +40,16 @@
 
   &__grid-item-link {
     font-size: 0.6rem;
+    max-height: 35px;
+    overflow: hidden;
     text-decoration: underline;
-    text-overflow: ellipsis;
     white-space: pre-wrap;
     width: 100%;
     word-break: break-word;
+  }
+
+  &__grid-item-link-text {
+    height: 100%;
+    text-overflow: ellipsis;
   }
 }

@@ -61,6 +61,10 @@ main {
 .page-header {
   font-size: 1.25rem;
   margin-bottom: 2rem;
+
+  &__actions {
+    display: flex;
+  }
 }
 
 select {
@@ -138,6 +142,33 @@ input[type="submit"],
   cursor: pointer;
   min-height: 35px;
   min-width: 7.5rem;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: $gray-5;
+    color: $white;
+  }
+}
+
+.nav-button-link {
+  background-color: $white;
+  border: 1px solid $gray-4;
+  color: $black;
+  cursor: pointer;
+  font-size: 0.85rem;
+  height: 35px;
+  line-height: 35px;
+  min-width: 7.5rem;
+  text-align: center;
+
+  span {
+    display: inline-block;
+    vertical-align: middle;
+  }
 
   &:disabled {
     cursor: not-allowed;

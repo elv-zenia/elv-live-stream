@@ -1,35 +1,46 @@
 import React from "react";
+import {NavLink} from "react-router-dom";
 import ImageIcon from "Components/ImageIcon";
 
 const TableCell = ({
   label,
-  onClick,
   type,
   items=[]
 }) => {
   let contents;
   items = items.filter(item => !item.hidden);
 
-  if(type === "button") {
-    contents = (
-      <button className="button__secondary" onClick={onClick}>
-        { label }
-      </button>
-    );
-  } else if(type === "buttonGroup") {
+  if(type === "buttonGroup") {
     contents = (
       <div className="table__button-group">
         {
-          items.map((item) => (
-            <button
-              key={item.id}
-              className="button__secondary"
-              onClick={item.onClick}
-              title={item.label}
-            >
-              { item.label }
-            </button>
-          ))
+          items.map((item) => {
+            if(item.onClick) {
+              return (
+                <button
+                  key={item.id}
+                  className="button__secondary"
+                  onClick={item.onClick}
+                  title={item.label}
+                >
+                  { item.label }
+                </button>
+              );
+            } else if(item.to) {
+              return (
+                <NavLink
+                  className="nav-button-link"
+                  key={item.id}
+                  to={item.to}
+                  title={item.label}
+                >
+                  <span>
+                    { item.label }
+                  </span>
+                </NavLink>
+              );
+            }
+          })
         }
       </div>
     );

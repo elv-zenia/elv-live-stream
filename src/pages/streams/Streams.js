@@ -90,8 +90,7 @@ const Streams = observer(() => {
                         {
                           id: `${streamStore.streams[slug].objectId}-view-button`,
                           label: "View",
-                          onClick: () => {
-                          }
+                          to: `/streams/${streamStore.streams[slug].objectId}`
                         },
                         {
                           id: `${streamStore.streams[slug].objectId}-start-button`,

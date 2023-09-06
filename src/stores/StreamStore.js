@@ -103,6 +103,7 @@ class StreamStore {
 
     yield this.OperateLRO({
       objectId,
+      slug,
       operation: "START"
     });
   });

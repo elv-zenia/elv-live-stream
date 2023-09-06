@@ -93,7 +93,7 @@ class DataStore {
       throw Error(`Unable to load live streams for site ${this.siteId}.`);
     }
 
-    for(const slug of Object.keys(streamMetadata).sort((a, b) => a.localeCompare(b))) {
+    for(const slug of Object.keys(streamMetadata)) {
       if(streamMetadata[slug]?.sources?.default?.["."]?.container) {
         streamMetadata[slug].versionHash = streamMetadata[slug].sources.default["."].container;
         const objectId = this.client.utils.DecodeVersionHash(streamMetadata[slug].versionHash).objectId;
