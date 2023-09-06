@@ -20,10 +20,17 @@ const DataWrapper = observer(({children}) => {
   }, [streamStore.streams]);
 
   // const CheckStreamStatus = async () => {
+  //   const promises = [];
   //   for(let slug of Object.keys(streamStore.streams)) {
-  //     const status = await streamStore.CheckStatus({objectId: streamStore.streams[slug].objectId});
-  //     console.log("status", status)
+  //     promises.push(
+  //       streamStore.CheckStatus({
+  //         slug,
+  //         objectId: streamStore.streams[slug].objectId
+  //       })
+  //     );
   //   }
+  //
+  //   await Promise.all(promises);
   // };
 
   const HandleStreamSetup = async ({streams}) => {

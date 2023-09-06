@@ -11,9 +11,11 @@ const STATUS_KEYS = {
   checking: "Checking",
   ready: "Ready",
   starting: "Starting",
+  running: "Running",
   stalled: "Stalled",
   checkFailed: "Stream Check Failed",
-  inactive: "Inactive"
+  inactive: "Inactive",
+  terminated: "Terminated"
 };
 
 const StreamModal = observer(({

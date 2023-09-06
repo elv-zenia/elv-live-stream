@@ -4,7 +4,6 @@ import {dataStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
-import {toJS} from "mobx";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -298,11 +297,6 @@ const Create = observer(() => {
     event.preventDefault();
     setIsCreating(true);
 
-    console.log("data", toJS({basicFormData,
-      inputFormData,
-      outputFormData,
-      advancedData,
-      drmFormData}));
     try {
       await editStore.InitLiveStreamObject({
         basicFormData,

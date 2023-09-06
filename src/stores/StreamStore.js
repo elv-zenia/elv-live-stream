@@ -29,7 +29,6 @@ class StreamStore {
       [key]: value,
       ...this.streams || {}
     };
-    console.log("UPDATE", streams);
 
     this.UpdateStreams({streams});
   };
@@ -67,11 +66,13 @@ class StreamStore {
     stopLro=false,
     showParams=false
   }) {
-    return yield this.client.StreamStatus({
-      objectId,
+    const response = yield this.client.StreamStatus({
+      name: objectId,
       stopLro,
       showParams
     });
+
+    return response;
   });
 
   StartStream = flow(function * ({
@@ -97,8 +98,7 @@ class StreamStore {
     }
 
     if(!tokenMeta) {
-      const createResponse = yield this.client.StreamCreate({name: objectId, start});
-      console.log("craete stream resp", createResponse);
+      yield this.client.StreamCreate({name: objectId, start});
     }
 
     yield this.OperateLRO({
@@ -126,7 +126,6 @@ class StreamStore {
       });
 
       this.UpdateStatus({slug, status: response.state});
-      console.log("resp", response);
     } catch(error) {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }

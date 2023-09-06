@@ -95,11 +95,20 @@ class DataStore {
 
     for(const slug of Object.keys(streamMetadata)) {
       if(streamMetadata[slug]?.sources?.default?.["."]?.container) {
-        streamMetadata[slug].versionHash = streamMetadata[slug].sources.default["."].container;
-        const objectId = this.client.utils.DecodeVersionHash(streamMetadata[slug].versionHash).objectId;
+        const versionHash = streamMetadata[slug].sources.default["."].container;
+        const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
+        const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+
+        const statusResponse = yield streamStore.CheckStatus({
+          objectId
+        });
+
         streamMetadata[slug].objectId = objectId;
-        streamMetadata[slug].libraryId = yield this.client.ContentObjectLibraryId({objectId});
+        streamMetadata[slug].versionHash = versionHash;
+        streamMetadata[slug].libraryId = libraryId;
         streamMetadata[slug].embedUrl = yield this.EmbedUrl({objectId});
+
+        streamMetadata[slug].status = statusResponse.state;
       }
     }
 
