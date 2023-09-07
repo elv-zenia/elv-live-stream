@@ -21,10 +21,19 @@ class StreamStore {
   }
 
   UpdateStream = ({key, value={}}) => {
-    const streams = {
-      [key]: value,
-      ...this.streams || {}
-    };
+    let streams;
+    if(this.streams[key]) {
+      streams = {
+        ...this.streams || {}
+      };
+
+      streams[key] = value;
+    } else {
+      streams = {
+        [key]: value,
+        ...this.streams || {}
+      };
+    }
 
     this.UpdateStreams({streams});
   };
@@ -43,13 +52,19 @@ class StreamStore {
   }
 
   ConfigureStream = flow(function * ({
-    objectId
+    objectId,
+    slug
   }) {
     try {
       yield this.client.StreamConfig({name: objectId});
       yield editStore.CreateSiteLinks({objectId});
       yield editStore.AddStreamToSite({objectId});
 
+      const response = yield this.CheckStatus({
+        objectId
+      });
+
+      this.UpdateStatus({slug, status: response.state});
     } catch(error) {
       console.error("Unable to apply configuration.", error);
     }

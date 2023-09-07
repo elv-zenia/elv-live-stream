@@ -77,12 +77,19 @@ class EditStore {
       console.error("Unable to set permission.", error);
     }
 
+    const statusResponse = yield streamStore.CheckStatus({
+      objectId
+    });
+
+    const streamValue = {
+      objectId,
+      title: name,
+      status: statusResponse.state
+    };
+
     streamStore.UpdateStream({
       key: Slugify(name),
-      value: {
-        objectId,
-        title: name
-      }
+      value: streamValue
     });
 
     return objectId;

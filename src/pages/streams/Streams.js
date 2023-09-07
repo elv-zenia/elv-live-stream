@@ -17,7 +17,7 @@ const STATUS_MAP = {
 };
 
 const STATUS_TEXT = {
-  unconfigured: "Not configured",
+  unconfigured: "Not Configured",
   uninitialized: "Uninitialized",
   inactive: "Inactive",
   stopped: "Stopped",
@@ -153,7 +153,8 @@ const Streams = observer(() => {
                               description: "Are you sure you want to check the stream?",
                               ConfirmCallback: async () => {
                                 await streamStore.ConfigureStream({
-                                  objectId: streamStore.streams[slug].objectId
+                                  objectId: streamStore.streams[slug].objectId,
+                                  slug
                                 });
                               },
                               CloseCallback: () => ResetModal()
