@@ -30,7 +30,7 @@ const StreamPreview = observer(() => {
 
       <AppFrame
         className="display-frame"
-        appUrl={EluvioConfiguration.streamSampleUrl}
+        appUrl={EluvioConfiguration.displayAppUrl}
         queryParams={queryParams}
         onComplete={() => this.setState({completed: true})}
         onCancel={() => this.setState({completed: true})}
