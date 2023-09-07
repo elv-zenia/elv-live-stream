@@ -91,7 +91,7 @@ const Streams = observer(() => {
                       items: [
                         {
                           id: `${streamStore.streams[slug].objectId}-view-button`,
-                          hidden: streamStore.streams[slug].status === "created",
+                          hidden: !["running", "starting"].includes(streamStore.streams[slug].status),
                           label: "View",
                           to: `/streams/${streamStore.streams[slug].objectId}`
                         },
