@@ -32,7 +32,7 @@ class EditStore {
     drmFormData
   }) {
     const {libraryId, url, name, description, displayName, accessGroup, permission} = basicFormData;
-    const {avProperties} = advancedData;
+    const {avProperties, retention} = advancedData;
     const {encryption} = drmFormData;
 
     const response = yield this.CreateContentObject({
@@ -54,7 +54,8 @@ class EditStore {
       outputFormData,
       url,
       encryption,
-      avProperties
+      avProperties,
+      retention
     });
 
     yield this.AddMetadata({

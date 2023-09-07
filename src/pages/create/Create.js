@@ -118,13 +118,22 @@ const AdvancedSection = observer(({
       {
         advancedData.avProperties === "CUSTOM" &&
         <>
-          <TextInput
+          <Select
             label="Retention"
+            labelDescription="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+            formName="playbackEncryption"
+            options={[
+              {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
+              {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
+              {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
+              {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
+            ]}
             value={advancedData.retention}
-            onChange={(event) => AdvancedUpdateCallback({
-              key: "avProperties",
+            onChange={event => AdvancedUpdateCallback({
+              key: "retention",
               event
-            })}
+            })
+            }
           />
           <PlaybackEncryption
             drmFormData={drmFormData}
@@ -252,7 +261,7 @@ const Create = observer(() => {
   });
 
   const [advancedData, setAdvancedData] = useState({
-    retention: "",
+    retention: 3600,
     avProperties: "DEFAULT"
   });
 

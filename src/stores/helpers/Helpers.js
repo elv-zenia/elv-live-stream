@@ -3,7 +3,8 @@ export const ParseLiveConfigData = ({
   outputFormData,
   url,
   encryption,
-  avProperties
+  avProperties,
+  retention
 }) => {
   const {videoStreamId, videoStreamIndex, audioStreamId, audioStreamIndex} = inputFormData;
   const {videoHeight, videoWidth, videoBitrate, audioChannelLayout, audioBitrate} = outputFormData;
@@ -50,7 +51,7 @@ export const ParseLiveConfigData = ({
         width: parseInt(videoWidth)
       }
     },
-    part_ttl: 3600,
+    part_ttl: retention,
     url
   };
 
