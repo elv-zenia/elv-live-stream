@@ -20,11 +20,7 @@ class StreamStore {
     return this.rootStore.client;
   }
 
-  UpdateStream = ({key, value={}, active=false}) => {
-    if(active) {
-      value.active = true;
-    }
-
+  UpdateStream = ({key, value={}}) => {
     const streams = {
       [key]: value,
       ...this.streams || {}
@@ -47,15 +43,13 @@ class StreamStore {
   }
 
   ConfigureStream = flow(function * ({
-    objectId,
-    slug
+    objectId
   }) {
     try {
       yield this.client.StreamConfig({name: objectId});
       yield editStore.CreateSiteLinks({objectId});
       yield editStore.AddStreamToSite({objectId});
 
-      this.UpdateStatus({slug, status: "ready"});
     } catch(error) {
       console.error("Unable to apply configuration.", error);
     }
@@ -137,14 +131,12 @@ class StreamStore {
 
     for(let slug of Object.keys(this.streams || {})) {
       try {
-        if(!["checking", "ready", "created"].includes(this.streams[slug].status)) {
-          const response = yield this.CheckStatus({
-            objectId: this.streams[slug].objectId
-          });
+        const response = yield this.CheckStatus({
+          objectId: this.streams[slug].objectId
+        });
 
-          streams[slug].status = response.state;
-          streams[slug].embedUrl = response?.playout_urls?.embed_url;
-        }
+        streams[slug].status = response.state;
+        streams[slug].embedUrl = response?.playout_urls?.embed_url;
       } catch(error) {
         console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
       }

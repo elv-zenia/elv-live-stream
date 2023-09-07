@@ -81,10 +81,8 @@ class EditStore {
       key: Slugify(name),
       value: {
         objectId,
-        title: name,
-        status: "created"
-      },
-      active: true
+        title: name
+      }
     });
 
     return objectId;
@@ -104,37 +102,6 @@ class EditStore {
     }
 
     return response;
-  });
-
-  AddDescriptiveMetadata = flow(function * ({
-    libraryId,
-    objectId,
-    writeToken,
-    name,
-    description,
-    displayName
-  }) {
-    try {
-      yield this.client.MergeMetadata({
-        libraryId,
-        objectId,
-        writeToken,
-        metadata: {
-          public: {
-            name,
-            description,
-            asset_metadata: {
-              display_title: displayName || name,
-              title: displayName || name,
-              title_type: "live_stream",
-              video_type: "live"
-            }
-          }
-        }
-      });
-    } catch(error) {
-      console.error("Failed to add public metadata.", error);
-    }
   });
 
   AddAccessGroupPermission = flow(function * ({

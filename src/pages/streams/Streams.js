@@ -6,16 +6,24 @@ import TrashIcon from "Assets/icons/trash.svg";
 import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
 
-const STATUS_KEYS = {
-  created: "Initializing",
-  checking: "Checking",
-  ready: "Ready",
+const STATUS_MAP = {
+  UNCONFIGURED: "unconfigured",
+  UNINITIALIZED: "uninitialized",
+  INACTIVE: "inactive",
+  STOPPED: "stopped",
+  STARTING: "starting",
+  RUNNING: "running",
+  STALLED: "stalled",
+};
+
+const STATUS_TEXT = {
+  unconfigured: "Not configured",
+  uninitialized: "Uninitialized",
+  inactive: "Inactive",
+  stopped: "Stopped",
   starting: "Starting",
   running: "Running",
-  stalled: "Stalled",
-  checkFailed: "Stream Check Failed",
-  inactive: "Inactive",
-  terminated: "Terminated"
+  stalled: "Stalled"
 };
 
 const StreamModal = observer(({
@@ -83,7 +91,7 @@ const Streams = observer(() => {
                       id: `${streamStore.streams[slug].objectId}-id`
                     },
                     {
-                      label: STATUS_KEYS[streamStore.streams[slug].status] || "--",
+                      label: STATUS_TEXT[streamStore.streams[slug].status] || "--",
                       id: `${streamStore.streams[slug].objectId}-status`
                     },
                     {
@@ -91,14 +99,14 @@ const Streams = observer(() => {
                       items: [
                         {
                           id: `${streamStore.streams[slug].objectId}-view-button`,
-                          hidden: !["running", "starting"].includes(streamStore.streams[slug].status),
+                          hidden: ![STATUS_MAP.RUNNING, STATUS_MAP.STARTING].includes(streamStore.streams[slug].status),
                           label: "View",
                           to: `/streams/${streamStore.streams[slug].objectId}`
                         },
                         {
                           id: `${streamStore.streams[slug].objectId}-start-button`,
                           label: "Start",
-                          hidden: streamStore.streams[slug].status !== "ready",
+                          hidden: ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(streamStore.streams[slug].status),
                           onClick: () => {
                             setModalData({
                               objectId: streamStore.streams[slug].objectId,
@@ -115,7 +123,7 @@ const Streams = observer(() => {
                         {
                           id: `${streamStore.streams[slug].objectId}-stop-button`,
                           label: "Stop",
-                          hidden: !["starting", "running"].includes(streamStore.streams[slug].status),
+                          hidden: ![STATUS_MAP.STARTING, STATUS_MAP.RUNNING, STATUS_MAP.STALLED].includes(streamStore.streams[slug].status),
                           onClick: () => {
                             setModalData({
                               objectId: streamStore.streams[slug].objectId,
@@ -134,46 +142,64 @@ const Streams = observer(() => {
                           }
                         },
                         {
-                          id: `${streamStore.streams[slug].objectId}-recheck-button`,
-                          label: "Re-check",
-                          hidden: streamStore.streams[slug].status !== "inactive",
+                          id: `${streamStore.streams[slug].objectId}-check-button`,
+                          label: "Check",
+                          hidden: streamStore.streams[slug].status !== STATUS_MAP.UNINITIALIZED,
                           onClick: () => {
                             setModalData({
                               objectId: streamStore.streams[slug].objectId,
                               showModal: true,
-                              title: "Re-check Stream",
-                              description: "Are you sure you want to re-check the stream?",
+                              title: "Check Stream",
+                              description: "Are you sure you want to check the stream?",
                               ConfirmCallback: async () => {
                                 await streamStore.ConfigureStream({
-                                  objectId: streamStore.streams[slug].objectId,
-                                  slug
+                                  objectId: streamStore.streams[slug].objectId
                                 });
                               },
                               CloseCallback: () => ResetModal()
                             });
                           }
                         },
-                        {
-                          id: `${streamStore.streams[slug].objectId}-restart-button`,
-                          label: "Restart",
-                          hidden: streamStore.streams[slug].status !== "checkFailed",
-                          onClick: () => {
-                            setModalData({
-                              objectId: streamStore.streams[slug].objectId,
-                              showModal: true,
-                              title: "Restart Stream",
-                              description: "Are you sure you want to restart the stream?",
-                              ConfirmCallback: async () => {
-                                await streamStore.OperateLRO({
-                                  objectId: streamStore.streams[slug].objectId,
-                                  slug,
-                                  operation: "RESET"
-                                });
-                              },
-                              CloseCallback: () => ResetModal()
-                            });
-                          }
-                        }
+                        // {
+                        //   id: `${streamStore.streams[slug].objectId}-recheck-button`,
+                        //   label: "Re-check",
+                        //   hidden: streamStore.streams[slug].status !== STATUS_MAP.INACTIVE,
+                        //   onClick: () => {
+                        //     setModalData({
+                        //       objectId: streamStore.streams[slug].objectId,
+                        //       showModal: true,
+                        //       title: "Re-check Stream",
+                        //       description: "Are you sure you want to re-check the stream?",
+                        //       ConfirmCallback: async () => {
+                        //         await streamStore.ConfigureStream({
+                        //           objectId: streamStore.streams[slug].objectId
+                        //         });
+                        //       },
+                        //       CloseCallback: () => ResetModal()
+                        //     });
+                        //   }
+                        // },
+                        // {
+                        //   id: `${streamStore.streams[slug].objectId}-restart-button`,
+                        //   label: "Restart",
+                        //   hidden: streamStore.streams[slug].status !== STATUS_MAP.STALLED,
+                        //   onClick: () => {
+                        //     setModalData({
+                        //       objectId: streamStore.streams[slug].objectId,
+                        //       showModal: true,
+                        //       title: "Restart Stream",
+                        //       description: "Are you sure you want to restart the stream?",
+                        //       ConfirmCallback: async () => {
+                        //         await streamStore.OperateLRO({
+                        //           objectId: streamStore.streams[slug].objectId,
+                        //           slug,
+                        //           operation: "RESET"
+                        //         });
+                        //       },
+                        //       CloseCallback: () => ResetModal()
+                        //     });
+                        //   }
+                        // }
                       ]
                     },
                     {
