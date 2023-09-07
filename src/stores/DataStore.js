@@ -94,21 +94,19 @@ class DataStore {
     }
 
     for(const slug of Object.keys(streamMetadata)) {
-      const versionHash = streamMetadata[slug]?.sources?.default?.["."]?.container;
+      const versionHash = (
+        streamMetadata[slug]?.sources?.default?.["."]?.container ||
+        ((streamMetadata[slug]["/"] || "").match(/^\/?qfab\/([\w]+)\/?.+/) || [])[1]
+      );
 
       if(versionHash) {
         const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
         const libraryId = yield this.client.ContentObjectLibraryId({objectId});
 
-        const statusResponse = yield streamStore.CheckStatus({
-          objectId
-        });
-
         streamMetadata[slug].objectId = objectId;
         streamMetadata[slug].versionHash = versionHash;
         streamMetadata[slug].libraryId = libraryId;
         streamMetadata[slug].embedUrl = yield this.EmbedUrl({objectId});
-        streamMetadata[slug].status = statusResponse.state;
       }
     }
 

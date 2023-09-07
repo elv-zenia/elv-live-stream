@@ -4,12 +4,19 @@ import {observer} from "mobx-react";
 
 const DataWrapper = observer(({children}) => {
   useEffect(() => {
-    let intervalId = setInterval(async () => {
+
+    const GetStatus = async () => {
       try {
         await streamStore.AllStreamsStatus();
       } catch(error) {
-        console.error("Polling error:", error);
+        console.error("Unable to get stream status.", error);
       }
+    };
+
+    GetStatus();
+
+    let intervalId = setInterval(async () => {
+      await GetStatus();
     }, 15000);
 
     return () => {

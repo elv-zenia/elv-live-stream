@@ -137,10 +137,14 @@ class StreamStore {
 
     for(let slug of Object.keys(this.streams || {})) {
       try {
-        const response = yield this.CheckStatus({
-          objectId: this.streams[slug].objectId
-        });
-        streams[slug].status = response.state;
+        if(!["checking", "ready", "created"].includes(this.streams[slug].status)) {
+          const response = yield this.CheckStatus({
+            objectId: this.streams[slug].objectId
+          });
+
+          streams[slug].status = response.state;
+          streams[slug].embedUrl = response?.playout_urls?.embed_url;
+        }
       } catch(error) {
         console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
       }

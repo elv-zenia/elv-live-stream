@@ -91,6 +91,7 @@ const Streams = observer(() => {
                       items: [
                         {
                           id: `${streamStore.streams[slug].objectId}-view-button`,
+                          hidden: streamStore.streams[slug].status === "created",
                           label: "View",
                           to: `/streams/${streamStore.streams[slug].objectId}`
                         },
@@ -126,6 +127,26 @@ const Streams = observer(() => {
                                   objectId: streamStore.streams[slug].objectId,
                                   slug,
                                   operation: "STOP"
+                                });
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }
+                        },
+                        {
+                          id: `${streamStore.streams[slug].objectId}-recheck-button`,
+                          label: "Re-check",
+                          hidden: streamStore.streams[slug].status !== "inactive",
+                          onClick: () => {
+                            setModalData({
+                              objectId: streamStore.streams[slug].objectId,
+                              showModal: true,
+                              title: "Re-check Stream",
+                              description: "Are you sure you want to re-check the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.ConfigureStream({
+                                  objectId: streamStore.streams[slug].objectId,
+                                  slug
                                 });
                               },
                               CloseCallback: () => ResetModal()

@@ -49,15 +49,6 @@ class EditStore {
       });
     }
 
-    yield this.AddDescriptiveMetadata({
-      libraryId,
-      objectId,
-      writeToken: write_token,
-      name,
-      description,
-      displayName
-    });
-
     const config = ParseLiveConfigData({
       inputFormData,
       outputFormData,
@@ -66,12 +57,24 @@ class EditStore {
       avProperties
     });
 
-    yield this.AddLiveRecordingMetadata({
+    yield this.AddMetadata({
       libraryId,
       objectId,
+      name,
+      description,
+      displayName,
       writeToken: write_token,
       config
     });
+
+    try {
+      yield this.client.SetPermission({
+        objectId,
+        permission
+      });
+    } catch(error) {
+      console.error("Unable to set permission.", error);
+    }
 
     streamStore.UpdateStream({
       key: Slugify(name),
@@ -87,8 +90,7 @@ class EditStore {
   });
 
   CreateContentObject = flow(function * ({
-    libraryId,
-    permission
+    libraryId
   }) {
     let response;
     try {
@@ -98,15 +100,6 @@ class EditStore {
       });
     } catch(error) {
       console.error("Failed to create content object.", error);
-    }
-
-    try {
-      yield this.client.SetPermission({
-        objectId: response.id,
-        permission
-      });
-    } catch(error) {
-      console.error("Unable to set permission.", error);
     }
 
     return response;
@@ -158,29 +151,41 @@ class EditStore {
     }
   });
 
-  AddLiveRecordingMetadata = flow(function * ({
+  AddMetadata = flow(function * ({
     libraryId,
     objectId,
     writeToken,
-    config
+    config,
+    name,
+    description,
+    displayName
   }) {
-    yield this.client.ReplaceMetadata({
+    yield this.client.MergeMetadata({
       libraryId,
       objectId,
       writeToken,
-      metadataSubtree: "/live_recording_config",
-      metadata: config
+      metadata: {
+        public: {
+          name,
+          description,
+          asset_metadata: {
+            display_title: displayName || name,
+            title: displayName || name,
+            title_type: "live_stream",
+            video_type: "live"
+          }
+        },
+        "live_recording_config": config
+      }
     });
 
     yield this.client.FinalizeContentObject({
       libraryId,
       objectId,
       writeToken,
-      commitMessage: "Add live_recording_config",
+      commitMessage: "Add metadata",
       awaitCommitConfirmation: true
     });
-
-    yield new Promise(resolve => setTimeout(resolve, 2000));
   });
 
   CreateSiteLinks = flow(function * ({objectId}) {

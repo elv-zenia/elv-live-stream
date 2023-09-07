@@ -13,6 +13,7 @@ class RootStore {
   client;
   loaded = false;
   networkInfo;
+  contentSpaceId;
 
   constructor() {
     makeAutoObservable(this);
@@ -33,6 +34,7 @@ class RootStore {
 
       window.client = this.client;
       this.networkInfo = yield this.client.NetworkInfo();
+      this.contentSpaceId = yield client.ContentSpaceId();
 
       yield this.dataStore.Initialize();
     } catch(error) {
@@ -41,6 +43,10 @@ class RootStore {
     } finally {
       this.loaded = true;
     }
+  });
+
+  ExecuteFrameRequest = flow(function * ({request, Respond}) {
+    Respond(yield this.client.PassRequest({request, Respond}));
   });
 }
 
