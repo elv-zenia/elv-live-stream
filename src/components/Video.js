@@ -4,8 +4,7 @@ import {rootStore} from "../stores";
 import {observer} from "mobx-react";
 
 const Video = observer(({
-  versionHash,
-  videoMetadata,
+  objectId,
   className,
   clientOptions={},
   sourceOptions={},
@@ -18,13 +17,7 @@ const Video = observer(({
     return () => player?.Destroy();
   }, [player]);
 
-  if(!versionHash) {
-    if(videoMetadata.sources?.default?.["."]?.container) {
-      versionHash = videoMetadata.sources.default["."].container;
-    }
-  }
-
-  if(!versionHash) {
+  if(!objectId) {
     // eslint-disable-next-line no-console
     console.warn("Unable to determine playout hash for video");
     return null;
@@ -50,13 +43,13 @@ const Video = observer(({
                   protocols: [EluvioPlayerParameters.protocols.HLS],
                   ...sourceOptions,
                   playoutParameters: {
-                    versionHash,
+                    objectId,
                     ...playoutParameters
                   }
                 },
                 playerOptions: {
                   watermark: EluvioPlayerParameters.watermark.OFF,
-                  muted: EluvioPlayerParameters.muted.OFF,
+                  muted: EluvioPlayerParameters.muted.ON,
                   autoplay: EluvioPlayerParameters.autoplay.OFF,
                   controls: EluvioPlayerParameters.controls.AUTO_HIDE,
                   loop: EluvioPlayerParameters.loop.OFF,

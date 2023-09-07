@@ -17,7 +17,7 @@ const Monitor = observer(() => {
                   <div key={slug} className="monitor__grid-item-container">
                     <div className="monitor__video-wrapper">
                       <AspectRatio>
-                        <Video versionHash={streamStore.streams[slug].versionHash} videoMetadata={streamStore.streams[slug]}/>
+                        <Video objectId={streamStore.streams[slug].objectId} />
                       </AspectRatio>
                     </div>
                     <div className="monitor__grid-item-details">
