@@ -1,121 +1,112 @@
 const Path = require("path");
-const HTMLWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const webpack = require("webpack");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+let plugins = [
+  new HtmlWebpackPlugin({
+    title: "Eluvio Livestream Manager",
+    template: Path.join(__dirname, "src", "index.html"),
+    filename: "index.html",
+    inject: "body"
+  })
+];
+
+if(process.env.ANALYZE_BUNDLE) {
+  plugins.push(new BundleAnalyzerPlugin());
+}
 
 module.exports = {
+  entry: Path.resolve(__dirname, "src/index.js"),
   target: "web",
-  stats: {
-    warningsFilter: ["./node_modules/ethers/dist/ethers.min.js"]
-  },
   output: {
-    chunkFilename: "[name].[contenthash].bundle.js",
+    path: Path.resolve(__dirname, "dist"),
+    clean: true,
+    filename: "main.js",
+    publicPath: process.env.ASSET_PATH,
+    chunkFilename: "bundle.[id].[chunkhash].js"
   },
+  plugins,
   devServer: {
+    hot: true,
+    historyApiFallback: true,
     allowedHosts: "all",
     port: 8155,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "Content-Type, Accept",
       "Access-Control-Allow-Methods": "POST"
+    },
+    // This is to allow configuration.js to be accessed
+    static: {
+      directory: Path.resolve(__dirname, "./config"),
+      publicPath: "/"
     }
   },
   mode: "development",
-  devtool: "source-map",
-  optimization: {
-    splitChunks: {
-      chunks: "all"
-    }
+  devtool: "eval-source-map",
+  externals: {
+    crypto: "crypto",
+    stream: "stream"
   },
-  plugins: [
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: Path.join(__dirname, "configuration.js"), to: Path.join(__dirname, "dist", "configuration.js") }
-      ]
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.join(__dirname, "src", "index.html"),
-      title: "Eluvio Live Stream",
-      cache: false,
-      filename: "index.html",
-      favicon: "./src/static/images/favicon.png",
-    }),
-    new webpack.ProvidePlugin({
-      process: "process/browser"
-    })
-  ],
   resolve: {
     alias: {
-      "browser": "process/browser",
       Assets: Path.resolve(__dirname, "src/static"),
       Components: Path.resolve(__dirname, "src/components"),
       Pages: Path.resolve(__dirname, "src/pages"),
-      Stores: Path.resolve(__dirname, "src/stores")
+      Routes: Path.resolve(__dirname, "src/routes"),
+      Stores: Path.resolve(__dirname, "src/stores"),
+      // Force webpack to use *one* copy of bn.js instead of 8
+      "bn.js": Path.resolve(Path.join(__dirname, "node_modules", "bn.js"))
     },
+    extensions: [".js", ".jsx", ".mjs", ".scss", ".png", ".svg"],
     fallback: {
-      "fs": false,
-      "https": false,
-      "http": false,
-      "url": false,
-      "zlib": false,
-      "os": false,
-      "stream": require.resolve("stream-browserify"),
-      "crypto": require.resolve("crypto-browserify"),
-      "process/browser": require.resolve("process/browser")
-    },
-    extensions: [".js", ".jsx", ".scss", ".png", ".svg"]
+      "url": require.resolve("url")
+    }
   },
   module: {
     rules: [
       {
-        test: /\.(js|mjs|jsx)$/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: [
-              ["@babel/preset-env", { targets: "defaults" }],
-              ["@babel/preset-react", {"runtime": "automatic"}]
-            ]
-          },
-        }
-      },
-      {
         test: /\.(css|scss)$/,
         use: [
           "style-loader",
-          "css-loader",
+          {
+            loader: "css-loader",
+            options: {
+              importLoaders: 2
+            }
+          },
+          "postcss-loader",
           "sass-loader"
         ]
+      },
+      {
+        test: /\.(js|mjs|jsx)$/,
+        exclude: /node_modules\/(?!@eluvio\/elv-embed)/,
+        loader: "babel-loader",
+        options: {
+          presets: [
+            "@babel/preset-env",
+            "@babel/preset-react",
+          ]
+        }
       },
       {
         test: /\.svg$/,
         loader: "svg-inline-loader"
       },
       {
-        test: /\.(woff2?|ttf|json)$/i,
-        loader: "file-loader",
-        type: "javascript/auto"
-      },
-      {
-        test: /\.(gif|png|jpe?g)$/i,
-        use: [
-          "file-loader",
-          {
-            loader: "image-webpack-loader"
-          }
-        ],
-        type: "javascript/auto"
+        test: /\.(gif|png|jpe?g|otf|woff2?|ttf)$/i,
+        type: "asset/resource",
       },
       {
         test: /\.(txt|bin|abi)$/i,
-        loader: "raw-loader",
-        type: "javascript/auto"
+        type: "asset/source"
       },
       {
         test: /\.ya?ml$/,
-        type: "json",
         use: "yaml-loader"
       }
     ]
   }
 };
+

@@ -17,7 +17,7 @@ const DataWrapper = observer(({children}) => {
 
     let intervalId = setInterval(async () => {
       await GetStatus();
-    }, 15000);
+    }, 60000);
 
     return () => {
       clearInterval(intervalId);

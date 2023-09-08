@@ -1,5 +1,5 @@
 // Force strict mode so mutations are only allowed within actions.
-import {configure, flow, makeAutoObservable} from "mobx";
+import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {editStore} from "./index";
 
 configure({
@@ -140,24 +140,32 @@ class StreamStore {
   });
 
   AllStreamsStatus = flow(function * () {
-    const streams = {
-      ...this.streams
-    };
+    if(this.loadingStatus) { return; }
 
-    for(let slug of Object.keys(this.streams || {})) {
-      try {
-        const response = yield this.CheckStatus({
-          objectId: this.streams[slug].objectId
-        });
+    try {
+      this.loadingStatus = true;
 
-        streams[slug].status = response.state;
-        streams[slug].embedUrl = response?.playout_urls?.embed_url;
-      } catch(error) {
-        console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
-      }
+      yield Promise.all(
+        Object.keys(this.streams || {}).map(async slug => {
+          try {
+            const response = await this.CheckStatus({
+              objectId: this.streams[slug].objectId
+            });
+
+            runInAction(() => {
+              this.streams[slug].status = response.state;
+              this.streams[slug].embedUrl = response?.playout_urls?.embed_url;
+            });
+          } catch(error) {
+            console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
+          }
+        })
+      );
+    } catch(error) {
+      console.error(error);
+    } finally {
+      this.loadingStatus = false;
     }
-
-    this.UpdateStreams({streams});
   });
 }
 

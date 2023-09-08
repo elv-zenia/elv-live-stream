@@ -7,7 +7,7 @@ node_modules/
 dist/*
 !*/.keep
 
-configuration.js
+config/configuration.js
 
 deploy.sh
 

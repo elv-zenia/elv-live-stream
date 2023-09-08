@@ -1,9 +1,10 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import {dataStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
+import {Loader} from "Components/Loader";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -235,6 +236,16 @@ const AdvancedSection = observer(({
 });
 
 const Create = observer(() => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      dataStore.LoadAccessGroups(),
+      dataStore.LoadLibraries()
+    ])
+      .finally(() => setLoading(false));
+  }, []);
+
   const [basicFormData, setBasicFormData] = useState({
     url: "",
     name: "",
@@ -445,6 +456,10 @@ const Create = observer(() => {
             formKey: FORM_KEYS.ADVANCED
           })}
         />
+
+        <div style={{maxWidth: "200px"}}>
+          { loading ? <Loader /> : null }
+        </div>
 
         <div className="form__actions">
           <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Create"} />

@@ -29,14 +29,12 @@ const TableCell = ({
             } else if(item.to) {
               return (
                 <NavLink
-                  className="nav-button-link"
+                  className="button__secondary nav-button-link"
                   key={item.id}
                   to={item.to}
                   title={item.label}
                 >
-                  <span>
-                    { item.label }
-                  </span>
+                  { item.label }
                 </NavLink>
               );
             }

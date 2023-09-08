@@ -37,9 +37,8 @@ class DataStore {
     const tenantContractId = yield this.LoadTenantInfo();
     this.siteId = yield this.LoadTenantData({tenantContractId});
     this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
+
     yield this.LoadStreams();
-    yield this.LoadLibraries();
-    yield this.LoadAccessGroups();
   });
 
   LoadTenantInfo = flow(function * () {
@@ -106,7 +105,6 @@ class DataStore {
         streamMetadata[slug].objectId = objectId;
         streamMetadata[slug].versionHash = versionHash;
         streamMetadata[slug].libraryId = libraryId;
-        streamMetadata[slug].embedUrl = yield this.EmbedUrl({objectId});
       }
     }
 
@@ -114,6 +112,8 @@ class DataStore {
   });
 
   LoadLibraries = flow(function * () {
+    if(this.libraries) { return; }
+
     try {
       let loadedLibraries = {};
 
@@ -144,6 +144,8 @@ class DataStore {
   });
 
   LoadAccessGroups = flow(function * () {
+    if(this.accessGroups) { return; }
+
     try {
       if(!this.accessGroups) {
         this.accessGroups = {};
