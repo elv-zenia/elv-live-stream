@@ -39,6 +39,7 @@ class DataStore {
     this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
 
     yield this.LoadStreams();
+    yield this.rootStore.streamStore.AllStreamsStatus();
   });
 
   LoadTenantInfo = flow(function * () {
@@ -93,18 +94,22 @@ class DataStore {
     }
 
     for(const slug of Object.keys(streamMetadata)) {
+      const stream = streamMetadata[slug];
+
       const versionHash = (
-        streamMetadata[slug]?.sources?.default?.["."]?.container ||
-        ((streamMetadata[slug]["/"] || "").match(/^\/?qfab\/([\w]+)\/?.+/) || [])[1]
+        stream?.sources?.default?.["."]?.container ||
+        ((stream["/"] || "").match(/^\/?qfab\/([\w]+)\/?.+/) || [])[1]
       );
 
       if(versionHash) {
         const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
         const libraryId = yield this.client.ContentObjectLibraryId({objectId});
 
+        streamMetadata[slug].slug = slug;
         streamMetadata[slug].objectId = objectId;
         streamMetadata[slug].versionHash = versionHash;
         streamMetadata[slug].libraryId = libraryId;
+        streamMetadata[slug].name = stream.display_title || stream.title;
       }
     }
 

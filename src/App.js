@@ -2,6 +2,8 @@ import React from "react";
 import {observer} from "mobx-react";
 import {HashRouter, Navigate, Route, Routes} from "react-router-dom";
 
+import {MantineProvider} from "@mantine/core";
+
 import {PageLoader} from "Components/Loader";
 import LeftNavigation from "Components/LeftNavigation";
 import DataWrapper from "Components/DataWrapper";
@@ -27,14 +29,16 @@ const App = observer(() => {
   if(!rootStore.loaded) { return <PageLoader />; }
 
   return (
-    <HashRouter>
-      <LeftNavigation />
-      <main>
-        <DataWrapper>
-          { rootStore.loaded ? <AppRoutes /> : null}
-        </DataWrapper>
-      </main>
-    </HashRouter>
+    <MantineProvider withGlobalStyles withNormalizeCSS withCSSVariables>
+      <HashRouter>
+        <LeftNavigation />
+        <main>
+          <DataWrapper>
+            { rootStore.loaded ? <AppRoutes /> : null}
+          </DataWrapper>
+        </main>
+      </HashRouter>
+    </MantineProvider>
   );
 });
 

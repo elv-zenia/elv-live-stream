@@ -1,10 +1,20 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
 import {editStore, streamStore} from "Stores";
-import Table from "Components/Table";
-import TrashIcon from "Assets/icons/trash.svg";
-import ExternalLinkIcon from "Assets/icons/external-link.svg";
 import Modal from "Components/Modal";
+
+import {DataTable} from "mantine-datatable";
+import {Container, Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import {Link} from "react-router-dom";
+
+import {
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconTrash,
+  IconExternalLink,
+  IconDeviceAnalytics
+} from "@tabler/icons-react";
+import {useDebouncedValue} from "@mantine/hooks";
 
 const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
@@ -44,7 +54,32 @@ const StreamModal = observer(({
   );
 });
 
+export const SortTable = ({sortStatus, AdditionalCondition}) => {
+  return (a, b) => {
+    if(AdditionalCondition && typeof AdditionalCondition(a, b) !== "undefined") {
+      return AdditionalCondition(a, b);
+    }
+
+    a = a[sortStatus.columnAccessor];
+    b = b[sortStatus.columnAccessor];
+
+    if(typeof a === "number") {
+      a = a || 0;
+      b = b || 0;
+    } else {
+      a = a?.toLowerCase?.() || a || "";
+      b = b?.toLowerCase?.() || b || "";
+    }
+
+    return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
+  };
+};
+
 const Streams = observer(() => {
+  const [sortStatus, setSortStatus] = useState({columnAccessor: "name", direction: "asc"});
+  const [filter, setFilter] = useState("");
+  const [debouncedFilter] = useDebouncedValue(filter, 200);
+
   const ResetModal = () => {
     setModalData({
       showModal: false,
@@ -64,6 +99,136 @@ const Streams = observer(() => {
     CloseCallback: null
   });
 
+  const records = Object.values(streamStore.streams || {})
+    .filter(record => !debouncedFilter || record.name.toLowerCase().includes(debouncedFilter.toLowerCase()))
+    .sort(SortTable({sortStatus}));
+
+  return (
+    <>
+      <div className="streams">
+        <div className="page-header">Streams</div>
+        <Container p={0} pb={100} m={0} maw={1000}>
+          <TextInput placeholder="Filter" mb="md" value={filter} onChange={event => setFilter(event.target.value)} />
+          <DataTable
+            withBorder
+            highlightOnHover
+            idAccessor="objectId"
+            minHeight={!records || records.length === 0 ? 150 : 75}
+            fetching={!streamStore.streams}
+            records={records}
+            sortStatus={sortStatus}
+            onSortStatusChange={setSortStatus}
+            columns={[
+              { accessor: "name", title: "Name", sortable: true, render: record => <Text fw={600}>{record.name}</Text> },
+              { accessor: "objectId", title: "Object ID", render: record => <Text color="dimmed" fz="xs">{record.objectId}</Text> },
+              { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
+              {
+                accessor: "actions",
+                title: "",
+                render: record => {
+
+                  return (
+                    <Group spacing={5} align="top" position="center">
+                      <ActionIcon
+                        component={Link}
+                        to={`/streams/${record.objectId}`}
+                        title="View Stream"
+                      >
+                        <IconDeviceAnalytics />
+                      </ActionIcon>
+                      {
+                        !record.status || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(record.status) ? null :
+                          <ActionIcon
+                            title="Start Stream"
+                            onClick={() => {
+                              setModalData({
+                                objectId: record.objectId,
+                                showModal: true,
+                                title: "Start Stream",
+                                description: "Are you sure you want to start the stream?",
+                                ConfirmCallback: async () => {
+                                  await streamStore.StartStream({slug: record.slug});
+                                },
+                                CloseCallback: () => ResetModal()
+                              });
+                            }}
+                          >
+                            <IconPlayerPlay />
+                          </ActionIcon>
+                      }
+                      {
+                        !record.status || ![STATUS_MAP.STARTING, STATUS_MAP.RUNNING, STATUS_MAP.STALLED].includes(record.status) ? null :
+                          <ActionIcon
+                            title="Stop Stream"
+                            onClick={() => {
+                              setModalData({
+                                objectId: record.objectId,
+                                showModal: true,
+                                title: "Stop Stream",
+                                description: "Are you sure you want to stop the stream?",
+                                ConfirmCallback: async () => {
+                                  await streamStore.OperateLRO({
+                                    objectId: record.objectId,
+                                    slug: record.slug,
+                                    operation: "STOP"
+                                  });
+                                },
+                                CloseCallback: () => ResetModal()
+                              });
+                            }}
+                          >
+                            <IconPlayerPause />
+                          </ActionIcon>
+                      }
+                      <ActionIcon
+                        title="Open in Fabric Browser"
+                        onClick={() => editStore.client.SendMessage({
+                          options: {
+                            operation: "OpenLink",
+                            libraryId: record.libraryId,
+                            objectId: record.objectId
+                          },
+                          noResponse: true
+                        })}
+                      >
+                        <IconExternalLink />
+                      </ActionIcon>
+                      <ActionIcon
+                        title="Delete Stream"
+                        onClick={() => {
+                          setModalData({
+                            objectId: record.objectId,
+                            showModal: true,
+                            title: "Delete Stream",
+                            description: "Are you sure you want to delete the stream? This action cannot be undone.",
+                            ConfirmCallback: async () => {
+                              await editStore.DeleteStream({objectId: record.objectId});
+                            },
+                            CloseCallback: () => ResetModal()
+                          });
+                        }}
+                      >
+                        <IconTrash />
+                      </ActionIcon>
+                    </Group>
+                  );
+                }
+              }
+            ]}
+          />
+        </Container>
+      </div>
+      <StreamModal
+        title={modalData.title}
+        description={modalData.description}
+        open={modalData.showModal}
+        onOpenChange={modalData.CloseCallback}
+        ConfirmCallback={modalData.ConfirmCallback}
+      />
+    </>
+  );
+
+  /*
   return (
     <div className="streams">
       <div className="page-header">Streams</div>
@@ -246,15 +411,10 @@ const Streams = observer(() => {
             />
           </div> : "No streams found."
       }
-      <StreamModal
-        title={modalData.title}
-        description={modalData.description}
-        open={modalData.showModal}
-        onOpenChange={modalData.CloseCallback}
-        ConfirmCallback={modalData.ConfirmCallback}
-      />
     </div>
   );
+
+   */
 });
 
 export default Streams;

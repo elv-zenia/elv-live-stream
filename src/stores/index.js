@@ -36,7 +36,7 @@ class RootStore {
       this.networkInfo = yield this.client.NetworkInfo();
       this.contentSpaceId = yield client.ContentSpaceId();
 
-      yield this.dataStore.Initialize();
+      this.dataStore.Initialize();
     } catch(error) {
       console.error("Failed to initialize application");
       console.error(error);

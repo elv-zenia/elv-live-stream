@@ -153,8 +153,11 @@ class StreamStore {
             });
 
             runInAction(() => {
-              this.streams[slug].status = response.state;
-              this.streams[slug].embedUrl = response?.playout_urls?.embed_url;
+              this.streams[slug] = {
+                ...this.streams[slug],
+                status: response.state,
+                embedUrl: response?.playout_urls?.embed_url
+              };
             });
           } catch(error) {
             console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);

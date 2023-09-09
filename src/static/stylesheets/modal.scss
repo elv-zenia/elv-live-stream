@@ -1,4 +1,7 @@
 .modal {
+  position: relative;
+  z-index: 100;
+
   &__content {
     background-color: $white;
     border-radius: 6px;
