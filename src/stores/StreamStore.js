@@ -1,6 +1,7 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {editStore} from "./index";
+import UrlJoin from "url-join";
 
 configure({
   enforceActions: "always"
@@ -9,6 +10,7 @@ configure({
 // Store for all stream-related actions
 class StreamStore {
   streams;
+  streamFrameUrls = {};
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -170,6 +172,112 @@ class StreamStore {
       this.loadingStatus = false;
     }
   });
+
+  async FetchVideoPath(stream, playlistPath) {
+    const [path, params] = playlistPath.split("?");
+    const searchParams = new URLSearchParams(params);
+    searchParams.delete("authorization");
+
+    const url = new URL(
+      await this.client.FabricUrl({
+        libraryId: await this.client.ContentObjectLibraryId({objectId: stream.objectId}),
+        objectId: stream.objectId,
+        rep: UrlJoin("/playout/default/hls-clear", path),
+        queryParams: Object.fromEntries(searchParams),
+        noAuth: true,
+        channelAuth: true
+      })
+    );
+
+    const authToken = url.searchParams.get("authorization");
+    url.searchParams.delete("authorization");
+
+    return await fetch(
+      url,
+      { headers: { Authorization: `Bearer ${authToken}`}}
+    );
+  }
+
+  FetchStreamFrameURL = flow(function * (slug) {
+    try {
+      const stream = this.streams[slug];
+
+      if(!stream) {
+        return;
+      }
+
+      const playlist = yield(yield this.FetchVideoPath(stream, "playlist.m3u8")).text();
+
+      let lowestBitratePath = playlist
+        .split("\n")
+        .filter(line => line.startsWith("video/video"))
+        .reverse()[0];
+
+      if(!lowestBitratePath) {
+        return;
+      }
+
+      const segmentPlaylist = yield(yield this.FetchVideoPath(stream, lowestBitratePath)).text();
+
+      if(!segmentPlaylist) {
+        return;
+      }
+
+      const initSegmentPath = segmentPlaylist
+        .split("\n")
+        .filter(line => line.includes("init.m4s"))[0]
+        .split("\"")[1].replaceAll("\"", "");
+
+      const segmentPath = segmentPlaylist
+        .split("\n")
+        .filter(line => /^.*\.m4s/.test(line))
+        .reverse()[0];
+
+      const segmentBasePath = lowestBitratePath
+        .split("?")[0]
+        .split("/").slice(0, -1)
+        .join("/");
+
+      const [videoInitSegment, videoSegment] = yield Promise.all([
+        this.FetchVideoPath(
+          stream,
+          UrlJoin(segmentBasePath, initSegmentPath)
+        ),
+        this.FetchVideoPath(
+          stream,
+          UrlJoin(segmentBasePath, segmentPath)
+        )
+      ]);
+
+      return URL.createObjectURL(
+        new Blob([
+          yield videoInitSegment.arrayBuffer(),
+          yield videoSegment.arrayBuffer()
+        ])
+      );
+    } catch(error) {
+      console.error("Error fetching frame for " + slug);
+      console.error(error);
+      return;
+    }
+  });
+
+  StreamFrameURL = flow(function * (slug) {
+    const existingUrl = this.streamFrameUrls[slug];
+
+    if(existingUrl && Date.now() - existingUrl.timestamp < 60000) {
+      return yield existingUrl.url;
+    } else if(existingUrl) {
+      URL.revokeObjectURL(yield existingUrl.url);
+    }
+
+    this.streamFrameUrls[slug] = {
+      timestamp: Date.now(),
+      url: this.FetchStreamFrameURL(slug)
+    };
+
+    return yield this.streamFrameUrls[slug].url;
+  })
 }
 
 export default StreamStore;
