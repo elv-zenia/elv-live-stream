@@ -46,7 +46,7 @@ const VideoContainer = observer(({slug, showFrame, index}) => {
     }, delay);
 
     return () => clearTimeout(frameTimeout);
-  }, [play, frameKey, status]);
+  }, [play, frameKey, status, showFrame]);
 
   // Reload frame every minute after initial frame load
   useEffect(() => {
@@ -72,7 +72,7 @@ const VideoContainer = observer(({slug, showFrame, index}) => {
             >
               <ImageIcon icon={PlayIcon} label="Play" className="monitor__video-placeholder-icon" />
               {
-                !frameSegmentUrl ? null :
+                !showFrame || !frameSegmentUrl ? null :
                   <video src={frameSegmentUrl} className="monitor__video-frame" />
               }
             </button> :
@@ -80,7 +80,7 @@ const VideoContainer = observer(({slug, showFrame, index}) => {
               <Video
                 objectId={streamStore.streams[slug].objectId}
                 playerOptions={{
-                  capLevelToPlayerSize: autoplay,
+                  capLevelToPlayerSize: false,
                   autoplay: true
                 }}
               />
@@ -129,7 +129,6 @@ const Monitor = observer(() => {
                           index={index}
                           slug={slug}
                           showFrame={showFrames}
-                          key={`video-${slug}-${showFrames}`}
                         />
                         <div className="monitor__grid-item-details">
                           <div className="monitor__grid-item-details-content">
