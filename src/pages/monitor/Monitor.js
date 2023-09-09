@@ -42,9 +42,7 @@ const VideoContainer = observer(({slug, autoplay=false, index}) => {
     // Stagger frame loads
     const delay = Math.min(200 + 500 * index, 10000);
     const frameTimeout = setTimeout(async () => {
-      console.time(`load-${slug}`);
       setFrameSegmentUrl(await streamStore.StreamFrameURL(slug));
-      console.timeEnd(`load-${slug}`);
     }, delay);
 
     return () => clearTimeout(frameTimeout);
@@ -53,7 +51,7 @@ const VideoContainer = observer(({slug, autoplay=false, index}) => {
   useEffect(() => {
     if(!frameSegmentUrl) { return; }
 
-    const delay = 60000 + (60000 * Math.random());
+    const delay = 60000 + Math.min(200 + 500 * index, 10000);
 
     const updateTimeout = setTimeout(() => setFrameKey(frameKey + 1), delay);
 

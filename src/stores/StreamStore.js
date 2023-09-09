@@ -199,6 +199,7 @@ class StreamStore {
   }
 
   FetchStreamFrameURL = flow(function * (slug) {
+    console.time(`Load Frame: ${slug}`);
     try {
       const stream = this.streams[slug];
 
@@ -259,6 +260,8 @@ class StreamStore {
       console.error("Error fetching frame for " + slug);
       console.error(error);
       return;
+    } finally {
+      console.timeEnd(`Load Frame: ${slug}`);
     }
   });
 
