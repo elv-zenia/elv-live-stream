@@ -9,6 +9,7 @@ import {ActionIcon} from "@mantine/core";
 import PlayIcon from "Assets/icons/play circle.svg";
 
 import {IconX} from "@tabler/icons-react";
+import {Loader} from "Components/Loader";
 
 const STATUS_TEXT = {
   unconfigured: "Not Configured",
@@ -110,57 +111,61 @@ const Monitor = observer(() => {
         </button>
       </div>
       {
-        Object.keys(streamStore.streams || {}).length > 0 ?
-          <div className="monitor__grid-items">
-            {
-              (Object.keys(streamStore.streams || {}).sort((a, b) => a.localeCompare(b)) || [])
-                .map((slug, index) => {
-                  const status = streamStore.streams?.[slug]?.status;
-                  return (
-                    <div key={slug} className="monitor__grid-item-container">
-                      <VideoContainer
-                        index={index}
-                        slug={slug}
-                        autoplay={autoplay}
-                        key={`video-${slug}-${autoplay}`}
-                      />
-                      <div className="monitor__grid-item-details">
-                        <div className="monitor__grid-item-details-content">
-                          <div className="monitor__grid-item-details-top">
-                            <div className="monitor__grid-item-title">
-                              {streamStore.streams[slug].display_title || streamStore.streams[slug].title}
+        !streamStore.streams ?
+          <div style={{maxWidth: "200px"}}>
+            <Loader />
+          </div> :
+          Object.keys(streamStore.streams).length === 0 ? "No Streams Found" :
+            <div className="monitor__grid-items">
+              {
+                (Object.keys(streamStore.streams || {}).sort((a, b) => a.localeCompare(b)) || [])
+                  .map((slug, index) => {
+                    const status = streamStore.streams?.[slug]?.status;
+                    return (
+                      <div key={slug} className="monitor__grid-item-container">
+                        <VideoContainer
+                          index={index}
+                          slug={slug}
+                          autoplay={autoplay}
+                          key={`video-${slug}-${autoplay}`}
+                        />
+                        <div className="monitor__grid-item-details">
+                          <div className="monitor__grid-item-details-content">
+                            <div className="monitor__grid-item-details-top">
+                              <div className="monitor__grid-item-title">
+                                {streamStore.streams[slug].display_title || streamStore.streams[slug].title}
+                              </div>
+                              <div className="monitor__grid-item-id">
+                                {streamStore.streams[slug].objectId || ""}
+                              </div>
                             </div>
-                            <div className="monitor__grid-item-id">
-                              {streamStore.streams[slug].objectId || ""}
+                            <div className="monitor__grid-item-details-bottom">
+                              {
+                                !status ? <div /> :
+                                  <div className={`monitor__grid-item-status ${status === "running" ? "monitor__grid-item-status--green" : ""}`}>
+                                    {STATUS_TEXT[status]}
+                                  </div>
+                              }
+                              {
+                                streamStore.streams[slug].embedUrl &&
+                                <a
+                                  className="monitor__grid-item-link"
+                                  href={streamStore.streams[slug].embedUrl}
+                                  target="_blank"
+                                >
+                                  <div className="monitor__grid-item-link-text">
+                                    Embed URL
+                                  </div>
+                                </a>
+                              }
                             </div>
-                          </div>
-                          <div className="monitor__grid-item-details-bottom">
-                            {
-                              !status ? <div /> :
-                                <div className={`monitor__grid-item-status ${status === "running" ? "monitor__grid-item-status--green" : ""}`}>
-                                  {STATUS_TEXT[status]}
-                                </div>
-                            }
-                            {
-                              streamStore.streams[slug].embedUrl &&
-                              <a
-                                className="monitor__grid-item-link"
-                                href={streamStore.streams[slug].embedUrl}
-                                target="_blank"
-                              >
-                                <div className="monitor__grid-item-link-text">
-                                  Embed URL
-                                </div>
-                              </a>
-                            }
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
-            }
-          </div> : "No streams found."
+                    );
+                  })
+              }
+            </div>
       }
     </div>
   );
