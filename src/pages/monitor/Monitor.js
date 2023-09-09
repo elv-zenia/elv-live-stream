@@ -21,14 +21,14 @@ const STATUS_TEXT = {
   stalled: "Stalled"
 };
 
-const VideoContainer = observer(({slug, autoplay=false, index}) => {
-  const [play, setPlay] = useState(autoplay);
+const VideoContainer = observer(({slug, showFrame, index}) => {
+  const [play, setPlay] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
   const [frameSegmentUrl, setFrameSegmentUrl] = useState(undefined);
   const status = streamStore.streams?.[slug]?.status;
 
   useEffect(() => {
-    if(play || status !== "running") {
+    if(!showFrame || play || status !== "running") {
       return;
     }
 
@@ -48,6 +48,7 @@ const VideoContainer = observer(({slug, autoplay=false, index}) => {
     return () => clearTimeout(frameTimeout);
   }, [play, frameKey, status]);
 
+  // Reload frame every minute after initial frame load
   useEffect(() => {
     if(!frameSegmentUrl) { return; }
 
@@ -100,15 +101,15 @@ const VideoContainer = observer(({slug, autoplay=false, index}) => {
 });
 
 const Monitor = observer(() => {
-  const [autoplay, setAutoplay] = useState(false);
+  const [showFrames, setShowFrames] = useState(false);
   return (
     <div className="monitor">
       <div className="page-header monitor__page-header">
         <div>
           Monitor
         </div>
-        <button className="button__secondary" onClick={() => setAutoplay(!autoplay)}>
-          { autoplay ? "Stop All" : "Play All"}
+        <button className="button__secondary" onClick={() => setShowFrames(!showFrames)}>
+          { showFrames ? "Hide Previews" : "Show Previews"}
         </button>
       </div>
       {
@@ -127,8 +128,8 @@ const Monitor = observer(() => {
                         <VideoContainer
                           index={index}
                           slug={slug}
-                          autoplay={autoplay}
-                          key={`video-${slug}-${autoplay}`}
+                          showFrame={showFrames}
+                          key={`video-${slug}-${showFrames}`}
                         />
                         <div className="monitor__grid-item-details">
                           <div className="monitor__grid-item-details-content">

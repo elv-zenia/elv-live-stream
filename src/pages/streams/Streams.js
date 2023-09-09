@@ -4,7 +4,7 @@ import {editStore, streamStore} from "Stores";
 import Modal from "Components/Modal";
 
 import {DataTable} from "mantine-datatable";
-import {Container, Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import {Link} from "react-router-dom";
 
 import {
@@ -107,116 +107,120 @@ const Streams = observer(() => {
     <>
       <div className="streams">
         <div className="page-header">Streams</div>
-        <Container p={0} pb={100} m={0} maw={1000}>
-          <TextInput placeholder="Filter" mb="md" value={filter} onChange={event => setFilter(event.target.value)} />
-          <DataTable
-            withBorder
-            highlightOnHover
-            idAccessor="objectId"
-            minHeight={!records || records.length === 0 ? 150 : 75}
-            fetching={!streamStore.streams}
-            records={records}
-            sortStatus={sortStatus}
-            onSortStatusChange={setSortStatus}
-            columns={[
-              { accessor: "name", title: "Name", sortable: true, render: record => <Text fw={600}>{record.name}</Text> },
-              { accessor: "objectId", title: "Object ID", render: record => <Text color="dimmed" fz="xs">{record.objectId}</Text> },
-              { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
-              {
-                accessor: "actions",
-                title: "",
-                render: record => {
+        <TextInput
+          maw={400}
+          placeholder="Filter"
+          mb="md"
+          value={filter}
+          onChange={event => setFilter(event.target.value)}
+        />
+        <DataTable
+          withBorder
+          highlightOnHover
+          idAccessor="objectId"
+          minHeight={!records || records.length === 0 ? 150 : 75}
+          fetching={!streamStore.streams}
+          records={records}
+          sortStatus={sortStatus}
+          onSortStatusChange={setSortStatus}
+          columns={[
+            { accessor: "name", title: "Name", sortable: true, render: record => <Text fw={600}>{record.name}</Text> },
+            { accessor: "objectId", title: "Object ID", render: record => <Text color="dimmed" fz="xs">{record.objectId}</Text> },
+            { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
+            {
+              accessor: "actions",
+              title: "",
+              render: record => {
 
-                  return (
-                    <Group spacing={5} align="top" position="center">
-                      <ActionIcon
-                        component={Link}
-                        to={`/streams/${record.objectId}`}
-                        title="View Stream"
-                      >
-                        <IconDeviceAnalytics />
-                      </ActionIcon>
-                      {
-                        !record.status || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(record.status) ? null :
-                          <ActionIcon
-                            title="Start Stream"
-                            onClick={() => {
-                              setModalData({
-                                objectId: record.objectId,
-                                showModal: true,
-                                title: "Start Stream",
-                                description: "Are you sure you want to start the stream?",
-                                ConfirmCallback: async () => {
-                                  await streamStore.StartStream({slug: record.slug});
-                                },
-                                CloseCallback: () => ResetModal()
-                              });
-                            }}
-                          >
-                            <IconPlayerPlay />
-                          </ActionIcon>
-                      }
-                      {
-                        !record.status || ![STATUS_MAP.STARTING, STATUS_MAP.RUNNING, STATUS_MAP.STALLED].includes(record.status) ? null :
-                          <ActionIcon
-                            title="Stop Stream"
-                            onClick={() => {
-                              setModalData({
-                                objectId: record.objectId,
-                                showModal: true,
-                                title: "Stop Stream",
-                                description: "Are you sure you want to stop the stream?",
-                                ConfirmCallback: async () => {
-                                  await streamStore.OperateLRO({
-                                    objectId: record.objectId,
-                                    slug: record.slug,
-                                    operation: "STOP"
-                                  });
-                                },
-                                CloseCallback: () => ResetModal()
-                              });
-                            }}
-                          >
-                            <IconPlayerStop />
-                          </ActionIcon>
-                      }
-                      <ActionIcon
-                        title="Open in Fabric Browser"
-                        onClick={() => editStore.client.SendMessage({
-                          options: {
-                            operation: "OpenLink",
-                            libraryId: record.libraryId,
-                            objectId: record.objectId
+                return (
+                  <Group spacing={5} align="top" position="center">
+                    <ActionIcon
+                      component={Link}
+                      to={`/streams/${record.objectId}`}
+                      title="View Stream"
+                    >
+                      <IconDeviceAnalytics />
+                    </ActionIcon>
+                    {
+                      !record.status || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(record.status) ? null :
+                        <ActionIcon
+                          title="Start Stream"
+                          onClick={() => {
+                            setModalData({
+                              objectId: record.objectId,
+                              showModal: true,
+                              title: "Start Stream",
+                              description: "Are you sure you want to start the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.StartStream({slug: record.slug});
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }}
+                        >
+                          <IconPlayerPlay />
+                        </ActionIcon>
+                    }
+                    {
+                      !record.status || ![STATUS_MAP.STARTING, STATUS_MAP.RUNNING, STATUS_MAP.STALLED].includes(record.status) ? null :
+                        <ActionIcon
+                          title="Stop Stream"
+                          onClick={() => {
+                            setModalData({
+                              objectId: record.objectId,
+                              showModal: true,
+                              title: "Stop Stream",
+                              description: "Are you sure you want to stop the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.OperateLRO({
+                                  objectId: record.objectId,
+                                  slug: record.slug,
+                                  operation: "STOP"
+                                });
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }}
+                        >
+                          <IconPlayerStop />
+                        </ActionIcon>
+                    }
+                    <ActionIcon
+                      title="Open in Fabric Browser"
+                      onClick={() => editStore.client.SendMessage({
+                        options: {
+                          operation: "OpenLink",
+                          libraryId: record.libraryId,
+                          objectId: record.objectId
+                        },
+                        noResponse: true
+                      })}
+                    >
+                      <IconExternalLink />
+                    </ActionIcon>
+                    <ActionIcon
+                      title="Delete Stream"
+                      onClick={() => {
+                        setModalData({
+                          objectId: record.objectId,
+                          showModal: true,
+                          title: "Delete Stream",
+                          description: "Are you sure you want to delete the stream? This action cannot be undone.",
+                          ConfirmCallback: async () => {
+                            await editStore.DeleteStream({objectId: record.objectId});
                           },
-                          noResponse: true
-                        })}
-                      >
-                        <IconExternalLink />
-                      </ActionIcon>
-                      <ActionIcon
-                        title="Delete Stream"
-                        onClick={() => {
-                          setModalData({
-                            objectId: record.objectId,
-                            showModal: true,
-                            title: "Delete Stream",
-                            description: "Are you sure you want to delete the stream? This action cannot be undone.",
-                            ConfirmCallback: async () => {
-                              await editStore.DeleteStream({objectId: record.objectId});
-                            },
-                            CloseCallback: () => ResetModal()
-                          });
-                        }}
-                      >
-                        <IconTrash />
-                      </ActionIcon>
-                    </Group>
-                  );
-                }
+                          CloseCallback: () => ResetModal()
+                        });
+                      }}
+                    >
+                      <IconTrash />
+                    </ActionIcon>
+                  </Group>
+                );
               }
-            ]}
-          />
-        </Container>
+            }
+          ]}
+        />
       </div>
       <StreamModal
         title={modalData.title}
