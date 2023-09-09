@@ -276,7 +276,14 @@ class StreamStore {
       url: this.FetchStreamFrameURL(slug)
     };
 
-    return yield this.streamFrameUrls[slug].url;
+    const url = yield this.streamFrameUrls[slug].url;
+
+    if(!url) {
+      // URL not found - remove cache
+      delete this.streamFrameUrls[slug];
+    }
+
+    return url;
   })
 }
 

@@ -25,9 +25,12 @@ const VideoContainer = observer(({slug, autoplay=false, index}) => {
   const [play, setPlay] = useState(autoplay);
   const [frameKey, setFrameKey] = useState(0);
   const [frameSegmentUrl, setFrameSegmentUrl] = useState(undefined);
+  const status = streamStore.streams?.[slug]?.status;
 
   useEffect(() => {
-    if(play) { return; }
+    if(play || status !== "running") {
+      return;
+    }
 
     // Frame loading already initialized - no delay needed
     if(frameKey > 0 || streamStore.streamFrameUrls[slug]) {
@@ -45,7 +48,7 @@ const VideoContainer = observer(({slug, autoplay=false, index}) => {
     }, delay);
 
     return () => clearTimeout(frameTimeout);
-  }, [play, frameKey]);
+  }, [play, frameKey, status]);
 
   useEffect(() => {
     if(!frameSegmentUrl) { return; }
