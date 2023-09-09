@@ -9,7 +9,7 @@ import {Link} from "react-router-dom";
 
 import {
   IconPlayerPlay,
-  IconPlayerPause,
+  IconPlayerStop,
   IconTrash,
   IconExternalLink,
   IconDeviceAnalytics
@@ -177,7 +177,7 @@ const Streams = observer(() => {
                               });
                             }}
                           >
-                            <IconPlayerPause />
+                            <IconPlayerStop />
                           </ActionIcon>
                       }
                       <ActionIcon
