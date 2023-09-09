@@ -198,7 +198,7 @@ export const Radio = ({label, formName, required, options=[]}) => {
       </div>
       {
         options.map(({optionLabel, id, value, checked, onChange}) => (
-          <div key={`radio-option-${id}`}>
+          <div key={`radio-option-${id}`} style={{width: "max-content", cursor: "pointer"}}>
             <input
               name={formName}
               id={id}
@@ -207,7 +207,7 @@ export const Radio = ({label, formName, required, options=[]}) => {
               checked={checked}
               onChange={onChange}
             />
-            <label htmlFor={id}>
+            <label htmlFor={id} style={{marginLeft: "10px"}}>
               { optionLabel }
             </label>
           </div>

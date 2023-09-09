@@ -11,6 +11,7 @@ configure({
 class StreamStore {
   streams;
   streamFrameUrls = {};
+  showMonitorPreviews = false;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -20,6 +21,10 @@ class StreamStore {
 
   get client() {
     return this.rootStore.client;
+  }
+
+  ToggleMonitorPreviews() {
+    this.showMonitorPreviews = !this.showMonitorPreviews;
   }
 
   UpdateStream = ({key, value={}}) => {
@@ -250,12 +255,19 @@ class StreamStore {
         )
       ]);
 
-      return URL.createObjectURL(
+      const url = URL.createObjectURL(
         new Blob([
           yield videoInitSegment.arrayBuffer(),
           yield videoSegment.arrayBuffer()
         ])
       );
+
+      this.streamFrameUrls[slug] = {
+        ...this.streamFrameUrls[slug],
+        url
+      };
+
+      return url;
     } catch(error) {
       console.error("Error fetching frame for " + slug);
       console.error(error);
@@ -276,10 +288,10 @@ class StreamStore {
 
     this.streamFrameUrls[slug] = {
       timestamp: Date.now(),
-      url: this.FetchStreamFrameURL(slug)
+      promise: this.FetchStreamFrameURL(slug)
     };
 
-    const url = yield this.streamFrameUrls[slug].url;
+    const url = yield this.streamFrameUrls[slug].promise;
 
     if(!url) {
       // URL not found - remove cache

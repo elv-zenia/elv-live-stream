@@ -1,8 +1,11 @@
 import React from "react";
 import {observer} from "mobx-react";
 import {rootStore, streamStore} from "Stores";
-import {useParams, NavLink} from "react-router-dom";
+import {useParams, Link} from "react-router-dom";
 import AppFrame from "Components/AppFrame";
+import {ActionIcon} from "@mantine/core";
+
+import {IconArrowBackUp} from "@tabler/icons-react";
 
 const StreamPreview = observer(() => {
   const {id} = useParams();
@@ -22,12 +25,11 @@ const StreamPreview = observer(() => {
   return (
     <div className="stream-preview">
       <div className="page-header">
+        <ActionIcon component={Link} to="/streams" title="Back to Streams">
+          <IconArrowBackUp />
+        </ActionIcon>
         Preview { streamObject.display_title || streamObject.title || streamObject.objectId }
       </div>
-      <div className="page-header__actions">
-        <NavLink to="/streams" className="nav-button-link">Back to Streams</NavLink>
-      </div>
-
       <AppFrame
         className="display-frame"
         appUrl={EluvioConfiguration.displayAppUrl}

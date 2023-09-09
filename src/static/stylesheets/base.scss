@@ -59,14 +59,11 @@ main {
 }
 
 .page-header {
+  align-items: center;
+  display: flex;
   font-size: 1.25rem;
+  gap: 10px;
   margin-bottom: 2rem;
-
-  &__actions {
-    display: flex;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
 }
 
 select {
