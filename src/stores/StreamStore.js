@@ -74,11 +74,23 @@ class StreamStore {
   }) {
     const objectId = this.streams[slug].objectId;
     const libraryId = yield this.client.ContentObjectLibraryId({objectId});
-    const edgeWriteToken = yield this.client.ContentObjectMetadata({
-      libraryId,
-      objectId,
-      metadataSubtree: "live_recording/fabric_config/edge_write_token"
+
+    const response = yield this.CheckStatus({
+      objectId: this.streams[slug].objectId
     });
+    switch(response.state) {
+      case "unconfigured":
+      case "uninitialized":
+          throw Error("Stream not ready to start");
+      case "starting":
+      case "running":
+      case "stalled":
+          // Already started - nothing to do
+          return;
+    }
+
+    const edgeWriteToken = response.edge_write_token;
+
     let tokenMeta;
 
     if(edgeWriteToken) {
