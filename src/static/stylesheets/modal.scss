@@ -2,6 +2,12 @@
   position: relative;
   z-index: 100;
 
+  &__error {
+    color: $red;
+    font-size: 12px;
+    margin-top: 20px;
+  }
+
   &__content {
     background-color: $white;
     border-radius: 6px;

@@ -44,6 +44,8 @@ const StreamModal = observer(({
   title,
   description
 }) => {
+  if(!open) { return null; }
+
   return (
     <Modal
       title={title}
@@ -133,7 +135,7 @@ const Streams = observer(() => {
               title: "",
               render: record => {
                 return (
-                  <Group spacing={5} align="top" position="center">
+                  <Group spacing={5} align="top" position="right">
                     {
                       record.status !== STATUS_MAP.UNINITIALIZED ? null :
                         <ActionIcon

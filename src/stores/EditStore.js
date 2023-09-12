@@ -84,7 +84,7 @@ class EditStore {
     const streamValue = {
       objectId,
       title: name,
-      status: statusResponse.state
+      status: statusResponse.state,
     };
 
     streamStore.UpdateStream({

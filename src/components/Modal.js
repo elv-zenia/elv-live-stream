@@ -23,6 +23,7 @@ const Modal = ({
   size="SM"
 }) => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(undefined);
 
   return (
     <div className="modal">
@@ -37,6 +38,12 @@ const Modal = ({
               }
               { children }
             </div>
+            {
+              !error ? null :
+                <div className="modal__error">
+                  Error: { error }
+                </div>
+            }
             <div className="modal__actions">
               {
                 !hideCancelButton &&
@@ -51,10 +58,17 @@ const Modal = ({
                 disabled={loading}
                 className="button__primary"
                 onClick={async () => {
-                  setLoading(true);
-                  await ConfirmCallback();
-                  setLoading(false);
-                  onOpenChange(false);
+                  try {
+                    setError(undefined);
+                    setLoading(true);
+                    await ConfirmCallback();
+                    onOpenChange(false);
+                  } catch(error) {
+                    console.error(error);
+                    setError(error?.message || error.kind || error.toString());
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
               >
                 { loading ? <Loader loader="inline" className="modal__loader" /> : confirmText }

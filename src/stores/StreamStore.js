@@ -30,7 +30,8 @@ class StreamStore {
   UpdateStream = ({key, value={}}) => {
     this.streams[key] = {
       ...(this.streams[key] || {}),
-      ...value
+      ...value,
+      slug: key
     };
   };
 
@@ -38,32 +39,19 @@ class StreamStore {
     this.streams = streams;
   };
 
-  UpdateStatus = ({slug, status}) => {
-    const streamObject = this.streams[slug];
-    streamObject.status = status;
-    this.UpdateStream({
-      key: slug,
-      value: streamObject
-    });
-  }
-
   ConfigureStream = flow(function * ({
     objectId,
     slug
   }) {
-    try {
-      yield this.client.StreamConfig({name: objectId});
-      yield editStore.CreateSiteLinks({objectId});
-      yield editStore.AddStreamToSite({objectId});
+    yield this.client.StreamConfig({name: objectId});
+    yield editStore.CreateSiteLinks({objectId});
+    yield editStore.AddStreamToSite({objectId});
 
-      const response = yield this.CheckStatus({
-        objectId
-      });
+    const response = yield this.CheckStatus({
+      objectId
+    });
 
-      this.UpdateStatus({slug, status: response.state});
-    } catch(error) {
-      console.error("Unable to apply configuration.", error);
-    }
+    this.UpdateStream({key: slug, value: {status: response.state}});
   });
 
   CheckStatus = flow(function * ({
@@ -129,7 +117,7 @@ class StreamStore {
         op: OP_MAP[operation]
       });
 
-      this.UpdateStatus({slug, status: response.state});
+      this.UpdateStream({key: slug, value: { status: response.state }});
     } catch(error) {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }
