@@ -109,7 +109,7 @@ class DataStore {
         streamMetadata[slug].objectId = objectId;
         streamMetadata[slug].versionHash = versionHash;
         streamMetadata[slug].libraryId = libraryId;
-        streamMetadata[slug].name = stream.display_title || stream.title;
+        streamMetadata[slug].title = stream.display_title || stream.title;
       }
     }
 

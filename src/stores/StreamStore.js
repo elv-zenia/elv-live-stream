@@ -28,21 +28,10 @@ class StreamStore {
   }
 
   UpdateStream = ({key, value={}}) => {
-    let streams;
-    if(this.streams[key]) {
-      streams = {
-        ...this.streams || {}
-      };
-
-      streams[key] = value;
-    } else {
-      streams = {
-        [key]: value,
-        ...this.streams || {}
-      };
-    }
-
-    this.UpdateStreams({streams});
+    this.streams[key] = {
+      ...(this.streams[key] || {}),
+      ...value
+    };
   };
 
   UpdateStreams = ({streams}) => {

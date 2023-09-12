@@ -12,7 +12,8 @@ import {
   IconPlayerStop,
   IconTrash,
   IconExternalLink,
-  IconDeviceAnalytics
+  IconDeviceAnalytics,
+  IconListCheck
 } from "@tabler/icons-react";
 import {useDebouncedValue} from "@mantine/hooks";
 
@@ -76,7 +77,7 @@ export const SortTable = ({sortStatus, AdditionalCondition}) => {
 };
 
 const Streams = observer(() => {
-  const [sortStatus, setSortStatus] = useState({columnAccessor: "name", direction: "asc"});
+  const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
 
@@ -100,7 +101,7 @@ const Streams = observer(() => {
   });
 
   const records = Object.values(streamStore.streams || {})
-    .filter(record => !debouncedFilter || record.name.toLowerCase().includes(debouncedFilter.toLowerCase()))
+    .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
     .sort(SortTable({sortStatus}));
 
   return (
@@ -124,23 +125,38 @@ const Streams = observer(() => {
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}
           columns={[
-            { accessor: "name", title: "Name", sortable: true, render: record => <Text fw={600}>{record.name}</Text> },
+            { accessor: "title", title: "Name", sortable: true, render: record => <Text fw={600}>{record.title}</Text> },
             { accessor: "objectId", title: "Object ID", render: record => <Text color="dimmed" fz="xs">{record.objectId}</Text> },
             { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
             {
               accessor: "actions",
               title: "",
               render: record => {
-
                 return (
                   <Group spacing={5} align="top" position="center">
-                    <ActionIcon
-                      component={Link}
-                      to={`/streams/${record.objectId}`}
-                      title="View Stream"
-                    >
-                      <IconDeviceAnalytics />
-                    </ActionIcon>
+                    {
+                      record.status !== STATUS_MAP.UNINITIALIZED ? null :
+                        <ActionIcon
+                          title="Check Stream"
+                          onClick={() => {
+                            setModalData({
+                              objectId: record.objectId,
+                              showModal: true,
+                              title: "Check Stream",
+                              description: "Are you sure you want to check the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.ConfigureStream({
+                                  objectId: record.objectId,
+                                  slug: record.slug
+                                });
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }}
+                        >
+                          <IconListCheck />
+                        </ActionIcon>
+                    }
                     {
                       !record.status || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(record.status) ? null :
                         <ActionIcon
@@ -163,27 +179,36 @@ const Streams = observer(() => {
                     }
                     {
                       !record.status || ![STATUS_MAP.STARTING, STATUS_MAP.RUNNING, STATUS_MAP.STALLED].includes(record.status) ? null :
-                        <ActionIcon
-                          title="Stop Stream"
-                          onClick={() => {
-                            setModalData({
-                              objectId: record.objectId,
-                              showModal: true,
-                              title: "Stop Stream",
-                              description: "Are you sure you want to stop the stream?",
-                              ConfirmCallback: async () => {
-                                await streamStore.OperateLRO({
-                                  objectId: record.objectId,
-                                  slug: record.slug,
-                                  operation: "STOP"
-                                });
-                              },
-                              CloseCallback: () => ResetModal()
-                            });
-                          }}
-                        >
-                          <IconPlayerStop />
-                        </ActionIcon>
+                        <>
+                          <ActionIcon
+                            component={Link}
+                            to={`/streams/${record.objectId}`}
+                            title="View Stream"
+                          >
+                            <IconDeviceAnalytics />
+                          </ActionIcon>
+                          <ActionIcon
+                            title="Stop Stream"
+                            onClick={() => {
+                              setModalData({
+                                objectId: record.objectId,
+                                showModal: true,
+                                title: "Stop Stream",
+                                description: "Are you sure you want to stop the stream?",
+                                ConfirmCallback: async () => {
+                                  await streamStore.OperateLRO({
+                                    objectId: record.objectId,
+                                    slug: record.slug,
+                                    operation: "STOP"
+                                  });
+                                },
+                                CloseCallback: () => ResetModal()
+                              });
+                            }}
+                          >
+                            <IconPlayerStop />
+                          </ActionIcon>
+                        </>
                     }
                     <ActionIcon
                       title="Open in Fabric Browser"
