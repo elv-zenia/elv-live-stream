@@ -109,8 +109,8 @@ const Monitor = observer(() => {
 
   const streams = !streamStore.streams ? undefined :
     Object.values(streamStore.streams || {})
-      .filter(record => !debouncedFilter || record.name.toLowerCase().includes(debouncedFilter.toLowerCase()))
-      .sort(SortTable({sortStatus: {columnAccessor: "name", direction: "asc"}}));
+      .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
+      .sort(SortTable({sortStatus: {columnAccessor: "title", direction: "asc"}}));
 
   return (
     <div className="monitor">
@@ -146,7 +146,7 @@ const Monitor = observer(() => {
                           <div className="monitor__grid-item-details-content">
                             <div className="monitor__grid-item-details-top">
                               <div className="monitor__grid-item-title">
-                                { stream.name }
+                                { stream.title }
                               </div>
                               <div className="monitor__grid-item-id">
                                 { stream.objectId || "" }
