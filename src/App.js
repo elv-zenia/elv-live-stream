@@ -1,8 +1,10 @@
 import React from "react";
 import {observer} from "mobx-react";
 import {HashRouter, Navigate, Route, Routes} from "react-router-dom";
+import {rootStore} from "Stores";
 
-import {MantineProvider} from "@mantine/core";
+import {MantineProvider, ActionIcon} from "@mantine/core";
+import {IconX} from "@tabler/icons-react";
 
 import {PageLoader} from "Components/Loader";
 import LeftNavigation from "Components/LeftNavigation";
@@ -25,6 +27,21 @@ const AppRoutes = observer(() => {
   );
 });
 
+const ErrorBanner = observer(() => {
+  if(!rootStore.errorMessage) { return null; }
+
+  return (
+    <div className="error-banner">
+      <div className="error-banner__message">
+        {rootStore.errorMessage}
+      </div>
+      <ActionIcon className="error-banner__close" onClick={() => rootStore.SetErrorMessage(undefined)}>
+        <IconX />
+      </ActionIcon>
+    </div>
+  );
+});
+
 const App = observer(() => {
   if(!rootStore.loaded) { return <PageLoader />; }
 
@@ -33,9 +50,12 @@ const App = observer(() => {
       <HashRouter>
         <LeftNavigation />
         <main>
-          <DataWrapper>
-            { rootStore.loaded ? <AppRoutes /> : null}
-          </DataWrapper>
+          <ErrorBanner />
+          <div className="main-content">
+            <DataWrapper>
+              { rootStore.loaded ? <AppRoutes /> : null}
+            </DataWrapper>
+          </div>
         </main>
       </HashRouter>
     </MantineProvider>

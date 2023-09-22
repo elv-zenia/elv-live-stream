@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
-import {streamStore} from "Stores";
+import {dataStore, streamStore} from "Stores";
 import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
 import ImageIcon from "Components/ImageIcon";
@@ -130,55 +130,56 @@ const Monitor = observer(() => {
         onChange={event => setFilter(event.target.value)}
       />
       {
-        !streams ?
-          <div style={{maxWidth: "200px"}}>
-            <Loader />
-          </div> :
-          streams.length === 0 ? (debouncedFilter ? "No Matching Streams" : "No Streams Found") :
-            <div className="monitor__grid-items">
-              {
-                streams
-                  .map((stream, index) => {
-                    return (
-                      <div key={stream.slug} className="monitor__grid-item-container">
-                        <VideoContainer index={index} slug={stream.slug} />
-                        <div className="monitor__grid-item-details">
-                          <div className="monitor__grid-item-details-content">
-                            <div className="monitor__grid-item-details-top">
-                              <div className="monitor__grid-item-title">
-                                { stream.title }
+        !dataStore.tenantId ? null :
+          !streams ?
+            <div style={{maxWidth: "200px"}}>
+              <Loader />
+            </div> :
+            streams.length === 0 ? (debouncedFilter ? "No Matching Streams" : "No Streams Found") :
+              <div className="monitor__grid-items">
+                {
+                  streams
+                    .map((stream, index) => {
+                      return (
+                        <div key={stream.slug} className="monitor__grid-item-container">
+                          <VideoContainer index={index} slug={stream.slug} />
+                          <div className="monitor__grid-item-details">
+                            <div className="monitor__grid-item-details-content">
+                              <div className="monitor__grid-item-details-top">
+                                <div className="monitor__grid-item-title">
+                                  { stream.title }
+                                </div>
+                                <div className="monitor__grid-item-id">
+                                  { stream.objectId || "" }
+                                </div>
                               </div>
-                              <div className="monitor__grid-item-id">
-                                { stream.objectId || "" }
+                              <div className="monitor__grid-item-details-bottom">
+                                {
+                                  !stream.status ? <div /> :
+                                    <div className={`monitor__grid-item-status ${stream.status === "running" ? "monitor__grid-item-status--green" : ""}`}>
+                                      {STATUS_TEXT[stream.status]}
+                                    </div>
+                                }
+                                {
+                                  stream.embedUrl &&
+                                  <a
+                                    className="monitor__grid-item-link"
+                                    href={stream.embedUrl}
+                                    target="_blank"
+                                  >
+                                    <div className="monitor__grid-item-link-text">
+                                      Embed URL
+                                    </div>
+                                  </a>
+                                }
                               </div>
-                            </div>
-                            <div className="monitor__grid-item-details-bottom">
-                              {
-                                !stream.status ? <div /> :
-                                  <div className={`monitor__grid-item-status ${stream.status === "running" ? "monitor__grid-item-status--green" : ""}`}>
-                                    {STATUS_TEXT[stream.status]}
-                                  </div>
-                              }
-                              {
-                                stream.embedUrl &&
-                                <a
-                                  className="monitor__grid-item-link"
-                                  href={stream.embedUrl}
-                                  target="_blank"
-                                >
-                                  <div className="monitor__grid-item-link-text">
-                                    Embed URL
-                                  </div>
-                                </a>
-                              }
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })
-              }
-            </div>
+                      );
+                    })
+                }
+              </div>
       }
     </div>
   );

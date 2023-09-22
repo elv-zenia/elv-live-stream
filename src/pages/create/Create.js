@@ -333,7 +333,7 @@ const Create = observer(() => {
   };
 
   return (
-    <div>
+    <div className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}>
       <div className="page-header">Create Live Stream</div>
       <form className="form" onSubmit={HandleSubmit}>
         <TextInput

@@ -1,3 +1,8 @@
+.create-form-container--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .form {
   line-height: 1.5;
   width: 700px;

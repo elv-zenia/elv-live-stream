@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
-import {editStore, streamStore} from "Stores";
+import {dataStore, editStore, streamStore} from "Stores";
 import Modal from "Components/Modal";
 
 import {DataTable} from "mantine-datatable";
@@ -122,7 +122,7 @@ const Streams = observer(() => {
           highlightOnHover
           idAccessor="objectId"
           minHeight={!records || records.length === 0 ? 150 : 75}
-          fetching={!streamStore.streams}
+          fetching={dataStore.tenantId && !streamStore.streams}
           records={records}
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}

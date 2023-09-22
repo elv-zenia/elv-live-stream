@@ -59,13 +59,11 @@ class StreamStore {
     stopLro=false,
     showParams=false
   }) {
-    const response = yield this.client.StreamStatus({
+    return yield this.client.StreamStatus({
       name: objectId,
       stopLro,
       showParams
     });
-
-    return response;
   });
 
   StartStream = flow(function * ({
@@ -141,8 +139,10 @@ class StreamStore {
     try {
       this.loadingStatus = true;
 
-      yield Promise.all(
-        Object.keys(this.streams || {}).map(async slug => {
+      yield this.client.utils.LimitedMap(
+        15,
+        Object.keys(this.streams || {}),
+        async slug => {
           try {
             const response = await this.CheckStatus({
               objectId: this.streams[slug].objectId
@@ -158,7 +158,7 @@ class StreamStore {
           } catch(error) {
             console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
           }
-        })
+        }
       );
     } catch(error) {
       console.error(error);

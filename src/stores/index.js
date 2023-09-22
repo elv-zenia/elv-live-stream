@@ -14,6 +14,7 @@ class RootStore {
   loaded = false;
   networkInfo;
   contentSpaceId;
+  errorMessage;
 
   constructor() {
     makeAutoObservable(this);
@@ -48,6 +49,10 @@ class RootStore {
   ExecuteFrameRequest = flow(function * ({request, Respond}) {
     Respond(yield this.client.PassRequest({request, Respond}));
   });
+
+  SetErrorMessage(message) {
+    this.errorMessage = message;
+  }
 }
 
 export const rootStore = new RootStore();

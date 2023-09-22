@@ -9,6 +9,7 @@ configure({
 // Store for loading all the initial data
 class DataStore {
   rootStore;
+  tenantId;
   libraries;
   accessGroups;
   contentType;
@@ -44,8 +45,18 @@ class DataStore {
 
   LoadTenantInfo = flow(function * () {
     try {
-      return yield this.client.userProfileClient.TenantContractId();
+      if(!this.tenantId) {
+        this.tenantId = yield this.client.userProfileClient.TenantContractId();
+
+        if(!this.tenantId) {
+          throw "Tenant ID not found";
+        }
+      }
+
+      return this.tenantId;
     } catch(error) {
+      this.rootStore.SetErrorMessage("Error: Unable to determine tenant info");
+      console.error(error);
       throw Error("No tenant contract ID found.");
     }
   });
@@ -69,6 +80,8 @@ class DataStore {
 
       return sites?.live_streams;
     } catch(error) {
+      this.rootStore.SetErrorMessage("Error: Unable to load tenant sites");
+      console.error(error);
       throw Error(`Unable to load sites for tenant ${tenantContractId}.`);
     }
   });
@@ -90,6 +103,8 @@ class DataStore {
         ...siteStreams
       };
     } catch(error) {
+      this.rootStore.SetErrorMessage("Error: Unable to load streams");
+      console.error(error);
       throw Error(`Unable to load live streams for site ${this.siteId}.`);
     }
 
