@@ -40,18 +40,18 @@ export const ParseLiveConfigData = ({
     },
     output: {
       audio: {
-        bitrate: parseInt(audioBitrate),
+        bitrate: audioBitrate ? parseInt(audioBitrate) * 1000 : null,
         channel_layout: CHANNEL_LAYOUTS[audioChannelLayout],
         quality: AV_STREAM[avProperties]
       },
       video: {
-        bitrate: parseInt(videoBitrate),
+        bitrate: videoBitrate ? parseInt(videoBitrate) * 1000 : null,
         height: parseInt(videoHeight),
         quality: AV_STREAM[avProperties],
         width: parseInt(videoWidth)
       }
     },
-    part_ttl: retention,
+    part_ttl: parseInt(retention),
     url
   };
 

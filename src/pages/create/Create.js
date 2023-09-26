@@ -163,7 +163,7 @@ const AdvancedSection = observer(({
             })}
           />
           <NumberInput
-            label="Bitrate"
+            label="Bitrate (kbps)"
             value={outputFormData.videoBitrate}
             onChange={(event) => OutputUpdateCallback({
               key: "videoBitrate",
