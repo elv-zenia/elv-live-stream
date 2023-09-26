@@ -95,11 +95,11 @@ class StreamStore {
       tokenMeta = yield this.client.ContentObjectMetadata({
         libraryId,
         objectId,
-        metadataSubtree: `/q/${edgeWriteToken}/meta`
+        metadataSubtree: "live_recording/status/edge_write_token"
       });
     }
 
-    if(!tokenMeta) {
+    if(!tokenMeta || tokenMeta !== edgeWriteToken) {
       yield this.client.StreamCreate({name: objectId, start});
     }
 
