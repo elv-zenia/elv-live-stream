@@ -155,7 +155,7 @@ const Streams = observer(() => {
                               showModal: true,
                               title: "Check Stream",
                               description: "Are you sure you want to check the stream?",
-                              loadingText: `Please send your stream to ${url}.`,
+                              loadingText: `Please send your stream to ${url || "the URL you specified"}.`,
                               ConfirmCallback: async () => {
                                 await streamStore.ConfigureStream({
                                   objectId: record.objectId,
