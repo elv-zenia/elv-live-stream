@@ -43,7 +43,25 @@ class StreamStore {
     objectId,
     slug
   }) {
-    yield this.client.StreamConfig({name: objectId});
+    const liveRecordingConfig = yield this.client.ContentObjectMetadata({
+      libraryId: yield this.client.ContentObjectLibraryId({objectId}),
+      objectId,
+      metadataSubtree: "live_recording_config",
+      select: [
+        "input/audio/stream_index",
+        "input/audio/stream",
+        "output/audio/bitrate",
+        "part_ttl"
+      ]
+    });
+    const customSettings = {};
+
+    if(liveRecordingConfig.input?.audio?.stream === "specific") {
+      customSettings["audioIndex"] = liveRecordingConfig.input?.audio?.stream_index;
+      customSettings["audioBitrate"] = liveRecordingConfig?.output?.audio?.bitrate;
+      customSettings["partTtl"] = liveRecordingConfig?.part_ttl;
+    }
+    yield this.client.StreamConfig({name: objectId, customSettings});
     yield editStore.CreateSiteLinks({objectId});
     yield editStore.AddStreamToSite({objectId});
 

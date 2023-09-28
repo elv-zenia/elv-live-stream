@@ -144,32 +144,32 @@ const AdvancedSection = observer(({
             })}
           />
 
-          {/* Output */}
-          <div className="form__section-header">Video Output</div>
-          <NumberInput
-            label="Height"
-            value={outputFormData.videoHeight}
-            onChange={(event) => OutputUpdateCallback({
-              key: "videoHeight",
-              event
-            })}
-          />
-          <NumberInput
-            label="Width"
-            value={outputFormData.videoWidth}
-            onChange={(event) => OutputUpdateCallback({
-              key: "videoWidth",
-              event
-            })}
-          />
-          <NumberInput
-            label="Bitrate (kbps)"
-            value={outputFormData.videoBitrate}
-            onChange={(event) => OutputUpdateCallback({
-              key: "videoBitrate",
-              event
-            })}
-          />
+          {/* Output Settings */}
+          {/*<div className="form__section-header">Video Output</div>*/}
+          {/*<NumberInput*/}
+          {/*  label="Height"*/}
+          {/*  value={outputFormData.videoHeight}*/}
+          {/*  onChange={(event) => OutputUpdateCallback({*/}
+          {/*    key: "videoHeight",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
+          {/*<NumberInput*/}
+          {/*  label="Width"*/}
+          {/*  value={outputFormData.videoWidth}*/}
+          {/*  onChange={(event) => OutputUpdateCallback({*/}
+          {/*    key: "videoWidth",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
+          {/*<NumberInput*/}
+          {/*  label="Bitrate (kbps)"*/}
+          {/*  value={outputFormData.videoBitrate}*/}
+          {/*  onChange={(event) => OutputUpdateCallback({*/}
+          {/*    key: "videoBitrate",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
 
           <div className="form__section-header">Audio Output</div>
           <Select
@@ -192,34 +192,34 @@ const AdvancedSection = observer(({
             })}
           />
 
-          {/* Input */}
-          <div className="form__section-header">Video Input</div>
-          <NumberInput
-            label="Stream ID"
-            value={inputFormData.videoStreamId}
-            onChange={(event) => InputUpdateCallback({
-              key: "videoStreamId",
-              event
-            })}
-          />
-          <NumberInput
-            label="Stream Index"
-            value={inputFormData.videoStreamIndex}
-            onChange={(event) => InputUpdateCallback({
-              key: "videoStreamIndex",
-              event
-            })}
-          />
+          {/* Input Settings */}
+          {/*<div className="form__section-header">Video Input</div>*/}
+          {/*<NumberInput*/}
+          {/*  label="Stream ID"*/}
+          {/*  value={inputFormData.videoStreamId}*/}
+          {/*  onChange={(event) => InputUpdateCallback({*/}
+          {/*    key: "videoStreamId",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
+          {/*<NumberInput*/}
+          {/*  label="Stream Index"*/}
+          {/*  value={inputFormData.videoStreamIndex}*/}
+          {/*  onChange={(event) => InputUpdateCallback({*/}
+          {/*    key: "videoStreamIndex",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
 
           <div className="form__section-header">Audio Input</div>
-          <NumberInput
-            label="Stream ID"
-            value={inputFormData.audioStreamId}
-            onChange={(event) => InputUpdateCallback({
-              key: "audioStreamId",
-              event
-            })}
-          />
+          {/*<NumberInput*/}
+          {/*  label="Stream ID"*/}
+          {/*  value={inputFormData.audioStreamId}*/}
+          {/*  onChange={(event) => InputUpdateCallback({*/}
+          {/*    key: "audioStreamId",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
           <NumberInput
             label="Stream Index"
             min={0}
