@@ -51,6 +51,7 @@ class StreamStore {
         "input/audio/stream_index",
         "input/audio/stream",
         "output/audio/bitrate",
+        "output/audio/channel_layout",
         "part_ttl"
       ]
     });
@@ -60,7 +61,9 @@ class StreamStore {
       customSettings["audioIndex"] = liveRecordingConfig.input?.audio?.stream_index;
       customSettings["audioBitrate"] = liveRecordingConfig?.output?.audio?.bitrate;
       customSettings["partTtl"] = liveRecordingConfig?.part_ttl;
+      customSettings["channelLayout"] = liveRecordingConfig?.output?.audio?.channel_layout;
     }
+
     yield this.client.StreamConfig({name: objectId, customSettings});
     yield editStore.CreateSiteLinks({objectId});
     yield editStore.AddStreamToSite({objectId});

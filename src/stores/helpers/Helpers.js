@@ -19,11 +19,6 @@ export const ParseLiveConfigData = ({
     CLEAR: "clear"
   };
 
-  const CHANNEL_LAYOUTS = {
-    "stereo-2": 2,
-    "surround-5": 6
-  };
-
   const config = {
     drm: ENCRYPTION_TYPES[encryption],
     input: {
@@ -40,8 +35,8 @@ export const ParseLiveConfigData = ({
     },
     output: {
       audio: {
-        bitrate: audioBitrate ? parseInt(audioBitrate) * 1000 : null,
-        channel_layout: CHANNEL_LAYOUTS[audioChannelLayout],
+        bitrate: parseInt(audioBitrate),
+        channel_layout: parseInt(audioChannelLayout),
         quality: AV_STREAM[avProperties]
       }
       // video: {

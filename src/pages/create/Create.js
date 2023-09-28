@@ -175,17 +175,23 @@ const AdvancedSection = observer(({
           <Select
             label="Channel Layout"
             options={[
-              {label: "Stereo (2)", value: "stereo-2"},
-              {label: "Surround (5.1)", value: "surround-5"}
+              {label: "Stereo (2)", value: 2},
+              {label: "Surround (5.1)", value: 6}
             ]}
             onChange={(event) => OutputUpdateCallback({
               key: "audioChannelLayout",
               event
             })}
           />
-          <NumberInput
+          <Select
             label="Bitrate"
             value={outputFormData.audioBitrate}
+            options={[
+              {label: "128000", value: "128000"},
+              {label: "192000", value: "192000"},
+              {label: "256000", value: "256000"},
+              {label: "384000", value: "384000"}
+            ]}
             onChange={(event) => OutputUpdateCallback({
               key: "audioBitrate",
               event
@@ -260,8 +266,8 @@ const Create = observer(() => {
     videoHeight: "",
     videoWidth: "",
     videoBitrate: "",
-    audioChannelLayout: "",
-    audioBitrate: ""
+    audioChannelLayout: 2,
+    audioBitrate: 128000
   });
 
   const [inputFormData, setInputFormData] = useState({
