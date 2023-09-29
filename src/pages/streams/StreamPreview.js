@@ -6,20 +6,38 @@ import AppFrame from "Components/AppFrame";
 import {ActionIcon} from "@mantine/core";
 
 import {IconArrowBackUp} from "@tabler/icons-react";
+import {Loader} from "Components/Loader";
 
 const StreamPreview = observer(() => {
   const {id} = useParams();
-  const streamSlug = Object.keys(streamStore.streams).find(slug => (
+  const streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
     streamStore.streams[slug].objectId === id
   ));
+  const streamObject = streamStore.streams?.[streamSlug];
+
+  if(!streamObject) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          height: "500px",
+          width: "100%",
+          alignItems: "center"
+        }}
+        className="stream-preview"
+      >
+        <Loader />
+      </div>
+    );
+  }
 
   const libraryId = streamStore.streams[streamSlug].libraryId;
-  const streamObject = streamStore.streams[streamSlug];
   const queryParams = {
     contentSpaceId: rootStore.contentSpaceId,
     libraryId,
     objectId: id,
-    action: "display"
+    action: "display",
+    playerProfile: "live"
   };
 
   return (

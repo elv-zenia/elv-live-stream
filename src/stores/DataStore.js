@@ -88,45 +88,43 @@ class DataStore {
 
   LoadStreams = flow(function * () {
     let streamMetadata = {};
-    let siteStreams;
     try {
-      siteStreams = yield this.client.ContentObjectMetadata({
+      streamMetadata = yield this.client.ContentObjectMetadata({
         libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
         objectId: this.siteId,
         metadataSubtree: "public/asset_metadata/live_streams",
         resolveLinks: true,
         resolveIgnoreErrors: true
       });
-
-      streamMetadata = {
-        ...streamMetadata,
-        ...siteStreams
-      };
     } catch(error) {
       this.rootStore.SetErrorMessage("Error: Unable to load streams");
       console.error(error);
       throw Error(`Unable to load live streams for site ${this.siteId}.`);
     }
 
-    for(const slug of Object.keys(streamMetadata)) {
-      const stream = streamMetadata[slug];
+    yield this.client.utils.LimitedMap(
+      10,
+      Object.keys(streamMetadata),
+      async slug => {
+        const stream = streamMetadata[slug];
 
-      const versionHash = (
-        stream?.sources?.default?.["."]?.container ||
-        ((stream["/"] || "").match(/^\/?qfab\/([\w]+)\/?.+/) || [])[1]
-      );
+        const versionHash = (
+          stream?.sources?.default?.["."]?.container ||
+          ((stream["/"] || "").match(/^\/?qfab\/([\w]+)\/?.+/) || [])[1]
+        );
 
-      if(versionHash) {
-        const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
-        const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+        if(versionHash) {
+          const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
+          const libraryId = await this.client.ContentObjectLibraryId({objectId});
 
-        streamMetadata[slug].slug = slug;
-        streamMetadata[slug].objectId = objectId;
-        streamMetadata[slug].versionHash = versionHash;
-        streamMetadata[slug].libraryId = libraryId;
-        streamMetadata[slug].title = stream.display_title || stream.title;
+          streamMetadata[slug].slug = slug;
+          streamMetadata[slug].objectId = objectId;
+          streamMetadata[slug].versionHash = versionHash;
+          streamMetadata[slug].libraryId = libraryId;
+          streamMetadata[slug].title = stream.display_title || stream.title;
+        }
       }
-    }
+    );
 
     streamStore.UpdateStreams({streams: streamMetadata});
   });
@@ -189,7 +187,7 @@ class DataStore {
     objectId
   }) {
     try {
-      return yield this.client.EmbedUrl({objectId});
+      return yield this.client.EmbedUrl({objectId, mediaType: "live_video"});
     } catch(error) {
       console.error(error);
       return "";

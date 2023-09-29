@@ -79,12 +79,12 @@ class StreamStore {
     switch(response.state) {
       case "unconfigured":
       case "uninitialized":
-          throw Error("Stream not ready to start");
+        throw Error("Stream not ready to start");
       case "starting":
       case "running":
       case "stalled":
-          // Already started - nothing to do
-          return;
+        // Already started - nothing to do
+        return;
     }
 
     const edgeWriteToken = response.edge_write_token;
