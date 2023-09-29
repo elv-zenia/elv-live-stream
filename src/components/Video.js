@@ -3,6 +3,17 @@ import EluvioPlayer, {EluvioPlayerParameters} from "@eluvio/elv-player-js";
 import {rootStore} from "../stores";
 import {observer} from "mobx-react";
 
+export const LowLatencyLiveHLSOptions = {
+  "enableWorker": true,
+  "lowLatencyMode": true,
+  "maxBufferLength": 5,
+  "backBufferLength": 5,
+  "liveSyncDuration": 5,
+  "liveMaxLatencyDuration": 15,
+  "liveDurationInfinity": false,
+  "highBufferWatchdogPeriod": 1
+};
+
 const Video = observer(({
   objectId,
   className,
@@ -53,6 +64,10 @@ const Video = observer(({
                   autoplay: EluvioPlayerParameters.autoplay.OFF,
                   controls: EluvioPlayerParameters.controls.AUTO_HIDE,
                   loop: EluvioPlayerParameters.loop.OFF,
+                  hlsjsOptions: {
+                    ...LowLatencyLiveHLSOptions,
+                    ...(playerOptions?.hlsjsOptions || {})
+                  },
                   ...playerOptions
                 }
               }
