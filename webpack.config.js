@@ -45,8 +45,7 @@ module.exports = {
   mode: "development",
   devtool: "eval-source-map",
   externals: {
-    crypto: "crypto",
-    stream: "stream"
+    crypto: "crypto"
   },
   resolve: {
     alias: {
@@ -60,7 +59,8 @@ module.exports = {
     },
     extensions: [".js", ".jsx", ".mjs", ".scss", ".png", ".svg"],
     fallback: {
-      "url": require.resolve("url")
+      "url": require.resolve("url"),
+      "stream": require.resolve("stream-browserify")
     }
   },
   module: {
