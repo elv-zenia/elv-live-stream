@@ -12,6 +12,7 @@ const modalSizes = {
 const Modal = ({
   title,
   description,
+  loadingText,
   ConfirmCallback,
   CancelCallback,
   confirmText="Confirm",
@@ -35,6 +36,11 @@ const Modal = ({
               {
                 description &&
                 <Description>{ description }</Description>
+              }
+              {
+                loading &&
+                loadingText ?
+                  loadingText : null
               }
               { children }
             </div>

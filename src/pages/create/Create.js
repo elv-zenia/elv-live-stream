@@ -144,82 +144,88 @@ const AdvancedSection = observer(({
             })}
           />
 
-          {/* Output */}
-          <div className="form__section-header">Video Output</div>
-          <NumberInput
-            label="Height"
-            value={outputFormData.videoHeight}
-            onChange={(event) => OutputUpdateCallback({
-              key: "videoHeight",
-              event
-            })}
-          />
-          <NumberInput
-            label="Width"
-            value={outputFormData.videoWidth}
-            onChange={(event) => OutputUpdateCallback({
-              key: "videoWidth",
-              event
-            })}
-          />
-          <NumberInput
-            label="Bitrate"
-            value={outputFormData.videoBitrate}
-            onChange={(event) => OutputUpdateCallback({
-              key: "videoBitrate",
-              event
-            })}
-          />
+          {/* Output Settings */}
+          {/*<div className="form__section-header">Video Output</div>*/}
+          {/*<NumberInput*/}
+          {/*  label="Height"*/}
+          {/*  value={outputFormData.videoHeight}*/}
+          {/*  onChange={(event) => OutputUpdateCallback({*/}
+          {/*    key: "videoHeight",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
+          {/*<NumberInput*/}
+          {/*  label="Width"*/}
+          {/*  value={outputFormData.videoWidth}*/}
+          {/*  onChange={(event) => OutputUpdateCallback({*/}
+          {/*    key: "videoWidth",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
+          {/*<NumberInput*/}
+          {/*  label="Bitrate (kbps)"*/}
+          {/*  value={outputFormData.videoBitrate}*/}
+          {/*  onChange={(event) => OutputUpdateCallback({*/}
+          {/*    key: "videoBitrate",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
 
           <div className="form__section-header">Audio Output</div>
           <Select
             label="Channel Layout"
             options={[
-              {label: "Stereo (2)", value: "stereo-2"},
-              {label: "Surround (5.1)", value: "surround-5"}
+              {label: "Stereo (2)", value: 2},
+              {label: "Surround (5.1)", value: 6}
             ]}
             onChange={(event) => OutputUpdateCallback({
               key: "audioChannelLayout",
               event
             })}
           />
-          <NumberInput
+          <Select
             label="Bitrate"
             value={outputFormData.audioBitrate}
+            options={[
+              {label: "128000", value: "128000"},
+              {label: "192000", value: "192000"},
+              {label: "256000", value: "256000"},
+              {label: "384000", value: "384000"}
+            ]}
             onChange={(event) => OutputUpdateCallback({
               key: "audioBitrate",
               event
             })}
           />
 
-          {/* Input */}
-          <div className="form__section-header">Video Input</div>
-          <NumberInput
-            label="Stream ID"
-            value={inputFormData.videoStreamId}
-            onChange={(event) => InputUpdateCallback({
-              key: "videoStreamId",
-              event
-            })}
-          />
-          <NumberInput
-            label="Stream Index"
-            value={inputFormData.videoStreamIndex}
-            onChange={(event) => InputUpdateCallback({
-              key: "videoStreamIndex",
-              event
-            })}
-          />
+          {/* Input Settings */}
+          {/*<div className="form__section-header">Video Input</div>*/}
+          {/*<NumberInput*/}
+          {/*  label="Stream ID"*/}
+          {/*  value={inputFormData.videoStreamId}*/}
+          {/*  onChange={(event) => InputUpdateCallback({*/}
+          {/*    key: "videoStreamId",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
+          {/*<NumberInput*/}
+          {/*  label="Stream Index"*/}
+          {/*  value={inputFormData.videoStreamIndex}*/}
+          {/*  onChange={(event) => InputUpdateCallback({*/}
+          {/*    key: "videoStreamIndex",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
 
           <div className="form__section-header">Audio Input</div>
-          <NumberInput
-            label="Stream ID"
-            value={inputFormData.audioStreamId}
-            onChange={(event) => InputUpdateCallback({
-              key: "audioStreamId",
-              event
-            })}
-          />
+          {/*<NumberInput*/}
+          {/*  label="Stream ID"*/}
+          {/*  value={inputFormData.audioStreamId}*/}
+          {/*  onChange={(event) => InputUpdateCallback({*/}
+          {/*    key: "audioStreamId",*/}
+          {/*    event*/}
+          {/*  })}*/}
+          {/*/>*/}
           <NumberInput
             label="Stream Index"
             min={0}
@@ -260,8 +266,8 @@ const Create = observer(() => {
     videoHeight: "",
     videoWidth: "",
     videoBitrate: "",
-    audioChannelLayout: "",
-    audioBitrate: ""
+    audioChannelLayout: 2,
+    audioBitrate: 128000
   });
 
   const [inputFormData, setInputFormData] = useState({

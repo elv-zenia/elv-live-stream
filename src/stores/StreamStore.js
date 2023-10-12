@@ -43,7 +43,28 @@ class StreamStore {
     objectId,
     slug
   }) {
-    yield this.client.StreamConfig({name: objectId});
+    const liveRecordingConfig = yield this.client.ContentObjectMetadata({
+      libraryId: yield this.client.ContentObjectLibraryId({objectId}),
+      objectId,
+      metadataSubtree: "live_recording_config",
+      select: [
+        "input/audio/stream_index",
+        "input/audio/stream",
+        "output/audio/bitrate",
+        "output/audio/channel_layout",
+        "part_ttl"
+      ]
+    });
+    const customSettings = {};
+
+    if(liveRecordingConfig.input?.audio?.stream === "specific") {
+      customSettings["audioIndex"] = liveRecordingConfig.input?.audio?.stream_index;
+      customSettings["audioBitrate"] = liveRecordingConfig?.output?.audio?.bitrate;
+      customSettings["partTtl"] = liveRecordingConfig?.part_ttl;
+      customSettings["channelLayout"] = liveRecordingConfig?.output?.audio?.channel_layout;
+    }
+
+    yield this.client.StreamConfig({name: objectId, customSettings});
     yield editStore.CreateSiteLinks({objectId});
     yield editStore.AddStreamToSite({objectId});
 
@@ -95,11 +116,11 @@ class StreamStore {
       tokenMeta = yield this.client.ContentObjectMetadata({
         libraryId,
         objectId,
-        metadataSubtree: `/q/${edgeWriteToken}/meta`
+        metadataSubtree: "live_recording/status/edge_write_token"
       });
     }
 
-    if(!tokenMeta) {
+    if(!tokenMeta || tokenMeta !== edgeWriteToken) {
       yield this.client.StreamCreate({name: objectId, start});
     }
 
