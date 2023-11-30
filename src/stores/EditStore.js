@@ -68,6 +68,9 @@ class EditStore {
       config
     });
 
+    yield this.CreateSiteLinks({objectId});
+    yield this.AddStreamToSite({objectId});
+
     try {
       yield this.client.SetPermission({
         objectId,
@@ -252,7 +255,8 @@ class EditStore {
         libraryId: dataStore.siteLibraryId,
         objectId: dataStore.siteId,
         writeToken,
-        commitMessage: "Add live stream"
+        commitMessage: "Add live stream",
+        awaitCommitConfirmation: true
       });
     } catch(error) {
       console.error("Failed to replace meta", error);
