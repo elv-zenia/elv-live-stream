@@ -121,7 +121,7 @@ const AdvancedSection = observer(({
         <>
           <Select
             label="Retention"
-            labelDescription="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+            labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
             formName="playbackEncryption"
             options={[
               {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds

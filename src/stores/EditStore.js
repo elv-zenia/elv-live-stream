@@ -147,7 +147,8 @@ class EditStore {
             display_title: displayName || name,
             title: displayName || name,
             title_type: "live_stream",
-            video_type: "live"
+            video_type: "live",
+            slug: Slugify(name)
           }
         },
         "live_recording_config": config
