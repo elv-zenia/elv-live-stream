@@ -68,6 +68,9 @@ class EditStore {
       config
     });
 
+    yield this.CreateSiteLinks({objectId});
+    yield this.AddStreamToSite({objectId});
+
     try {
       yield this.client.SetPermission({
         objectId,
@@ -252,10 +255,49 @@ class EditStore {
         libraryId: dataStore.siteLibraryId,
         objectId: dataStore.siteId,
         writeToken,
-        commitMessage: "Add live stream"
+        commitMessage: "Add live stream",
+        awaitCommitConfirmation: true
       });
     } catch(error) {
       console.error("Failed to replace meta", error);
+    }
+  });
+
+  UpdateStreamLink = flow(function * ({objectId, slug}) {
+    try {
+      const originalLink = yield this.client.ContentObjectMetadata({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId,
+        metadataSubtree: `public/asset_metadata/live_streams/${slug}`,
+      });
+
+      const link = this.CreateLink({
+        targetHash: yield this.client.LatestVersionHash({objectId}),
+        options: originalLink
+      });
+
+      const {writeToken} = yield this.client.EditContentObject({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId
+      });
+
+      yield this.client.ReplaceMetadata({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId,
+        writeToken,
+        metadataSubtree: `public/asset_metadata/live_streams/${slug}`,
+        metadata: link
+      });
+
+      yield this.client.FinalizeContentObject({
+        libraryId: dataStore.siteLibraryId,
+        objectId: dataStore.siteId,
+        writeToken,
+        commitMessage: "Update stream link",
+        awaitCommitConfirmation: true
+      });
+    } catch(error) {
+      console.error("Unable to update stream link", error);
     }
   });
 
