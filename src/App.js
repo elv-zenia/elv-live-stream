@@ -18,7 +18,7 @@ import StreamPreview from "Pages/streams/StreamPreview";
 const AppRoutes = observer(() => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate replace to="/create" />} />
+      <Route path="/" element={<Navigate replace to="/streams" />} />
       <Route path="/create" element={<Create />} />
       <Route path="/streams" element={<Streams />} />
       <Route path="/monitor" element={<Monitor />} />
