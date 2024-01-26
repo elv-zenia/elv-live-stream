@@ -47,7 +47,8 @@ const FORMAT_TEXT = {
 
 const CODEC_TEXT = {
   h264: "H.264",
-  h265: "H.265"
+  h265: "H.265",
+  mpeg2video: "MPEG-2"
 };
 
 const StreamModal = observer(({
