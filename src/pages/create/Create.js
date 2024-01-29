@@ -290,7 +290,7 @@ const Create = observer(() => {
 
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
-  const urls = dataStore.liveStreamUrls?.[basicFormData.protocol] || [];
+  const urls = basicFormData.protocol === "custom" ? [] : dataStore.liveStreamUrls?.[basicFormData.protocol] || [];
 
   const UpdateFormData = ({formKey, key, value}) => {
     const FORM_MAP = {
@@ -380,23 +380,50 @@ const Create = observer(() => {
                 value: event.target.value,
                 formKey: FORM_KEYS.BASIC
               })
+            },
+            {
+              optionLabel: "Custom",
+              id: "custom",
+              value: "custom",
+              checked: basicFormData.protocol === "custom",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
             }
           ]}
         />
-        <Select
-          label="URL"
-          options={urls.map(url => (
-            {
-              label: url,
-              value: url
-            }
-          ))}
-          onChange={event => UpdateFormData({
-            key: "url",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
-        />
+        {
+          basicFormData.protocol === "custom" &&
+          <TextInput
+            label="URL"
+            required={basicFormData.protocol === "custom"}
+            value={basicFormData.url}
+            onChange={event => UpdateFormData({
+              key: "url",
+              value: event.target.value,
+              formKey: FORM_KEYS.BASIC
+            })}
+          />
+        }
+        {
+          basicFormData.protocol !== "custom" &&
+          <Select
+            label="URL"
+            options={urls.map(url => (
+              {
+                label: url,
+                value: url
+              }
+            ))}
+            onChange={event => UpdateFormData({
+              key: "url",
+              value: event.target.value,
+              formKey: FORM_KEYS.BASIC
+            })}
+          />
+        }
         <TextInput
           label="Name"
           required={true}
