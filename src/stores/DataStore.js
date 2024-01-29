@@ -15,6 +15,7 @@ class DataStore {
   contentType;
   siteId;
   siteLibraryId;
+  liveStreamUrls;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -93,11 +94,17 @@ class DataStore {
         libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
         objectId: this.siteId,
         select: [
+          "/live_stream_urls",
           "public/asset_metadata/live_streams"
         ],
         resolveLinks: true,
         resolveIgnoreErrors: true
       });
+
+      if(siteMetadata.live_stream_urls) {
+        this.liveStreamUrls = siteMetadata.live_stream_urls;
+      }
+
       streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
     } catch(error) {
       this.rootStore.SetErrorMessage("Error: Unable to load streams");

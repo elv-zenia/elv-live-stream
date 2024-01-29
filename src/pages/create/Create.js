@@ -255,6 +255,7 @@ const Create = observer(() => {
 
   const [basicFormData, setBasicFormData] = useState({
     url: "",
+    protocol: "mpegts",
     name: "",
     description: "",
     displayName: "",
@@ -289,6 +290,7 @@ const Create = observer(() => {
 
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
+  const urls = dataStore.liveStreamUrls?.[basicFormData.protocol] || [];
 
   const UpdateFormData = ({formKey, key, value}) => {
     const FORM_MAP = {
@@ -343,10 +345,52 @@ const Create = observer(() => {
     <div className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}>
       <div className="page-header">Create Live Stream</div>
       <form className="form" onSubmit={HandleSubmit}>
-        <TextInput
+        <Radio
+          label="Protocol"
+          options={[
+            {
+              optionLabel: "MPEGTS",
+              id: "mpegts",
+              value: "mpegts",
+              checked: basicFormData.protocol === "mpegts",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            },
+            {
+              optionLabel: "RTMP",
+              id: "rtmp",
+              value: "rtmp",
+              checked: basicFormData.protocol === "rtmp",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            },
+            {
+              optionLabel: "SRT",
+              id: "srt",
+              value: "srt",
+              checked: basicFormData.protocol === "srt",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            }
+          ]}
+        />
+        <Select
           label="URL"
-          required={true}
-          value={basicFormData.url}
+          options={urls.map(url => (
+            {
+              label: url,
+              value: url
+            }
+          ))}
           onChange={event => UpdateFormData({
             key: "url",
             value: event.target.value,
