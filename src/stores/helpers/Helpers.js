@@ -47,7 +47,8 @@ export const ParseLiveConfigData = ({
       // }
     },
     part_ttl: parseInt(retention),
-    url
+    url,
+    reference_url: url ? url.split("?")[0] : undefined
   };
 
   return config;

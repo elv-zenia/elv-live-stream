@@ -411,12 +411,17 @@ const Create = observer(() => {
           basicFormData.protocol !== "custom" &&
           <Select
             label="URL"
+            defaultValue={urls[0]}
             options={urls.map(url => (
               {
                 label: url,
                 value: url
               }
             ))}
+            defaultOption={{
+              value: "",
+              label: "Select URL"
+            }}
             onChange={event => UpdateFormData({
               key: "url",
               value: event.target.value,
