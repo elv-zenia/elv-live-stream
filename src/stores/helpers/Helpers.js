@@ -61,3 +61,17 @@ export const Slugify = (string) => {
     .replace(/[^a-z0-9\-]/g,"")
     .replace(/-+/g, "-");
 };
+
+export const VideoBitrateReadable = (bitrate) => {
+  if(!bitrate) { return ""; }
+  const denominator = 1000000;
+  let value = bitrate / denominator;
+
+  if(bitrate > denominator) {
+    value = value.toFixed();
+  } else {
+    value = value.toFixed(1);
+  }
+
+  return `${value}Mbps`;
+};

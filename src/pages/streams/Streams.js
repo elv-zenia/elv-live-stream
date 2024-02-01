@@ -17,6 +17,7 @@ import {
   IconCircleX
 } from "@tabler/icons-react";
 import {useDebouncedValue} from "@mantine/hooks";
+import {VideoBitrateReadable} from "Stores/helpers/Helpers";
 
 const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
@@ -168,7 +169,7 @@ const Streams = observer(() => {
             )},
             { accessor: "originUrl", title: "URL", render: record => <Text>{record.originUrl}</Text> },
             { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
-            { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {record.videoBitrate ? `${(record.videoBitrate / 1000000).toFixed()}Mbps` : ""}</Text> },
+            { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
             { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
             { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
             {
@@ -178,7 +179,7 @@ const Streams = observer(() => {
                 return (
                   <Group spacing={5} align="top" position="right">
                     {
-                      record.status !== STATUS_MAP.UNINITIALIZED ? null :
+                      ![STATUS_MAP.UNINITIALIZED, STATUS_MAP.INACTIVE].includes(record.status) ? null :
                         <ActionIcon
                           title="Check Stream"
                           onClick={async () => {
@@ -192,7 +193,7 @@ const Streams = observer(() => {
                               objectId: record.objectId,
                               showModal: true,
                               title: "Check Stream",
-                              description: "Are you sure you want to check the stream?",
+                              description: record.status === STATUS_MAP.INACTIVE ? "Are you sure you want to check the stream? This will override your saved configuration." : "Are you sure you want to check the stream?",
                               loadingText: `Please send your stream to ${url || "the URL you specified"}.`,
                               ConfirmCallback: async () => {
                                 await streamStore.ConfigureStream({
