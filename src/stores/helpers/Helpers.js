@@ -65,13 +65,7 @@ export const Slugify = (string) => {
 export const VideoBitrateReadable = (bitrate) => {
   if(!bitrate) { return ""; }
   const denominator = 1000000;
-  let value = bitrate / denominator;
-
-  if(bitrate > denominator) {
-    value = value.toFixed();
-  } else {
-    value = value.toFixed(1);
-  }
+  let value = (bitrate / denominator).toFixed(1);
 
   return `${value}Mbps`;
 };
