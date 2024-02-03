@@ -360,6 +360,7 @@ const Create = observer(() => {
           basicFormData.protocol !== "custom" &&
           <Select
             label="URL"
+            required={true}
             defaultValue={urls[0]}
             options={urls.map(url => (
               {
