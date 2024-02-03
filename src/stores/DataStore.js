@@ -1,5 +1,5 @@
 // Force strict mode so mutations are only allowed within actions.
-import {configure, flow, makeAutoObservable} from "mobx";
+import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {streamStore} from "./index";
 
 configure({
@@ -20,7 +20,9 @@ class DataStore {
   constructor(rootStore) {
     makeAutoObservable(this);
 
-    this.rootStore = rootStore;
+    runInAction(() => {
+      this.rootStore = rootStore;
+    });
   }
 
   get client() {
@@ -41,8 +43,8 @@ class DataStore {
     this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
 
     yield this.LoadStreams();
-    yield this.LoadStreamUrls();
-    yield this.rootStore.streamStore.AllStreamsStatus();
+    const streamUrls = yield this.LoadStreamUrls();
+    yield this.rootStore.streamStore.AllStreamsStatus({urls: streamUrls});
   });
 
   LoadTenantInfo = flow(function * () {
@@ -89,22 +91,17 @@ class DataStore {
   });
 
   LoadStreams = flow(function * () {
-    let streamMetadata, liveStreamUrls, activeStreams = {};
+    let streamMetadata;
     try {
       const siteMetadata = yield this.client.ContentObjectMetadata({
         libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
         objectId: this.siteId,
         select: [
-          "/live_stream_urls",
           "public/asset_metadata/live_streams"
         ],
         resolveLinks: true,
         resolveIgnoreErrors: true
       });
-
-      if(siteMetadata.live_stream_urls) {
-        liveStreamUrls = siteMetadata.live_stream_urls;
-      }
 
       streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
     } catch(error) {
@@ -139,10 +136,6 @@ class DataStore {
             libraryId
           }) || {};
 
-          if(stream?.live_recording_config?.state === "active") {
-            activeStreams[stream?.live_recording_config?.reference_url] = true;
-          }
-
           Object.keys(streamDetails).forEach(detail => {
             streamMetadata[slug][detail] = streamDetails[detail];
           });
@@ -150,55 +143,7 @@ class DataStore {
       }
     );
 
-    Object.keys(liveStreamUrls).forEach(type => {
-      liveStreamUrls[type] = liveStreamUrls[type].filter(url => !activeStreams[url]);
-    });
-    this.liveStreamUrls = liveStreamUrls;
-
     streamStore.UpdateStreams({streams: streamMetadata});
-  });
-
-  LoadStreamUrls = flow(function * () {
-    try {
-      const activeStreamUrls = {};
-
-      const streamUrlsMeta = yield this.client.ContentObjectMetadata({
-        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
-        objectId: this.siteId,
-        metadataSubtree: "/live_stream_urls",
-        resolveLinks: true,
-        resolveIgnoreErrors: true
-      });
-
-      for(let slug of Object.keys(streamStore.streams || {})) {
-        const streamMeta = streamStore.streams[slug];
-        const meta = yield this.client.ContentObjectMetadata({
-          libraryId: streamMeta.libraryId,
-          objectId: streamMeta.objectId,
-          resolveLinks: true,
-          resolveIgnoreErrors: true,
-          linkDepthLimit: 1,
-          metadataSubtree: "live_recording",
-          select: [
-            "fabric_config/edge_write_token",
-            "recording_config/recording_params/reference_url"
-          ]
-        });
-
-        const edgeWriteToken = meta?.fabric_config?.edge_write_token;
-        const referenceUrl = meta?.recording_config?.recording_params?.reference_url;
-
-        if(edgeWriteToken && referenceUrl) {
-          activeStreamUrls[referenceUrl] = true;
-        }
-      }
-
-      Object.keys(streamUrlsMeta || {}).forEach(type => {
-        streamUrlsMeta[type] = streamUrlsMeta[type].filter(url => !activeStreamUrls[url]);
-      });
-    } catch(error) {
-      console.error("Failed to load stream urls", error);
-    }
   });
 
   LoadLibraries = flow(function * () {
@@ -261,17 +206,18 @@ class DataStore {
         libraryId = yield this.client.ContentObjectLibraryId({objectId});
       }
 
-      const liveRecordingMeta = yield this.client.ContentObjectMetadata({
+      const streamMeta = yield this.client.ContentObjectMetadata({
         objectId,
         libraryId,
-        metadataSubtree: "/live_recording",
         select: [
-          "probe_info/format/filename",
-          "probe_info/streams",
-          "recording_config/recording_params/origin_url",
+          "live_recording/probe_info/format/filename",
+          "live_recording/probe_info/streams",
+          "live_recording/recording_config/recording_params/origin_url",
+          "live_recording_config/reference_url",
+          "live_recording_config/url"
         ]
       });
-      let probeMeta = liveRecordingMeta?.probe_info;
+      let probeMeta = streamMeta?.live_recording?.probe_info;
 
       // Phase out as new streams will have live_recording/probe_info
       if(!probeMeta) {
@@ -295,14 +241,41 @@ class DataStore {
       const audioStreamCount = probeMeta?.streams ? (probeMeta?.streams || []).filter(stream => stream.codec_type === "audio").length : undefined;
 
       return {
-        originUrl: liveRecordingMeta?.recording_config?.recording_params?.origin_url,
+        originUrl: streamMeta?.live_recording?.recording_config?.recording_params?.origin_url || streamMeta?.live_recording_config?.url,
         format: probeType,
         videoBitrate: videoStream?.bit_rate,
         codecName: videoStream?.codec_name,
-        audioStreamCount
+        audioStreamCount,
+        referenceUrl: streamMeta?.live_recording_config?.reference_url
       };
     } catch(error) {
       console.error("Unable to load stream metadata", error);
+    }
+  });
+
+  LoadStreamUrls = flow(function * () {
+    try {
+      const response = yield this.client.ContentObjectMetadata({
+        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
+        objectId: this.siteId,
+        metadataSubtree: "/live_stream_urls",
+        resolveLinks: true,
+        resolveIgnoreErrors: true
+      });
+
+      const urls = {};
+      Object.keys(response || {}).forEach(protocol => {
+        response[protocol].forEach(url => {
+          urls[url] = {
+            url,
+            protocol
+          };
+        });
+      });
+
+      return urls;
+    } catch(error) {
+      console.error("Unable to load stream URLs", error);
     }
   });
 
@@ -316,6 +289,20 @@ class DataStore {
       return "";
     }
   });
+
+  UpdateStreamUrls = ({urls}) => {
+    this.liveStreamUrls = urls;
+  };
+
+  UpdateStreamUrl = ({key, value={}}) => {
+    // Do not add custom stream urls to pre-allocated urls
+    if(!Object.hasOwn(this.liveStreamUrls, key)) { return; }
+
+    this.liveStreamUrls[key] = {
+      ...(this.liveStreamUrls[key] || {}),
+      ...value
+    };
+  };
 }
 
 export default DataStore;

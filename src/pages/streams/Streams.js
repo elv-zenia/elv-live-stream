@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {observer} from "mobx-react";
 import {dataStore, editStore, streamStore} from "Stores";
 import Modal from "Components/Modal";
+import {STATUS_MAP, StreamIsActive} from "Stores/helpers/Helpers";
 
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
@@ -18,16 +19,6 @@ import {
 } from "@tabler/icons-react";
 import {useDebouncedValue} from "@mantine/hooks";
 import {VideoBitrateReadable} from "Stores/helpers/Helpers";
-
-const STATUS_MAP = {
-  UNCONFIGURED: "unconfigured",
-  UNINITIALIZED: "uninitialized",
-  INACTIVE: "inactive",
-  STOPPED: "stopped",
-  STARTING: "starting",
-  RUNNING: "running",
-  STALLED: "stalled",
-};
 
 const STATUS_TEXT = {
   unconfigured: "Not Configured",
@@ -299,6 +290,7 @@ const Streams = observer(() => {
                     </ActionIcon>
                     <ActionIcon
                       title="Delete Stream"
+                      disabled={StreamIsActive(record.status)}
                       onClick={() => {
                         setModalData({
                           objectId: record.objectId,
