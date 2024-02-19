@@ -2,6 +2,7 @@
 import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {editStore} from "./index";
 import UrlJoin from "url-join";
+import {dataStore} from "./index";
 
 configure({
   enforceActions: "always"
@@ -73,7 +74,17 @@ class StreamStore {
       objectId
     });
 
-    this.UpdateStream({key: slug, value: {status: response.state}});
+    const streamDetails = yield dataStore.LoadStreamMetadata({
+      objectId
+    });
+
+    this.UpdateStream({
+      key: slug,
+      value: {
+        status: response.state,
+        ...streamDetails
+      }
+    });
   });
 
   CheckStatus = flow(function * ({
@@ -154,6 +165,16 @@ class StreamStore {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }
   });
+
+  DeactivateStream = flow(function * ({objectId, slug}) {
+    try {
+      const response = yield this.client.StreamDeactivate({name: objectId});
+
+      this.UpdateStream({key: slug, value: { status: response.state }});
+    } catch(error) {
+      console.error("Unable to deactivate stream", error);
+    }
+  })
 
   AllStreamsStatus = flow(function * () {
     if(this.loadingStatus) { return; }

@@ -13,9 +13,11 @@ import {
   IconTrash,
   IconExternalLink,
   IconDeviceAnalytics,
-  IconListCheck
+  IconListCheck,
+  IconCircleX
 } from "@tabler/icons-react";
 import {useDebouncedValue} from "@mantine/hooks";
+import {VideoBitrateReadable} from "Stores/helpers/Helpers";
 
 const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
@@ -35,6 +37,19 @@ const STATUS_TEXT = {
   starting: "Starting",
   running: "Running",
   stalled: "Stalled"
+};
+
+const FORMAT_TEXT = {
+  udp: "MPEGTS",
+  srt: "SRT",
+  "srt-caller": "SRT Caller",
+  rtmp: "RTMP"
+};
+
+const CODEC_TEXT = {
+  h264: "H.264",
+  h265: "H.265",
+  mpeg2video: "MPEG-2"
 };
 
 const StreamModal = observer(({
@@ -127,11 +142,35 @@ const Streams = observer(() => {
           minHeight={!records || records.length === 0 ? 150 : 75}
           fetching={dataStore.tenantId && !streamStore.streams}
           records={records}
+          emptyState={
+            // Mantine bug where empty state link still present underneath table rows
+            !records &&
+            <div className="streams__empty-data-table">
+              <div className="streams__empty-data-table-text">
+                No streams available
+              </div>
+              <Link className="button button__primary" to="/create">
+                <div className="button__link-inner">
+                  <span className="button__link-text">
+                    Create New Stream
+                  </span>
+                </div>
+              </Link>
+            </div>
+          }
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}
           columns={[
-            { accessor: "title", title: "Name", sortable: true, render: record => <Text fw={600}>{record.title}</Text> },
-            { accessor: "objectId", title: "Object ID", render: record => <Text color="dimmed" fz="xs">{record.objectId}</Text> },
+            { accessor: "title", title: "Name", sortable: true, render: record => (
+              <div className="table__multi-line">
+                <Text fw={600}>{record.title}</Text>
+                <Text color="dimmed" fz="xs">{record.objectId}</Text>
+              </div>
+            )},
+            { accessor: "originUrl", title: "URL", render: record => <Text>{record.originUrl}</Text> },
+            { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
+            { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
+            { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
             { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
             {
               accessor: "actions",
@@ -140,7 +179,7 @@ const Streams = observer(() => {
                 return (
                   <Group spacing={5} align="top" position="right">
                     {
-                      record.status !== STATUS_MAP.UNINITIALIZED ? null :
+                      ![STATUS_MAP.UNINITIALIZED, STATUS_MAP.INACTIVE].includes(record.status) ? null :
                         <ActionIcon
                           title="Check Stream"
                           onClick={async () => {
@@ -154,7 +193,7 @@ const Streams = observer(() => {
                               objectId: record.objectId,
                               showModal: true,
                               title: "Check Stream",
-                              description: "Are you sure you want to check the stream?",
+                              description: record.status === STATUS_MAP.INACTIVE ? "Are you sure you want to check the stream? This will override your saved configuration." : "Are you sure you want to check the stream?",
                               loadingText: `Please send your stream to ${url || "the URL you specified"}.`,
                               ConfirmCallback: async () => {
                                 await streamStore.ConfigureStream({
@@ -187,6 +226,29 @@ const Streams = observer(() => {
                           }}
                         >
                           <IconPlayerPlay />
+                        </ActionIcon>
+                    }
+                    {
+                      !record.status || record.status !== STATUS_MAP.STOPPED ? null :
+                        <ActionIcon
+                          title="Deactivate Stream"
+                          onClick={() => {
+                            setModalData({
+                              objectId: record.objectId,
+                              showModal: true,
+                              title: "Deactivate Stream",
+                              description: "Are you sure you want to deactivate the stream?",
+                              ConfirmCallback: async () => {
+                                await streamStore.DeactivateStream({
+                                  slug: record.slug,
+                                  objectId: record.objectId
+                                });
+                              },
+                              CloseCallback: () => ResetModal()
+                            });
+                          }}
+                        >
+                          <IconCircleX />
                         </ActionIcon>
                     }
                     {

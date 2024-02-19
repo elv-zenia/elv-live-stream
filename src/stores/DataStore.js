@@ -87,15 +87,18 @@ class DataStore {
   });
 
   LoadStreams = flow(function * () {
-    let streamMetadata = {};
+    let streamMetadata;
     try {
-      streamMetadata = yield this.client.ContentObjectMetadata({
+      const siteMetadata = yield this.client.ContentObjectMetadata({
         libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
         objectId: this.siteId,
-        metadataSubtree: "public/asset_metadata/live_streams",
+        select: [
+          "public/asset_metadata/live_streams"
+        ],
         resolveLinks: true,
         resolveIgnoreErrors: true
       });
+      streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
     } catch(error) {
       this.rootStore.SetErrorMessage("Error: Unable to load streams");
       console.error(error);
@@ -122,6 +125,15 @@ class DataStore {
           streamMetadata[slug].versionHash = versionHash;
           streamMetadata[slug].libraryId = libraryId;
           streamMetadata[slug].title = stream.display_title || stream.title;
+
+          const streamDetails = await this.LoadStreamMetadata({
+            objectId,
+            libraryId
+          }) || {};
+
+          Object.keys(streamDetails).forEach(detail => {
+            streamMetadata[slug][detail] = streamDetails[detail];
+          });
         }
       }
     );
@@ -180,6 +192,57 @@ class DataStore {
       }
     } catch(error) {
       console.error("Failed to load access groups", error);
+    }
+  });
+
+  LoadStreamMetadata = flow(function * ({objectId, libraryId}) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      const liveRecordingMeta = yield this.client.ContentObjectMetadata({
+        objectId,
+        libraryId,
+        metadataSubtree: "/live_recording",
+        select: [
+          "probe_info/format/filename",
+          "probe_info/streams",
+          "recording_config/recording_params/origin_url",
+        ]
+      });
+      let probeMeta = liveRecordingMeta?.probe_info;
+
+      // Phase out as new streams will have live_recording/probe_info
+      if(!probeMeta) {
+        probeMeta = yield this.client.ContentObjectMetadata({
+          objectId,
+          libraryId,
+          metadataSubtree: "/probe",
+          select: [
+            "format/filename",
+            "streams"
+          ]
+        });
+      }
+
+      let probeType = (probeMeta?.format?.filename)?.split("://")[0];
+      if(probeType === "srt" && !probeMeta.format?.filename?.includes("listener")) {
+        probeType = "srt-caller";
+      }
+
+      const videoStream = (probeMeta?.streams || []).find(stream => stream.codec_type === "video");
+      const audioStreamCount = probeMeta?.streams ? (probeMeta?.streams || []).filter(stream => stream.codec_type === "audio").length : undefined;
+
+      return {
+        originUrl: liveRecordingMeta?.recording_config?.recording_params?.origin_url,
+        format: probeType,
+        videoBitrate: videoStream?.bit_rate,
+        codecName: videoStream?.codec_name,
+        audioStreamCount
+      };
+    } catch(error) {
+      console.error("Unable to load stream metadata", error);
     }
   });
 
