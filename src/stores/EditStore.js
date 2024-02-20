@@ -93,6 +93,15 @@ class EditStore {
       status: statusResponse.state,
     };
 
+    const streamDetails = yield dataStore.LoadStreamMetadata({
+      objectId,
+      libraryId
+    }) || {};
+
+    Object.keys(streamDetails).forEach(detail => {
+      streamValue[detail] = streamDetails[detail];
+    });
+
     streamStore.UpdateStream({
       key: Slugify(name),
       value: streamValue
