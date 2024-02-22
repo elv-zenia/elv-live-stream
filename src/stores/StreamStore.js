@@ -3,7 +3,7 @@ import {configure, flow, makeAutoObservable} from "mobx";
 import {editStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
-import {StreamIsActive} from "Stores/helpers/Helpers";
+import {StreamIsActive} from "Stores/helpers/Misc";
 
 configure({
   enforceActions: "always"

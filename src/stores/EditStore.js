@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction, toJS} from "mobx";
-import {ParseLiveConfigData, Slugify} from "Stores/helpers/Helpers";
+import {ParseLiveConfigData, Slugify} from "Stores/helpers/Misc";
 import {dataStore, streamStore} from "./index";
 
 configure({

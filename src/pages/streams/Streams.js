@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {observer} from "mobx-react";
 import {dataStore, editStore, streamStore} from "Stores";
 import Modal from "Components/Modal";
-import {STATUS_MAP, StreamIsActive} from "Stores/helpers/Helpers";
+import {STATUS_MAP, StreamIsActive} from "Stores/helpers/Misc";
 
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
@@ -18,7 +18,7 @@ import {
   IconCircleX
 } from "@tabler/icons-react";
 import {useDebouncedValue} from "@mantine/hooks";
-import {VideoBitrateReadable} from "Stores/helpers/Helpers";
+import {VideoBitrateReadable} from "Stores/helpers/Misc";
 
 const STATUS_TEXT = {
   unconfigured: "Not Configured",
