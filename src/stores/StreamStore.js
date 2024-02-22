@@ -177,7 +177,7 @@ class StreamStore {
 
   DeactivateStream = flow(function * ({objectId, slug}) {
     try {
-      const response = yield this.client.StreamDeactivate({name: objectId});
+      const response = yield this.client.StreamStopSession({name: objectId});
 
       this.UpdateStream({key: slug, value: { status: response.state }});
 
