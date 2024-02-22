@@ -27,7 +27,8 @@ const STATUS_TEXT = {
   stopped: "Stopped",
   starting: "Starting",
   running: "Running",
-  stalled: "Stalled"
+  stalled: "Stalled",
+  terminating: "Terminating"
 };
 
 const FORMAT_TEXT = {
