@@ -1,8 +1,9 @@
 // Force strict mode so mutations are only allowed within actions.
-import {configure, flow, makeAutoObservable, runInAction} from "mobx";
+import {configure, flow, makeAutoObservable} from "mobx";
 import {editStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
+import {StreamIsActive} from "Stores/helpers/Misc";
 
 configure({
   enforceActions: "always"
@@ -13,6 +14,7 @@ class StreamStore {
   streams;
   streamFrameUrls = {};
   showMonitorPreviews = false;
+  loadingStatus = false;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -161,6 +163,13 @@ class StreamStore {
       });
 
       this.UpdateStream({key: slug, value: { status: response.state }});
+
+      dataStore.UpdateStreamUrl({
+        key: response.reference_url,
+        value: {
+          active: StreamIsActive(response.state)
+        }
+      });
     } catch(error) {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }
@@ -168,15 +177,22 @@ class StreamStore {
 
   DeactivateStream = flow(function * ({objectId, slug}) {
     try {
-      const response = yield this.client.StreamDeactivate({name: objectId});
+      const response = yield this.client.StreamStopSession({name: objectId});
 
       this.UpdateStream({key: slug, value: { status: response.state }});
+
+      dataStore.UpdateStreamUrl({
+        key: response.reference_url,
+        value: {
+          active: StreamIsActive(response.state)
+        }
+      });
     } catch(error) {
       console.error("Unable to deactivate stream", error);
     }
   })
 
-  AllStreamsStatus = flow(function * () {
+  AllStreamsStatus = flow(function * ({urls}={}) {
     if(this.loadingStatus) { return; }
 
     try {
@@ -187,22 +203,35 @@ class StreamStore {
         Object.keys(this.streams || {}),
         async slug => {
           try {
+            const streamMeta = this.streams[slug];
             const response = await this.CheckStatus({
-              objectId: this.streams[slug].objectId
+              objectId: streamMeta.objectId
             });
 
-            runInAction(() => {
-              this.streams[slug] = {
-                ...this.streams[slug],
+            this.UpdateStream({
+              key: slug,
+              value: {
                 status: response.state,
                 embedUrl: response?.playout_urls?.embed_url
-              };
+              }
             });
+
+            if(urls) {
+              const key = streamMeta?.referenceUrl || streamMeta?.originUrl;
+
+              if(Object.hasOwn(urls, key)) {
+                urls[key].active = StreamIsActive(response.state);
+              }
+            }
           } catch(error) {
             console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
           }
         }
       );
+
+      if(urls) {
+        dataStore.UpdateStreamUrls({urls});
+      }
     } catch(error) {
       console.error(error);
     } finally {

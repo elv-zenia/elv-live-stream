@@ -2,6 +2,7 @@ export const ParseLiveConfigData = ({
   inputFormData,
   outputFormData,
   url,
+  referenceUrl,
   encryption,
   avProperties,
   retention
@@ -24,14 +25,8 @@ export const ParseLiveConfigData = ({
     input: {
       audio: {
         stream: AV_STREAM[avProperties],
-        // stream_id: parseInt(audioStreamId),
         stream_index: parseInt(audioStreamIndex)
       }
-      // video: {
-      //   stream: AV_STREAM[avProperties],
-      //   stream_id: parseInt(videoStreamId),
-      //   stream_index: parseInt(videoStreamIndex)
-      // }
     },
     output: {
       audio: {
@@ -39,15 +34,10 @@ export const ParseLiveConfigData = ({
         channel_layout: parseInt(audioChannelLayout),
         quality: AV_STREAM[avProperties]
       }
-      // video: {
-      //   bitrate: videoBitrate ? parseInt(videoBitrate) * 1000 : null,
-      //   height: parseInt(videoHeight),
-      //   quality: AV_STREAM[avProperties],
-      //   width: parseInt(videoWidth)
-      // }
     },
     part_ttl: parseInt(retention),
-    url
+    url,
+    reference_url: referenceUrl
   };
 
   return config;
@@ -68,4 +58,24 @@ export const VideoBitrateReadable = (bitrate) => {
   let value = (bitrate / denominator).toFixed(1);
 
   return `${value}Mbps`;
+};
+
+export const STATUS_MAP = {
+  UNCONFIGURED: "unconfigured",
+  UNINITIALIZED: "uninitialized",
+  INACTIVE: "inactive",
+  STOPPED: "stopped",
+  STARTING: "starting",
+  RUNNING: "running",
+  STALLED: "stalled",
+};
+
+export const StreamIsActive = (state) => {
+  let active = false;
+
+  if([STATUS_MAP.STARTING, STATUS_MAP.RUNNING, STATUS_MAP.STALLED, STATUS_MAP.STOPPED].includes(state)) {
+    active = true;
+  }
+
+  return active;
 };

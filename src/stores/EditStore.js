@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
-import {configure, flow, makeAutoObservable, toJS} from "mobx";
-import {ParseLiveConfigData, Slugify} from "Stores/helpers/Helpers";
+import {configure, flow, makeAutoObservable, runInAction, toJS} from "mobx";
+import {ParseLiveConfigData, Slugify} from "Stores/helpers/Misc";
 import {dataStore, streamStore} from "./index";
 
 configure({
@@ -17,7 +17,9 @@ class EditStore {
   constructor(rootStore) {
     makeAutoObservable(this);
 
-    this.rootStore = rootStore;
+    runInAction(() => {
+      this.rootStore = rootStore;
+    });
   }
 
   get client() {
@@ -31,7 +33,7 @@ class EditStore {
     advancedData,
     drmFormData
   }) {
-    const {libraryId, url, name, description, displayName, accessGroup, permission} = basicFormData;
+    const {libraryId, url, name, description, displayName, accessGroup, permission, protocol} = basicFormData;
     const {avProperties, retention} = advancedData;
     const {encryption} = drmFormData;
 
@@ -55,7 +57,8 @@ class EditStore {
       url,
       encryption,
       avProperties,
-      retention
+      retention,
+      referenceUrl: protocol === "custom" ? undefined : url
     });
 
     yield this.AddMetadata({
@@ -89,6 +92,15 @@ class EditStore {
       title: name,
       status: statusResponse.state,
     };
+
+    const streamDetails = yield dataStore.LoadStreamMetadata({
+      objectId,
+      libraryId
+    }) || {};
+
+    Object.keys(streamDetails).forEach(detail => {
+      streamValue[detail] = streamDetails[detail];
+    });
 
     streamStore.UpdateStream({
       key: Slugify(name),

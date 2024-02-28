@@ -145,33 +145,6 @@ const AdvancedSection = observer(({
             })}
           />
 
-          {/* Output Settings */}
-          {/*<div className="form__section-header">Video Output</div>*/}
-          {/*<NumberInput*/}
-          {/*  label="Height"*/}
-          {/*  value={outputFormData.videoHeight}*/}
-          {/*  onChange={(event) => OutputUpdateCallback({*/}
-          {/*    key: "videoHeight",*/}
-          {/*    event*/}
-          {/*  })}*/}
-          {/*/>*/}
-          {/*<NumberInput*/}
-          {/*  label="Width"*/}
-          {/*  value={outputFormData.videoWidth}*/}
-          {/*  onChange={(event) => OutputUpdateCallback({*/}
-          {/*    key: "videoWidth",*/}
-          {/*    event*/}
-          {/*  })}*/}
-          {/*/>*/}
-          {/*<NumberInput*/}
-          {/*  label="Bitrate (kbps)"*/}
-          {/*  value={outputFormData.videoBitrate}*/}
-          {/*  onChange={(event) => OutputUpdateCallback({*/}
-          {/*    key: "videoBitrate",*/}
-          {/*    event*/}
-          {/*  })}*/}
-          {/*/>*/}
-
           <div className="form__section-header">Audio Output</div>
           <Select
             label="Channel Layout"
@@ -199,34 +172,7 @@ const AdvancedSection = observer(({
             })}
           />
 
-          {/* Input Settings */}
-          {/*<div className="form__section-header">Video Input</div>*/}
-          {/*<NumberInput*/}
-          {/*  label="Stream ID"*/}
-          {/*  value={inputFormData.videoStreamId}*/}
-          {/*  onChange={(event) => InputUpdateCallback({*/}
-          {/*    key: "videoStreamId",*/}
-          {/*    event*/}
-          {/*  })}*/}
-          {/*/>*/}
-          {/*<NumberInput*/}
-          {/*  label="Stream Index"*/}
-          {/*  value={inputFormData.videoStreamIndex}*/}
-          {/*  onChange={(event) => InputUpdateCallback({*/}
-          {/*    key: "videoStreamIndex",*/}
-          {/*    event*/}
-          {/*  })}*/}
-          {/*/>*/}
-
           <div className="form__section-header">Audio Input</div>
-          {/*<NumberInput*/}
-          {/*  label="Stream ID"*/}
-          {/*  value={inputFormData.audioStreamId}*/}
-          {/*  onChange={(event) => InputUpdateCallback({*/}
-          {/*    key: "audioStreamId",*/}
-          {/*    event*/}
-          {/*  })}*/}
-          {/*/>*/}
           <NumberInput
             label="Stream Index"
             min={0}
@@ -255,6 +201,7 @@ const Create = observer(() => {
 
   const [basicFormData, setBasicFormData] = useState({
     url: "",
+    protocol: "mpegts",
     name: "",
     description: "",
     displayName: "",
@@ -289,6 +236,10 @@ const Create = observer(() => {
 
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
+  const urls = basicFormData.protocol === "custom" ?
+    [] :
+    Object.keys(dataStore.liveStreamUrls || {})
+      .filter(url => dataStore.liveStreamUrls[url].protocol === basicFormData.protocol && !dataStore.liveStreamUrls[url].active);
 
   const UpdateFormData = ({formKey, key, value}) => {
     const FORM_MAP = {
@@ -343,16 +294,91 @@ const Create = observer(() => {
     <div className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}>
       <div className="page-header">Create Live Stream</div>
       <form className="form" onSubmit={HandleSubmit}>
-        <TextInput
-          label="URL"
-          required={true}
-          value={basicFormData.url}
-          onChange={event => UpdateFormData({
-            key: "url",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+        <Radio
+          label="Protocol"
+          options={[
+            {
+              optionLabel: "MPEGTS",
+              id: "mpegts",
+              value: "mpegts",
+              checked: basicFormData.protocol === "mpegts",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            },
+            {
+              optionLabel: "RTMP",
+              id: "rtmp",
+              value: "rtmp",
+              checked: basicFormData.protocol === "rtmp",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            },
+            {
+              optionLabel: "SRT",
+              id: "srt",
+              value: "srt",
+              checked: basicFormData.protocol === "srt",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            },
+            {
+              optionLabel: "Custom",
+              id: "custom",
+              value: "custom",
+              checked: basicFormData.protocol === "custom",
+              onChange: event => UpdateFormData({
+                key: "protocol",
+                value: event.target.value,
+                formKey: FORM_KEYS.BASIC
+              })
+            }
+          ]}
         />
+        {
+          basicFormData.protocol === "custom" &&
+          <TextInput
+            label="URL"
+            required={basicFormData.protocol === "custom"}
+            value={basicFormData.url}
+            onChange={event => UpdateFormData({
+              key: "url",
+              value: event.target.value,
+              formKey: FORM_KEYS.BASIC
+            })}
+          />
+        }
+        {
+          basicFormData.protocol !== "custom" &&
+          <Select
+            label="URL"
+            required={true}
+            defaultValue={urls[0]}
+            options={urls.map(url => (
+              {
+                label: url,
+                value: url
+              }
+            ))}
+            defaultOption={{
+              value: "",
+              label: "Select URL"
+            }}
+            onChange={event => UpdateFormData({
+              key: "url",
+              value: event.target.value,
+              formKey: FORM_KEYS.BASIC
+            })}
+          />
+        }
         <TextInput
           label="Name"
           required={true}
