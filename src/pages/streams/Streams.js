@@ -13,14 +13,14 @@ import {
 
 import Modal from "Components/Modal";
 import {dataStore, editStore, streamStore} from "Stores";
-import {VideoBitrateReadable} from "Stores/helpers/Misc";
+import {StatusIndicator, VideoBitrateReadable} from "Stores/helpers/Misc";
 import {StreamIsActive} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import {CODEC_TEXT, FORMAT_TEXT, STATUS_TEXT} from "Data/HumanReadableText";
 
 import {useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
-import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import {Text, ActionIcon, Group, TextInput, Indicator} from "@mantine/core";
 
 const StreamModal = observer(({
   open,
@@ -141,7 +141,17 @@ const Streams = observer(() => {
             { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
             { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
             { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
-            { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
+            {
+              accessor: "status",
+              title: "Status",
+              sortable: true,
+              render: record => !record.status ? null :
+                <Indicator color={StatusIndicator(record.status)} position="middle-start" size={7}>
+                  <Text fz="sm" ml="sm">
+                    {STATUS_TEXT[record.status]}
+                  </Text>
+                </Indicator>
+            },
             {
               accessor: "actions",
               title: "",

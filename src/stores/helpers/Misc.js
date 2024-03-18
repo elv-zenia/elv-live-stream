@@ -61,3 +61,15 @@ export const StreamIsActive = (state) => {
 
   return active;
 };
+
+export const StatusIndicator = (status) => {
+  if(status === STATUS_MAP.STOPPED) {
+    return "elv-orange.6";
+  } else if(status === STATUS_MAP.RUNNING) {
+    return "elv-green.5";
+  } else if([STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED, STATUS_MAP.UNINITIALIZED, STATUS_MAP.STALLED].includes(status)) {
+    return "elv-red.4";
+  } else if(status === STATUS_MAP.DEGRADED) {
+    return "elv-yellow.6";
+  }
+};

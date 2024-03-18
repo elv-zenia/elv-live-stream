@@ -16,4 +16,5 @@ export const STATUS_MAP = {
   STARTING: "starting",
   RUNNING: "running",
   STALLED: "stalled",
+  DEGRADED: "degraded"
 };
