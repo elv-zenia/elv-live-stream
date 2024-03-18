@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from "react";
-import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
-import {dataStore, editStore} from "Stores";
 import {observer} from "mobx-react";
+import {dataStore, editStore} from "Stores";
+import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
+import {ENCRYPTION_OPTIONS} from "Data/CreateData";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -44,12 +45,7 @@ const Permissions = observer(({permission, UpdateCallback}) => {
 });
 
 const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
-  const options = [
-    {value: "drm-public", label: "DRM - Public Access", title: "Playout Formats - Dash Widevine, HLS Sample AES, HLS AES-128"},
-    {value: "drm-all", label: "DRM - All Formats", title: "Playout Formats - Dash Widevine, HLS Sample AES, HLS AES-128, HLS Fairplay"},
-    {value: "drm-restricted", label: "DRM - Widevine and Fairplay", title: "Playout Formats - Dash Widevine, HLS Fairplay"},
-    {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear"}
-  ];
+  const options = ENCRYPTION_OPTIONS;
 
   return (
     <Select

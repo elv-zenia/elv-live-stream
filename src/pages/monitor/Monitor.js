@@ -1,27 +1,17 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
+import {IconX} from "@tabler/icons-react";
+import {ActionIcon, TextInput} from "@mantine/core";
+import {useDebouncedValue} from "@mantine/hooks";
+
 import {dataStore, streamStore} from "Stores";
 import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
 import ImageIcon from "Components/ImageIcon";
-import {ActionIcon, TextInput} from "@mantine/core";
-
-import PlayIcon from "Assets/icons/play circle.svg";
-
-import {IconX} from "@tabler/icons-react";
 import {Loader} from "Components/Loader";
 import {SortTable} from "Pages/streams/Streams";
-import {useDebouncedValue} from "@mantine/hooks";
-
-const STATUS_TEXT = {
-  unconfigured: "Not Configured",
-  uninitialized: "Uninitialized",
-  inactive: "Inactive",
-  stopped: "Stopped",
-  starting: "Starting",
-  running: "Running",
-  stalled: "Stalled"
-};
+import PlayIcon from "Assets/icons/play circle.svg";
+import {STATUS_TEXT} from "Data/HumanReadableText";
 
 const VideoContainer = observer(({slug, index}) => {
   const [play, setPlay] = useState(false);

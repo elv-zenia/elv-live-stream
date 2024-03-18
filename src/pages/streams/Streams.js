@@ -1,13 +1,6 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
-import {dataStore, editStore, streamStore} from "Stores";
-import Modal from "Components/Modal";
-import {STATUS_MAP, StreamIsActive} from "Stores/helpers/Misc";
-
-import {DataTable} from "mantine-datatable";
-import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import {Link} from "react-router-dom";
-
 import {
   IconPlayerPlay,
   IconPlayerStop,
@@ -17,32 +10,17 @@ import {
   IconListCheck,
   IconCircleX
 } from "@tabler/icons-react";
-import {useDebouncedValue} from "@mantine/hooks";
+
+import Modal from "Components/Modal";
+import {dataStore, editStore, streamStore} from "Stores";
 import {VideoBitrateReadable} from "Stores/helpers/Misc";
+import {StreamIsActive} from "Stores/helpers/Misc";
+import {STATUS_MAP} from "Data/StreamData";
+import {CODEC_TEXT, FORMAT_TEXT, STATUS_TEXT} from "Data/HumanReadableText";
 
-const STATUS_TEXT = {
-  unconfigured: "Not Configured",
-  uninitialized: "Uninitialized",
-  inactive: "Inactive",
-  stopped: "Stopped",
-  starting: "Starting",
-  running: "Running",
-  stalled: "Stalled",
-  terminating: "Terminating"
-};
-
-const FORMAT_TEXT = {
-  udp: "MPEGTS",
-  srt: "SRT",
-  "srt-caller": "SRT Caller",
-  rtmp: "RTMP"
-};
-
-const CODEC_TEXT = {
-  h264: "H.264",
-  h265: "H.265",
-  mpeg2video: "MPEG-2"
-};
+import {useDebouncedValue} from "@mantine/hooks";
+import {DataTable} from "mantine-datatable";
+import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 
 const StreamModal = observer(({
   open,

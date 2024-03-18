@@ -1,3 +1,5 @@
+import {ENCRYPTION_TYPES, AV_STREAM, STATUS_MAP} from "Data/StreamData";
+
 export const ParseLiveConfigData = ({
   inputFormData,
   outputFormData,
@@ -9,16 +11,6 @@ export const ParseLiveConfigData = ({
 }) => {
   const {audioStreamIndex} = inputFormData;
   const {audioChannelLayout, audioBitrate} = outputFormData;
-
-  const AV_STREAM = {
-    DEFAULT: "default",
-    CUSTOM: "specific"
-  };
-
-  const ENCRYPTION_TYPES = {
-    DRM: "drm",
-    CLEAR: "clear"
-  };
 
   const config = {
     drm: ENCRYPTION_TYPES[encryption],
@@ -58,16 +50,6 @@ export const VideoBitrateReadable = (bitrate) => {
   let value = (bitrate / denominator).toFixed(1);
 
   return `${value}Mbps`;
-};
-
-export const STATUS_MAP = {
-  UNCONFIGURED: "unconfigured",
-  UNINITIALIZED: "uninitialized",
-  INACTIVE: "inactive",
-  STOPPED: "stopped",
-  STARTING: "starting",
-  RUNNING: "running",
-  STALLED: "stalled",
 };
 
 export const StreamIsActive = (state) => {
