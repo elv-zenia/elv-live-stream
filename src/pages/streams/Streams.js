@@ -106,7 +106,7 @@ const Streams = observer(() => {
           onChange={event => setFilter(event.target.value)}
         />
         <DataTable
-          withBorder
+          withTableBorder
           highlightOnHover
           idAccessor="objectId"
           minHeight={!records || records.length === 0 ? 150 : 75}
@@ -134,7 +134,7 @@ const Streams = observer(() => {
             { accessor: "title", title: "Name", sortable: true, render: record => (
               <div className="table__multi-line">
                 <Text fw={600}>{record.title}</Text>
-                <Text color="dimmed" fz="xs">{record.objectId}</Text>
+                <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
             )},
             { accessor: "originUrl", title: "URL", render: record => <Text>{record.originUrl}</Text> },
@@ -147,11 +147,13 @@ const Streams = observer(() => {
               title: "",
               render: record => {
                 return (
-                  <Group spacing={5} align="top" position="right">
+                  <Group gap="xxs" justify="right">
                     {
                       ![STATUS_MAP.UNINITIALIZED, STATUS_MAP.INACTIVE].includes(record.status) ? null :
                         <ActionIcon
                           title="Check Stream"
+                          variant="subtle"
+                          color="gray.6"
                           onClick={async () => {
                             const url = await streamStore.client.ContentObjectMetadata({
                               libraryId: await streamStore.client.ContentObjectLibraryId({objectId: record.objectId}),
@@ -182,6 +184,8 @@ const Streams = observer(() => {
                       !record.status || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(record.status) ? null :
                         <ActionIcon
                           title="Start Stream"
+                          variant="subtle"
+                          color="gray.6"
                           onClick={() => {
                             setModalData({
                               objectId: record.objectId,
@@ -202,6 +206,8 @@ const Streams = observer(() => {
                       !record.status || record.status !== STATUS_MAP.STOPPED ? null :
                         <ActionIcon
                           title="Deactivate Stream"
+                          variant="subtle"
+                          color="gray.6"
                           onClick={() => {
                             setModalData({
                               objectId: record.objectId,
@@ -228,11 +234,15 @@ const Streams = observer(() => {
                             component={Link}
                             to={`/streams/${record.objectId}`}
                             title="View Stream"
+                            variant="subtle"
+                            color="gray.6"
                           >
                             <IconDeviceAnalytics />
                           </ActionIcon>
                           <ActionIcon
                             title="Stop Stream"
+                            variant="subtle"
+                            color="gray.6"
                             onClick={() => {
                               setModalData({
                                 objectId: record.objectId,
@@ -256,6 +266,8 @@ const Streams = observer(() => {
                     }
                     <ActionIcon
                       title="Open in Fabric Browser"
+                      variant="subtle"
+                      color="gray.6"
                       onClick={() => editStore.client.SendMessage({
                         options: {
                           operation: "OpenLink",
@@ -269,6 +281,8 @@ const Streams = observer(() => {
                     </ActionIcon>
                     <ActionIcon
                       title="Delete Stream"
+                      variant="subtle"
+                      color="gray.6"
                       disabled={StreamIsActive(record.status)}
                       onClick={() => {
                         setModalData({

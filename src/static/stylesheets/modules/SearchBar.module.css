@@ -1,0 +1,29 @@
+.flexbox {
+  border: transparent;
+  flex-basis: 600px;
+}
+
+.root {
+  flex-basis: 600px;
+}
+
+.input {
+  &:focus {
+    border: 1px solid var(--mantine-color-elv-violet-3);
+  }
+
+  border-radius: 100px;
+  padding-inline-start: 44px;
+
+  &::placeholder {
+    color: var(--mantine-color-elv-neutral-3);
+  }
+}
+
+.section {
+  inset-inline: 8px 8px;
+}
+
+.icon {
+  color: var(--mantine-color-elv-neutral-3);
+}
