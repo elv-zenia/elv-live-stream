@@ -133,7 +133,9 @@ const Streams = observer(() => {
           columns={[
             { accessor: "title", title: "Name", sortable: true, render: record => (
               <div className="table__multi-line">
-                <Text fw={600}>{record.title}</Text>
+                <Link to={`/streams/${record.objectId}`}>
+                  <Text fw={600}>{record.title}</Text>
+                </Link>
                 <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
             )},
@@ -242,7 +244,7 @@ const Streams = observer(() => {
                         <>
                           <ActionIcon
                             component={Link}
-                            to={`/streams/${record.objectId}`}
+                            to={`/streams/${record.objectId}/preview`}
                             title="View Stream"
                             variant="subtle"
                             color="gray.6"

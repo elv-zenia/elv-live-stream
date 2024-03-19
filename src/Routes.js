@@ -5,15 +5,17 @@ import Create from "Pages/create/Create";
 import Streams from "Pages/streams/Streams";
 import Monitor from "Pages/monitor/Monitor";
 import StreamPreview from "Pages/streams/StreamPreview";
+import StreamDetails from "Pages/streams/StreamDetails";
 
 const AppRoutes = observer(() => {
   return (
     <Routes>
       <Route path="/" element={<Navigate replace to="/streams" />} />
       <Route path="/create" element={<Create />} />
+      <Route path="/streams/:id" element={<StreamDetails />} />
       <Route path="/streams" element={<Streams />} />
       <Route path="/monitor" element={<Monitor />} />
-      <Route path="/streams/:id" element={<StreamPreview />} />
+      <Route path="/streams/:id/preview" element={<StreamPreview />} />
     </Routes>
   );
 });

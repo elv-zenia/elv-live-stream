@@ -4,7 +4,7 @@ import {useState} from "react";
 import MagnifyingGlassIcon from "Assets/icons/MagnifyingGlassIcon.jsx";
 import classes from "Assets/stylesheets/modules/SearchBar.module.css";
 
-const SearchBar = () => {
+const HeaderSearchBar = () => {
   const [value, setValue] = useState("");
 
   return (
@@ -25,4 +25,4 @@ const SearchBar = () => {
   );
 };
 
-export default SearchBar;
+export default HeaderSearchBar;

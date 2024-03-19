@@ -127,6 +127,20 @@ const theme = createTheme({
           "--mantine-spacing-xxs": "0.3125rem"
         }
       })
+    },
+    Button: {
+      styles: () => ({
+        root: {
+          "border": "2px solid var(--mantine-color-elv-violet-outline)"
+        }
+      })
+    },
+    Modal: {
+      styles: () => ({
+        title: {
+          "fontSize": "1.25rem"
+        }
+      })
     }
   }
 });
