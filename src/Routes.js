@@ -5,7 +5,7 @@ import Create from "Pages/create/Create";
 import Streams from "Pages/streams/Streams";
 import Monitor from "Pages/monitor/Monitor";
 import StreamPreview from "Pages/streams/StreamPreview";
-import StreamDetails from "Pages/streams/StreamDetails";
+import StreamDetails from "Pages/stream-details/StreamDetails";
 
 const AppRoutes = observer(() => {
   return (

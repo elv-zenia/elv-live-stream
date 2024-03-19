@@ -6,8 +6,9 @@ const theme = createTheme({
   headings: {
     fontFamily: "Greycliff CF, sans-serif"
   },
-  primaryColor: "elv-violet",
-  primaryShade: 3,
+  // TODO: Change primary color
+  // primaryColor: "elv-violet",
+  // primaryShade: 3,
   colors: {
     "elv-violet": [
       "#f9e9ff",

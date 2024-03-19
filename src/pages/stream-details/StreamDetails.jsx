@@ -3,8 +3,10 @@ import PageHeader from "Components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore} from "Stores";
 import {observer} from "mobx-react";
-import {Flex, Loader, Modal, Text} from "@mantine/core";
+import {Flex, Loader, Modal, Tabs, Text} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
+import {DETAILS_TABS} from "Data/StreamData";
+import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
 
 // TODO: Create ConfirmModal component and consolidate this with Modal
 const StreamDeleteModal = ({show, close, Callback}) => {
@@ -67,7 +69,6 @@ const StreamDetails = observer(() => {
       streamStore.streams[slug].objectId === params.id
     ));
     stream = streamStore.streams[streamSlug];
-    console.log("stream", stream);
   }
 
   if(!stream) {
@@ -94,6 +95,24 @@ const StreamDetails = observer(() => {
           }
         ]}
       />
+      <Tabs className={classes.root} defaultValue="details">
+        <Tabs.List className={classes.list}>
+          {
+            DETAILS_TABS.map(tab => (
+              <Tabs.Tab value={tab.value} key={`details-tabs-${tab.value}`} className={classes.tab} color="elv-violet.10">
+                <Text fw="700" size="sm">{tab.label}</Text>
+              </Tabs.Tab>
+            ))
+          }
+        </Tabs.List>
+        {
+          DETAILS_TABS.map(tab => (
+            <Tabs.Panel value={tab.value} key={`details-panel-${tab.value}`}>
+              <tab.Component status={stream.status} />
+            </Tabs.Panel>
+          ))
+        }
+      </Tabs>
       <StreamDeleteModal
         show={showModal}
         close={close}

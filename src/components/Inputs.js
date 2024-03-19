@@ -12,7 +12,8 @@ export const Select = ({
   onChange,
   disabled,
   value,
-  tooltip
+  tooltip,
+  ...rest
 }) => {
   return (
     <>
@@ -48,6 +49,7 @@ export const Select = ({
         onChange={onChange}
         disabled={disabled}
         value={value}
+        {...rest}
       >
         {
           "label" in defaultOption && "value" in defaultOption ?
