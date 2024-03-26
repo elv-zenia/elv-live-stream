@@ -1,6 +1,7 @@
 export const STATUS_TEXT = {
   unconfigured: "Not Configured",
   uninitialized: "Uninitialized",
+  initialized: "Initialized",
   inactive: "Inactive",
   stopped: "Stopped",
   starting: "Starting",

@@ -3,7 +3,8 @@ import {configure, flow, makeAutoObservable} from "mobx";
 import {editStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
-import {StreamIsActive} from "Stores/helpers/Misc";
+import {FileInfo, StreamIsActive} from "Stores/helpers/Misc";
+import {ENCRYPTION_OPTIONS, STATUS_MAP} from "Data/StreamData";
 
 configure({
   enforceActions: "always"
@@ -360,7 +361,191 @@ class StreamStore {
     }
 
     return url;
-  })
+  });
+
+  RemoveWatermark = flow(function * ({
+    objectId,
+    slug,
+    types
+  }) {
+    yield client.StreamRemoveWatermark({
+      objectId,
+      types,
+      finalize: true
+    });
+
+    const streamDetails = this.streams[slug];
+
+    types.forEach(type => {
+      if(type === "image") {
+        delete streamDetails.imageWatermark;
+      } else if(type === "text") {
+        delete streamDetails.simpleWatermark;
+      }
+    });
+
+    this.streams[slug] = streamDetails;
+  });
+
+  AddWatermark = flow(function * ({
+    objectId,
+    slug,
+    textWatermark,
+    imageWatermarkFile
+  }){
+    const payload = {
+      objectId,
+      finalize: true
+    };
+
+    if(imageWatermarkFile) {
+      const fileInfo = yield FileInfo({path: "", fileList: [imageWatermarkFile]});
+
+      const libraryId = yield client.ContentObjectLibraryId({objectId});
+      const {writeToken} = yield client.EditContentObject({objectId, libraryId});
+
+      yield client.UploadFiles({
+        libraryId,
+        objectId,
+        writeToken,
+        fileInfo
+      });
+
+      yield client.FinalizeContentObject({
+        libraryId,
+        objectId,
+        writeToken,
+        commitMessage: "Uploaded image"
+      });
+
+      const imageWatermark = {
+        "align_h": "right",
+        "align_v": "top",
+        "image": {
+          "/": `./files/${fileInfo?.[0].path}`
+        },
+        "margin_h": null,
+        "margin_v": null,
+        "target_video_height": 1080
+      };
+
+      payload["imageWatermark"] = imageWatermark;
+    } else if(textWatermark) {
+      payload["simpleWatermark"] = textWatermark;
+    }
+
+    const response = yield client.StreamAddWatermark(payload);
+
+    this.UpdateStream({
+      key: slug,
+      value: {
+        imageWatermark: response.imageWatermark,
+        simpleWatermark: response.textWatermark
+      }
+    });
+  });
+
+  WatermarkConfiguration = flow(function * ({
+    textWatermark,
+    existingTextWatermark,
+    imageWatermark,
+    existingImageWatermark,
+    objectId,
+    slug,
+    status
+  }) {
+    const removeTypes = [];
+    if(existingTextWatermark && !textWatermark) {
+      removeTypes.push("text");
+    } else if(textWatermark) {
+      yield this.AddWatermark({
+        objectId,
+        slug,
+        textWatermark: textWatermark ? JSON.parse(textWatermark) : null
+      });
+    }
+
+    if(existingImageWatermark && !imageWatermark) {
+      removeTypes.push("image");
+    } else if(imageWatermark) {
+      yield this.AddWatermark({
+        objectId,
+        slug,
+        imageWatermarkFile: imageWatermark
+      });
+    }
+
+    if(removeTypes.length > 0) {
+      yield this.RemoveWatermark({
+        objectId,
+        slug,
+        types: removeTypes
+      });
+    }
+
+    if(status === STATUS_MAP.RUNNING) {
+      yield this.OperateLRO({
+        objectId,
+        slug,
+        operation: "RESET"
+      });
+    }
+
+    const statusResponse = yield this.CheckStatus({
+      objectId
+    });
+
+    this.UpdateStream({
+      key: slug,
+      value: {
+        status: statusResponse.state
+      }
+    });
+  });
+
+  DrmConfiguration = flow(function * ({
+    objectId,
+    slug,
+    drmType
+  }) {
+    const drmOption = ENCRYPTION_OPTIONS.find(option => option.value === drmType);
+
+    const libraryId = yield client.ContentObjectLibraryId({objectId});
+    const {writeToken} = yield client.EditContentObject({
+      objectId,
+      libraryId
+    });
+
+    yield client.ReplaceMetadata({
+      objectId,
+      libraryId,
+      writeToken,
+      metadataSubtree: "live_recording_config/drm_type",
+      metadata: drmType
+    });
+
+    yield client.FinalizeContentObject({
+      objectId,
+      libraryId,
+      writeToken
+    });
+
+    const response = yield client.StreamInitialize({
+      name: objectId,
+      drm: drmType === "clear" ? false : true,
+      format: drmOption.format.join(",")
+    });
+
+    if(response) {
+      this.UpdateStream({
+        key: slug,
+        value: {
+          status: response.state,
+          drm: drmType
+        }
+      });
+    }
+  });
 }
 
 export default StreamStore;

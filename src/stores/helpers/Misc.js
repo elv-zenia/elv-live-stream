@@ -1,4 +1,4 @@
-import {ENCRYPTION_TYPES, AV_STREAM, STATUS_MAP} from "Data/StreamData";
+import {AV_STREAM, STATUS_MAP} from "Data/StreamData";
 
 export const ParseLiveConfigData = ({
   inputFormData,
@@ -13,7 +13,8 @@ export const ParseLiveConfigData = ({
   const {audioChannelLayout, audioBitrate} = outputFormData;
 
   const config = {
-    drm: ENCRYPTION_TYPES[encryption],
+    drm: encryption.includes("drm") ? "drm" : "clear",
+    drm_type: encryption,
     input: {
       audio: {
         stream: AV_STREAM[avProperties],
@@ -72,4 +73,30 @@ export const StatusIndicator = (status) => {
   } else if(status === STATUS_MAP.DEGRADED) {
     return "elv-yellow.6";
   }
+};
+
+export const FormatTime = ({milliseconds}) => {
+  if(!milliseconds) { return ""; }
+
+  const hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
+
+  return `${hours}h ${minutes}min`;
+};
+
+// Convert a FileList to file info
+export const FileInfo = async ({path, fileList}) => {
+  return Promise.all(
+    Array.from(fileList).map(async file => {
+      const data = file;
+      const filePath = file.webkitRelativePath || file.name;
+      return {
+        path: `${path}${filePath}`.replace(/^\/+/g, ""),
+        type: "file",
+        size: file.size,
+        mime_type: file.type,
+        data
+      };
+    })
+  );
 };

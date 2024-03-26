@@ -5,7 +5,7 @@ import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
-import {ENCRYPTION_OPTIONS} from "Data/CreateData";
+import {ENCRYPTION_OPTIONS} from "Data/StreamData";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -60,8 +60,8 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
       value={drmFormData.encryption}
       onChange={event => UpdateCallback({event, key: "encryption"})}
       tooltip={
-        options.map(({label, title, value}) =>
-          <div key={`encryption-info-${value}`} className="form__tooltip-item">
+        options.map(({label, title, id}) =>
+          <div key={`encryption-info-${id}`} className="form__tooltip-item">
             <div className="form__tooltip-item__encryption-title">{ label }:</div>
             <div>{ title }</div>
           </div>
@@ -328,7 +328,7 @@ const Create = observer(() => {
             },
             {
               optionLabel: "Custom",
-              id: "custom",
+              id: "customProtocol",
               value: "custom",
               checked: basicFormData.protocol === "custom",
               onChange: event => UpdateFormData({

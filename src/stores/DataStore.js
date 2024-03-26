@@ -213,8 +213,11 @@ class DataStore {
           "live_recording/probe_info/format/filename",
           "live_recording/probe_info/streams",
           "live_recording/recording_config/recording_params/origin_url",
+          "live_recording/recording_config/recording_params/simple_watermark",
+          "live_recording/recording_config/recording_params/image_watermark",
           "live_recording_config/reference_url",
-          "live_recording_config/url"
+          "live_recording_config/url",
+          "live_recording_config/drm_type"
         ]
       });
       let probeMeta = streamMeta?.live_recording?.probe_info;
@@ -246,7 +249,10 @@ class DataStore {
         videoBitrate: videoStream?.bit_rate,
         codecName: videoStream?.codec_name,
         audioStreamCount,
-        referenceUrl: streamMeta?.live_recording_config?.reference_url
+        referenceUrl: streamMeta?.live_recording_config?.reference_url,
+        drm: streamMeta?.live_recording_config?.drm_type,
+        simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
+        imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark
       };
     } catch(error) {
       console.error("Unable to load stream metadata", error);

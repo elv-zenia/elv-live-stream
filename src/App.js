@@ -5,7 +5,9 @@ import {rootStore} from "Stores";
 
 import "@mantine/core/styles.css";
 import "mantine-datatable/styles.css";
+import "@mantine/notifications/styles.css";
 import {MantineProvider} from "@mantine/core";
+import {Notifications} from "@mantine/notifications";
 
 import AppRoutes from "Routes";
 import MantineTheme from "Assets/MantineTheme";
@@ -23,6 +25,7 @@ const App = observer(() => {
         <LeftNavigation />
         <main>
           <ErrorBanner />
+          <Notifications zIndex={1000} position="top-right" autoClose={4000} />
           <div className="main-content">
             <DataWrapper>
               { rootStore.loaded ? <AppRoutes /> : null}

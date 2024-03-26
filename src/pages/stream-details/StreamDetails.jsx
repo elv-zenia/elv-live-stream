@@ -78,7 +78,7 @@ const StreamDetails = observer(() => {
   return (
     <>
       <PageHeader
-        title="Edit Livestream"
+        title={`Edit ${stream.title || stream.objectId}`}
         status={stream?.status}
         actions={[
           {
@@ -108,7 +108,14 @@ const StreamDetails = observer(() => {
         {
           DETAILS_TABS.map(tab => (
             <Tabs.Panel value={tab.value} key={`details-panel-${tab.value}`}>
-              <tab.Component status={stream.status} />
+              <tab.Component
+                status={stream.status}
+                slug={stream.slug}
+                currentDrm={stream.drm}
+                simpleWatermark={stream.simpleWatermark}
+                imageWatermark={stream.imageWatermark}
+                title={stream.title}
+              />
             </Tabs.Panel>
           ))
         }

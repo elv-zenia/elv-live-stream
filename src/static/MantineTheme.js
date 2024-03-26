@@ -131,9 +131,9 @@ const theme = createTheme({
     },
     Button: {
       styles: () => ({
-        root: {
-          "border": "2px solid var(--mantine-color-elv-violet-outline)"
-        }
+        // root: {
+        //   "border": "2px solid var(--mantine-color-elv-violet-outline)"
+        // }
       })
     },
     Modal: {

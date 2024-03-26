@@ -6,14 +6,10 @@ export const AV_STREAM = {
   CUSTOM: "specific"
 };
 
-export const ENCRYPTION_TYPES = {
-  DRM: "drm",
-  CLEAR: "clear"
-};
-
 export const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
   UNINITIALIZED: "uninitialized",
+  INITIALIZED: "initialized",
   INACTIVE: "inactive",
   STOPPED: "stopped",
   STARTING: "starting",
@@ -36,3 +32,17 @@ export const DEFAULT_WATERMARK_TEXT = {
   "x": "(w-tw)/2",
   "y": "h-(4*lh)"
 };
+
+export const DRM_MAP = {
+  ALL: ["hls-sample-aes", "hls-aes128", "hls-fairplay"],
+  PUBLIC: ["hls-sample-aes", "hls-aes128"],
+  FAIRPLAY: ["hls-fairplay"],
+  CLEAR: ["hls-clear"]
+};
+
+export const ENCRYPTION_OPTIONS = [
+  {value: "drm-public", label: "DRM - Public Access", title: "Playout Formats - HLS Sample AES, HLS AES-128", format: DRM_MAP.PUBLIC, id: "drm-public"},
+  {value: "drm-all", label: "DRM - All Formats", title: "Playout Formats - HLS Sample AES, HLS AES-128, HLS Fairplay", format: DRM_MAP.ALL, id: "drm-all"},
+  {value: "drm-fairplay", label: "DRM - Fairplay", title: "Playout Formats - HLS Fairplay", format: DRM_MAP.FAIRPLAY, id: "drm-fairplay"},
+  {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear", format: DRM_MAP.CLEAR, id: "clear"}
+];

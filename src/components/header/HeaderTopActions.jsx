@@ -7,7 +7,12 @@ const HeaderTopActions = ({actions=[]}) => {
     <Flex direction="row" gap="sm">
       {
         actions.map(({label, variant = "filled", onClick}) => (
-          <button type="button" className={variant === "filled" ? "button__primary" : "button__secondary"} onClick={onClick}>
+          <button
+            type="button"
+            className={variant === "filled" ? "button__primary" : "button__secondary"}
+            onClick={onClick}
+            key={`top-action-${label}`}
+          >
             {label}
           </button>
           // <Button

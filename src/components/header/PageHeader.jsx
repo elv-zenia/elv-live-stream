@@ -2,7 +2,7 @@ import React from "react";
 import {observer} from "mobx-react";
 import {Box, Flex, Group, Indicator, Text, Title} from "@mantine/core";
 import HeaderSearchBar from "Components/header/HeaderSearchBar.jsx";
-import HeaderTopActions from "Components/header/HeaderActions";
+import HeaderTopActions from "Components/header/HeaderTopActions";
 import {StatusIndicator} from "Stores/helpers/Misc";
 import {STATUS_TEXT} from "Data/HumanReadableText";
 import classes from "Assets/stylesheets/modules/PageHeader.module.css";

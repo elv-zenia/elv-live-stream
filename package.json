@@ -16,10 +16,11 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@eluvio/elv-client-js": "^4.0.79",
+    "@eluvio/elv-client-js": "git+https://github.com/eluv-io/elv-client-js.git#stream-watermark-vod",
     "@eluvio/elv-player-js": "^1.0.127",
     "@mantine/core": "^7.6.1",
     "@mantine/hooks": "^7.6.1",
+    "@mantine/notifications": "^7.6.2",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.4",
