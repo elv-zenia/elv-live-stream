@@ -1,10 +1,12 @@
 import {createTheme} from "@mantine/core";
 
 const theme = createTheme({
-  fontFamily: "Inter, Montserrat, Helvetica Neue, Helvetica, sans-serif",
-  fontFamilyMonospace: "Monaco, Courier, monospace",
+  fontFamily: "Helvetica Neue, Helvetica, sans-serif",
+  // fontFamily: "-apple-system, system-ui, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif",
+  // fontFamily: "Inter, Montserrat, Helvetica Neue, Helvetica, sans-serif",
+  // fontFamilyMonospace: "Monaco, Courier, monospace",
   headings: {
-    fontFamily: "Greycliff CF, sans-serif"
+    fontFamily: "Helvetica Neue, Helvetica, sans-serif"
   },
   // TODO: Change primary color
   // primaryColor: "elv-violet",
@@ -100,10 +102,10 @@ const theme = createTheme({
   components: {
     Tabs: {
       styles: () => ({
-        list: {
-          "--tab-border-color": "var(--mantine-color-elv-neutral-4)",
-          "--tabs-list-border-size": "1px"
-        }
+        // list: {
+        //   "--tab-border-color": "var(--mantine-color-elv-neutral-4)",
+        //   "--tabs-list-border-size": "1px"
+        // }
       })
     },
     Anchor: {

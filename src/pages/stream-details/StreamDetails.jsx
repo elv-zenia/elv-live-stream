@@ -99,8 +99,8 @@ const StreamDetails = observer(() => {
         <Tabs.List className={classes.list}>
           {
             DETAILS_TABS.map(tab => (
-              <Tabs.Tab value={tab.value} key={`details-tabs-${tab.value}`} className={classes.tab} color="elv-violet.10">
-                <Text fw="700" size="sm">{tab.label}</Text>
+              <Tabs.Tab value={tab.value} key={`details-tabs-${tab.value}`} className={classes.tab}>
+                <Text fw="400" size="md">{tab.label}</Text>
               </Tabs.Tab>
             ))
           }

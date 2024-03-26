@@ -57,10 +57,12 @@ const DetailsPanel = observer(({slug}) => {
       <Flex direction="row">
         <Flex direction="column" style={{flexGrow: "1"}}>
           <Box mb="24px" maw="50%">
-            <Title size="1.25rem" fw={600} color="elv-gray.9" mb="16px">Quality</Title>
+            {/*<Title size="1.25rem" fw={400} color="elv-gray.9" mb="16px">Quality</Title>*/}
+            <div className="form__section-header">Quality</div>
           </Box>
           <Box mb="24px" maw="50%">
-            <Title size="1.25rem" fw={600} color="elv-gray.9" mb="16px">Recording Info</Title>
+            {/*<Title size="1.25rem" fw={400} color="elv-gray.9" mb="16px">Recording Info</Title>*/}
+            <div className="form__section-header">Recording Info</div>
             <Text>
               Started: {status?.recording_period?.start_time_epoch_sec ? new Date(status?.recording_period?.start_time_epoch_sec * 1000).toISOString() : ""}
             </Text>

@@ -38,12 +38,12 @@ const PageHeader = observer(({
       </Flex>
       {
         title &&
-        <Title size="h3" mt="32px">
+        <div className="page-header" style={{marginTop: "32px"}}>
           <Group>
             {title}
             <StatusText status={status} />
           </Group>
-        </Title>
+        </div>
       }
     </Flex>
   );

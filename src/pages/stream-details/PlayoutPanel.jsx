@@ -1,6 +1,6 @@
 import React, {useRef, useState} from "react";
 const path = require("path");
-import {ActionIcon, Box, Button, FileButton, Flex, Group, Menu, Paper, Text, Textarea, Title} from "@mantine/core";
+import {ActionIcon, Box, FileButton, Flex, Group, Menu, Paper, Text, Textarea} from "@mantine/core";
 import {DEFAULT_WATERMARK_TEXT, STATUS_MAP} from "Data/StreamData";
 import {observer} from "mobx-react";
 import {Select} from "Components/Inputs";
@@ -12,7 +12,6 @@ import {Loader} from "Components/Loader";
 import {notifications} from "@mantine/notifications";
 import EditIcon from "Assets/icons/EditIcon";
 import TrashIcon from "Assets/icons/TrashIcon";
-import PlusIcon from "Assets/icons/PlusIcon";
 
 const WatermarkBox = ({type, value, actions=[]}) => {
   if(value === undefined) { return null; }
@@ -20,7 +19,7 @@ const WatermarkBox = ({type, value, actions=[]}) => {
   const placeholderText = (type === "Image" && !value) ? "No file selected" : undefined;
 
   return (
-    <Paper shadow="none" withBorder p="10px 16px" mb={16}>
+    <Paper shadow="none" withBorder p="10px 16px" mb={16} mt={16}>
       <Group>
         <Flex direction="column" mr={48}>
           <Text c="dimmed" size="xs">Watermark Type</Text>
@@ -125,7 +124,8 @@ const PlayoutPanel = observer(({
   return (
     <>
       <Box data-disabled={status === STATUS_MAP.RUNNING} mb="24px" maw="50%" className={classes.box}>
-        <Title size="1.25rem" fw={600} color="elv-gray.9" mb="16px">Playout</Title>
+        {/*<Title size="1.25rem" fw={600} color="elv-gray.9" mb="16px">Playout</Title>*/}
+        <div className="form__section-header">Playout</div>
         <Select
           label="DRM"
           formName="playbackEncryption"
@@ -149,36 +149,41 @@ const PlayoutPanel = observer(({
       </Box>
       <Box mb="24px" maw="50%">
         <Group mb={16}>
-          <Title size="1.25rem" fw={600} color="elv-gray.9">Visible Watermark</Title>
-          <Menu>
-            <Menu.Target>
-              <Button
-                variant="transparent"
-                leftSection={<PlusIcon width={12} />}
-              >
-                Add Watermark
-              </Button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item onClick={() => {
-                setFormWatermarks({
-                  text: formWatermarks.text,
-                  image: ""
-                });
-              }}>
-                Image
-              </Menu.Item>
-              <Menu.Item onClick={() => {
-                setFormWatermarks({
-                  text: JSON.stringify(DEFAULT_WATERMARK_TEXT, null, 2),
-                  image: formWatermarks.image
-                });
-              }}>
-                Text
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
+          {/*<Title size="1.25rem" fw={600} color="elv-gray.9">Visible Watermark</Title>*/}
+          <div style={{fontSize: "1.25rem", fontWeight: 400}}>Visible Watermark</div>
         </Group>
+
+        {/* Add WM button */}
+        <Menu>
+          <Menu.Target>
+            <button type="button" className="button__secondary">Add Watermark</button>
+            {/*<Button*/}
+            {/*  variant="outline"*/}
+            {/*  leftSection={<PlusIcon width={12}/>}*/}
+            {/*>*/}
+            {/*  Add Watermark*/}
+            {/*</Button>*/}
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item onClick={() => {
+              setFormWatermarks({
+                text: formWatermarks.text,
+                image: ""
+              });
+            }}>
+              Image Watermark
+            </Menu.Item>
+            <Menu.Item onClick={() => {
+              setFormWatermarks({
+                text: JSON.stringify(DEFAULT_WATERMARK_TEXT, null, 2),
+                image: formWatermarks.image
+              });
+            }}>
+              Text Watermark
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+
         <WatermarkBox
           value={formWatermarks.text ? formWatermarks.text : undefined}
           type="Text"
