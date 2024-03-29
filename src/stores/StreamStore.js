@@ -595,15 +595,24 @@ class StreamStore {
       commitMessage: "Create VoD object"
     });
 
-    const response = yield client.StreamCopyToVod({
-      name: objectId,
-      targetObjectId,
-      recordingPeriod,
-      startTime,
-      endTime
-    });
+    let response;
+    try {
+      response = yield client.StreamCopyToVod({
+        name: objectId,
+        targetObjectId,
+        recordingPeriod,
+        startTime,
+        endTime
+      });
+    } catch(error) {
+      console.error("Unable to copy to VoD.", error);
+    }
 
-    return response;
+    if(!response) {
+      throw Error("Unable to copy to VoD. Is part available?");
+    } else if(response) {
+      return response;
+    }
   });
 }
 
