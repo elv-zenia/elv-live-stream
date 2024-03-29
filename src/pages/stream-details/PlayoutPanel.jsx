@@ -147,7 +147,7 @@ const PlayoutPanel = observer(({
           }
         />
       </Box>
-      <Box mb="24px" maw="50%">
+      <Box mb="24px" maw="60%">
         <Group mb={16}>
           {/*<Title size="1.25rem" fw={600} color="elv-gray.9">Visible Watermark</Title>*/}
           <div style={{fontSize: "1.25rem", fontWeight: 400}}>Visible Watermark</div>

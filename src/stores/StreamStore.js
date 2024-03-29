@@ -552,12 +552,44 @@ class StreamStore {
     }
   });
 
+  FetchLiveRecordingCopies = flow(function * ({objectId, libraryId}) {
+    if(!libraryId) {
+      libraryId = yield client.ContentObjectLibraryId({objectId});
+    }
+
+    return client.ContentObjectMetadata({
+      objectId,
+      libraryId,
+      metadataSubtree: "live_recording_copies"
+    });
+  });
+
   CopyToVod = flow(function * ({
     objectId,
-    startTime="",
-    endTime="",
-    recordingPeriod=-1
+    selectedPeriods=[]
   }) {
+    let recordingPeriod, startTime, endTime;
+    // Used to save start and end times in stream object meta
+    const timeSeconds = {};
+    const firstPeriod = selectedPeriods[0];
+
+    if(selectedPeriods.length > 1) {
+      // Multiple periods
+      const lastPeriod = selectedPeriods[selectedPeriods.length - 1];
+      recordingPeriod = null;
+      startTime = new Date(firstPeriod?.start_time_epoch_sec * 1000).toISOString();
+      endTime = new Date(lastPeriod?.end_time_epoch_sec * 1000).toISOString();
+
+      timeSeconds.startTime = firstPeriod?.start_time_epoch_sec;
+      timeSeconds.endTime = lastPeriod?.end_time_epoch_sec;
+    } else {
+      // Specific period
+      recordingPeriod = firstPeriod.id;
+      timeSeconds.startTime = firstPeriod?.start_time_epoch_sec;
+      timeSeconds.endTime = firstPeriod?.end_time_epoch_sec;
+    }
+
+    // Create content object
     const contentTypes = yield client.ContentTypes();
     const titleType = Object.keys(contentTypes || {}).find(id => contentTypes[id]?.name?.toLowerCase().includes("title"));
 
@@ -581,6 +613,7 @@ class StreamStore {
     });
     const targetObjectId = createResponse.id;
 
+    // Set editable permission
     yield client.SetPermission({
       objectId: targetObjectId,
       permission: "editable",
@@ -611,6 +644,43 @@ class StreamStore {
     if(!response) {
       throw Error("Unable to copy to VoD. Is part available?");
     } else if(response) {
+      const libraryId = yield client.ContentObjectLibraryId({objectId});
+      const {writeToken} = yield client.EditContentObject({
+        objectId,
+        libraryId
+      });
+
+      let copiesMetadata = yield client.ContentObjectMetadata({
+        objectId,
+        libraryId,
+        metadataSubtree: "live_recording_copies"
+      });
+
+      if(!copiesMetadata) {
+        copiesMetadata = {};
+      }
+
+      copiesMetadata[targetObjectId] = {
+        startTime: timeSeconds.startTime,
+        endTime: timeSeconds.endTime
+      };
+
+      yield client.ReplaceMetadata({
+        objectId,
+        libraryId,
+        writeToken,
+        metadataSubtree: "/live_recording_copies",
+        metadata: copiesMetadata
+      });
+
+      yield client.FinalizeContentObject({
+        libraryId,
+        objectId,
+        writeToken,
+        awaitCommitConfirmation: true,
+        commitMessage: "Update live recording copies"
+      });
+
       return response;
     }
   });

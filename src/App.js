@@ -25,7 +25,7 @@ const App = observer(() => {
         <LeftNavigation />
         <main>
           <ErrorBanner />
-          <Notifications zIndex={1000} position="top-right" autoClose={4000} />
+          <Notifications zIndex={1000} position="top-right" />
           <div className="main-content">
             <DataWrapper>
               { rootStore.loaded ? <AppRoutes /> : null}

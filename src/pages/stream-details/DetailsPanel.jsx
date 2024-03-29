@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {Box, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
+import {ActionIcon, Box, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
-import {streamStore} from "Stores";
+import {editStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
 import {FormatTime, Pluralize} from "Stores/helpers/Misc";
@@ -9,37 +9,23 @@ import {STATUS_MAP} from "Data/StreamData";
 import ClipboardIcon from "Assets/icons/ClipboardIcon";
 import {CopyToClipboard} from "Stores/helpers/Actions";
 import {RECORDING_STATUS_TEXT} from "Data/HumanReadableText";
-import {IconCheck} from "@tabler/icons-react";
+import {IconCheck, IconExternalLink} from "@tabler/icons-react";
 import {Loader} from "Components/Loader";
 import {notifications} from "@mantine/notifications";
 
-const StreamPeriodsTable = observer(({records=[], objectId, title}) => {
+const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [copyingToVod, setCopyingToVod] = useState(false);
 
   const HandleCopy = async () => {
     try {
-      let recordingPeriod, startTime, endTime;
-      const firstPeriod = selectedRecords[0];
-
-      if(selectedRecords.length > 1) {
-        // Multiple periods
-        const lastPeriod = selectedRecords[selectedRecords.length - 1];
-        recordingPeriod = null;
-        startTime = new Date(firstPeriod?.start_time_epoch_sec * 1000).toISOString();
-        endTime = new Date(lastPeriod?.end_time_epoch_sec * 1000).toISOString();
-      } else {
-        // Specific period
-        recordingPeriod = firstPeriod.id;
-      }
-
       setCopyingToVod(true);
       const response = await streamStore.CopyToVod({
         objectId,
-        recordingPeriod,
-        startTime,
-        endTime
+        selectedPeriods: selectedRecords
       });
+
+      await CopyCallback();
 
       notifications.show({
         title: `${title || objectId} copied to VoD`,
@@ -97,6 +83,7 @@ const StreamPeriodsTable = observer(({records=[], objectId, title}) => {
         </button>
       </Flex>
       <DataTable
+        mb="4rem"
         columns={[
           {
             accessor: "recording_start_time_epoch_sec",
@@ -166,6 +153,7 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
   const params = useParams();
   const currentTimeMs = new Date().getTime();
 
@@ -179,11 +167,25 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
           objectId: params.id
         });
         setStatus(statusResponse);
+
+        GetLiveRecordingCopies();
       }
     };
 
     LoadDetails();
   }, [params]);
+
+  const GetLiveRecordingCopies = async() => {
+    let liveRecordingCopies = await streamStore.FetchLiveRecordingCopies({
+      objectId: params.id
+    });
+
+    Object.keys(liveRecordingCopies || {}).forEach(id => (
+      liveRecordingCopies[id]["_id"] = id
+    ));
+
+    setLiveRecordingCopies(liveRecordingCopies || {});
+  };
 
   const Runtime = ({startTime}) => {
     let time;
@@ -218,11 +220,11 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
       <Grid>
         <Grid.Col span={8}>
           <Flex direction="column" style={{flexGrow: "1"}}>
-            <Box mb="24px" maw="50%">
+            <Box mb="24px" maw="60%">
               {/*<Title size="1.25rem" fw={400} color="elv-gray.9" mb="16px">Quality</Title>*/}
               <div className="form__section-header">Quality</div>
             </Box>
-            <Box mb="24px" maw="50%">
+            <Box mb="24px" maw="60%">
               {/*<Title size="1.25rem" fw={400} color="elv-gray.9" mb="16px">Recording Info</Title>*/}
               <div className="form__section-header">Recording Info</div>
               <Text>
@@ -243,6 +245,66 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
                 }
               </Text>
             </Box>
+            <Box mb="24px" maw="60%">
+              <div className="form__section-header">Live Recording Copies</div>
+              <DataTable
+                idAccessor="_id"
+                columns={[
+                  {
+                    accessor: "id",
+                    title: "Object ID",
+                    render: record => (
+                      <Text>{record._id}</Text>
+                    )
+                  },
+                  {
+                    accessor: "startTime",
+                    title: "Start Time",
+                    render: record => (
+                      <Text>
+                        {
+                          record.startTime ?
+                            new Date(record.startTime * 1000).toLocaleTimeString() : ""
+                        }
+                      </Text>
+                    )
+                  },
+                  {
+                    accessor: "endTime",
+                    title: "End Time",
+                    render: record => (
+                      <Text>
+                        {
+                          record.endTime ?
+                            new Date(record.endTime * 1000).toLocaleTimeString() : ""
+                        }
+                      </Text>
+                    )
+                  },
+                  {
+                    accessor: "actions",
+                    title: "",
+                    render: record => (
+                      <ActionIcon
+                        title="Open in Fabric Browser"
+                        variant="subtle"
+                        color="gray.6"
+                        onClick={() => editStore.client.SendMessage({
+                          options: {
+                            operation: "OpenLink",
+                            objectId: record._id
+                          },
+                          noResponse: true
+                        })}
+                      >
+                        <IconExternalLink />
+                      </ActionIcon>
+                    )
+                  }
+                ]}
+                records={Object.values(liveRecordingCopies || {})}
+              />
+            </Box>
           </Flex>
         </Grid.Col>
         <Grid.Col span={4}>
@@ -254,7 +316,7 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
                   (status?.state === STATUS_MAP.RUNNING && frameSegmentUrl) ?
                     <video src={frameSegmentUrl} height={200} style={{paddingRight: "32px"}}/> :
                     <Box bg="gray.3" h="100%" margin="auto" ta="center" style={{borderRadius: "4px"}}>
-                      <Text lh="200px">Stream is not available</Text>
+                      <Text lh="200px">Preview is not available</Text>
                     </Box>
                 }
               </Skeleton>
@@ -288,6 +350,7 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
         objectId={params.id}
         records={recordingInfo?.live_offering}
         title={title}
+        CopyCallback={GetLiveRecordingCopies}
       />
     </>
   );
