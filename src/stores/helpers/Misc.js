@@ -1,4 +1,5 @@
 import {AV_STREAM, STATUS_MAP} from "Data/StreamData";
+import Fraction from "fraction.js";
 
 export const ParseLiveConfigData = ({
   inputFormData,
@@ -75,13 +76,40 @@ export const StatusIndicator = (status) => {
   }
 };
 
-export const FormatTime = ({milliseconds}) => {
+export const FormatTime = ({milliseconds, format="hh:mm"}) => {
   if(!milliseconds) { return ""; }
 
-  const hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
+  const hours = new Fraction(milliseconds, 1000)
+    .div(3600)
+    .mod(24)
+    .floor(0)
+    .toString();
+  const minutes = new Fraction(milliseconds, 1000)
+    .div(60)
+    .mod(60)
+    .floor(0)
+    .toString();
+  const seconds = new Fraction(milliseconds, 1000)
+    .mod(60)
+    .floor(0)
+    .toString();
 
-  return `${hours}h ${minutes}min`;
+  let timeString = `${hours}h ${minutes}min`;
+
+  if(format === "hh:mm:ss") {
+    const arrayValue = [
+      hours.padStart(2, "0"),
+      minutes.padStart(2, "0"),
+      seconds.padStart(2, "0")
+    ];
+
+    timeString = arrayValue.join(":");
+    // timeString = `${hours}h ${minutes}min ${seconds}sec`
+  } else if(format === "hh:mm") {
+    timeString = `${hours}h ${minutes}min`;
+  }
+
+  return timeString;
 };
 
 // Convert a FileList to file info
@@ -99,4 +127,8 @@ export const FileInfo = async ({path, fileList}) => {
       };
     })
   );
+};
+
+export const Pluralize = ({base, suffix="s", count}) => {
+  return `${count} ${base}${count > 1 ? suffix : ""}`;
 };

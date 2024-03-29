@@ -67,7 +67,8 @@ module.exports = {
     extensions: [".js", ".jsx", ".mjs", ".scss", ".png", ".svg"],
     fallback: {
       "url": require.resolve("url"),
-      "stream": require.resolve("stream-browserify")
+      "stream": require.resolve("stream-browserify"),
+      "vm": false
     }
   },
   module: {

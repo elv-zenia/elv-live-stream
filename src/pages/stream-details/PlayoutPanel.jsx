@@ -88,15 +88,15 @@ const PlayoutPanel = observer(({
 
     try {
       setApplyingChanges(true);
-      // await streamStore.WatermarkConfiguration({
-      //   existingTextWatermark: simpleWatermark,
-      //   textWatermark: formWatermarks.text,
-      //   existingImageWatermark: imageWatermark,
-      //   imageWatermark: formWatermarks.image,
-      //   objectId,
-      //   slug,
-      //   status
-      // });
+      await streamStore.WatermarkConfiguration({
+        existingTextWatermark: simpleWatermark,
+        textWatermark: formWatermarks.text,
+        existingImageWatermark: imageWatermark,
+        imageWatermark: formWatermarks.image,
+        objectId,
+        slug,
+        status
+      });
 
       await streamStore.DrmConfiguration({
         objectId,
@@ -219,7 +219,6 @@ const PlayoutPanel = observer(({
         {
           showTextWatermarkInput &&
           <Textarea
-            label="Text Watermark"
             mb={16}
             value={formWatermarks.text}
             size="md"

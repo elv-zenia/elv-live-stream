@@ -285,7 +285,12 @@ class StreamStore {
         return;
       }
 
-      const segmentPlaylist = yield(yield this.FetchVideoPath(stream, lowestBitratePath)).text();
+      const segmentPlaylistResponse = yield(yield this.FetchVideoPath(stream, lowestBitratePath));
+
+      let segmentPlaylist;
+      if(segmentPlaylist?.status === 200) {
+        segmentPlaylist = segmentPlaylistResponse.text();
+      }
 
       if(!segmentPlaylist) {
         return;
@@ -545,6 +550,60 @@ class StreamStore {
         }
       });
     }
+  });
+
+  CopyToVod = flow(function * ({
+    objectId,
+    startTime="",
+    endTime="",
+    recordingPeriod=-1
+  }) {
+    const contentTypes = yield client.ContentTypes();
+    const titleType = Object.keys(contentTypes || {}).find(id => contentTypes[id]?.name?.toLowerCase().includes("title"));
+
+    const targetLibraryId = yield client.ContentObjectLibraryId({objectId});
+    const streamSlug = Object.keys(this.streams || {}).find(slug => (
+      this.streams[slug].objectId === objectId
+    ));
+
+    const createResponse = yield client.CreateContentObject({
+      libraryId: targetLibraryId,
+      options: titleType ?
+        {
+          type: titleType,
+          meta: {
+            public: {
+              name: `${this.streams[streamSlug]?.title || objectId} VoD`
+            }
+          }
+        } :
+        {}
+    });
+    const targetObjectId = createResponse.id;
+
+    yield client.SetPermission({
+      objectId: targetObjectId,
+      permission: "editable",
+      writeToken: createResponse.writeToken
+    });
+
+    yield client.FinalizeContentObject({
+      libraryId: targetLibraryId,
+      objectId: targetObjectId,
+      writeToken: createResponse.writeToken,
+      awaitCommitConfirmation: true,
+      commitMessage: "Create VoD object"
+    });
+
+    const response = yield client.StreamCopyToVod({
+      name: objectId,
+      targetObjectId,
+      recordingPeriod,
+      startTime,
+      endTime
+    });
+
+    return response;
   });
 }
 

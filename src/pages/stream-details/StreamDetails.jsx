@@ -1,12 +1,13 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PageHeader from "Components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
-import {streamStore, editStore} from "Stores";
+import {streamStore, editStore, dataStore} from "Stores";
 import {observer} from "mobx-react";
-import {Flex, Loader, Modal, Tabs, Text} from "@mantine/core";
+import {Flex, Modal, Tabs, Text} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS} from "Data/StreamData";
 import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
+import {Loader} from "Components/Loader";
 
 // TODO: Create ConfirmModal component and consolidate this with Modal
 const StreamDeleteModal = ({show, close, Callback}) => {
@@ -61,18 +62,50 @@ const StreamDeleteModal = ({show, close, Callback}) => {
 const StreamDetails = observer(() => {
   const navigate = useNavigate();
   const params = useParams();
-  let stream;
+  const [stream, setStream] = useState(null);
+  const [recordingInfo, setRecordingInfo] = useState(null);
+  let streamSlug;
   const [showModal, {open, close}] = useDisclosure(false);
 
-  if(params?.id && streamStore.streams) {
-    const streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
-      streamStore.streams[slug].objectId === params.id
-    ));
-    stream = streamStore.streams[streamSlug];
-  }
+  useEffect(() => {
+    const LoadStream = () => {
+      if(params?.id && streamStore.streams) {
+        streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
+          streamStore.streams[slug].objectId === params.id
+        ));
+
+        if(streamSlug) {
+          setStream(streamStore.streams[streamSlug]);
+        }
+      }
+    };
+
+    LoadStream();
+  }, [params.id, streamStore.streams]);
+
+  useEffect(() => {
+    const LoadData = async() => {
+      if(stream) {
+        const metadata = await dataStore.LoadEdgeWriteTokenMeta({
+          objectId: params.id
+        });
+
+        if(metadata) {
+          metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
+            ...item,
+            id: i
+          }));
+
+          setRecordingInfo(metadata);
+        }
+      }
+    };
+
+    LoadData();
+  }, [stream]);
 
   if(!stream) {
-    return <Loader/>;
+    return <Loader />;
   }
 
   return (
@@ -115,6 +148,8 @@ const StreamDetails = observer(() => {
                 simpleWatermark={stream.simpleWatermark}
                 imageWatermark={stream.imageWatermark}
                 title={stream.title}
+                embedUrl={stream.embedUrl}
+                recordingInfo={recordingInfo}
               />
             </Tabs.Panel>
           ))

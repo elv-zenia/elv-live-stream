@@ -26,6 +26,7 @@
     "@radix-ui/react-dialog": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.6",
     "@tabler/icons-react": "^2.34.0",
+    "fraction.js": "^4.3.7",
     "mantine-datatable": "^7.6.1",
     "mobx": "^6.6.0",
     "mobx-react": "^7.5.0",

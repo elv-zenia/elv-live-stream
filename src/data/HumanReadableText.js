@@ -22,3 +22,9 @@ export const CODEC_TEXT = {
   h265: "H.265",
   mpeg2video: "MPEG-2"
 };
+
+export const RECORDING_STATUS_TEXT = {
+  NOT_AVAILABLE: "Not Available",
+  PARTIALLY_AVAILABLE: "Partially Available",
+  AVAILABLE: "Available"
+};

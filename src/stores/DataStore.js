@@ -130,6 +130,7 @@ class DataStore {
           streamMetadata[slug].versionHash = versionHash;
           streamMetadata[slug].libraryId = libraryId;
           streamMetadata[slug].title = stream.display_title || stream.title;
+          streamMetadata[slug].embedUrl = await this.EmbedUrl({objectId});
 
           const streamDetails = await this.LoadStreamMetadata({
             objectId,
@@ -282,6 +283,34 @@ class DataStore {
       return urls;
     } catch(error) {
       console.error("Unable to load stream URLs", error);
+    }
+  });
+
+  LoadEdgeWriteTokenMeta = flow(function * ({
+    objectId,
+    libraryId
+  }) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      const edgeWriteToken = yield this.client.ContentObjectMetadata({
+        objectId,
+        libraryId,
+        metadataSubtree: "/live_recording/fabric_config/edge_write_token"
+      });
+
+      const metadata = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        writeToken: edgeWriteToken,
+        metadataSubtree: "live_recording/recordings"
+      });
+
+      return metadata;
+    } catch(error) {
+      console.error("Unable to load metadata with edge write token", error);
     }
   });
 
