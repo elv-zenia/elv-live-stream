@@ -249,6 +249,8 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
               <div className="form__section-header">Live Recording Copies</div>
               <DataTable
                 idAccessor="_id"
+                noRecordsText="No live recording copies found"
+                minHeight={Object.values(liveRecordingCopies || {}) ? 150 : 75}
                 columns={[
                   {
                     accessor: "id",
