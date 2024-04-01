@@ -118,7 +118,7 @@ const AdvancedSection = observer(({
           <Select
             label="Retention"
             labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-            formName="playbackEncryption"
+            formName="retention"
             options={[
               {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
               {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
@@ -227,7 +227,7 @@ const Create = observer(() => {
   });
 
   const [drmFormData, setDrmFormData] = useState({
-    encryption: "DRM"
+    encryption: "drm-public"
   });
 
   const navigate = useNavigate();
