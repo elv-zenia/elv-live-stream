@@ -123,8 +123,7 @@ const PlayoutPanel = observer(({
 
   return (
     <>
-      <Box data-disabled={status === STATUS_MAP.RUNNING} mb="24px" maw="50%" className={classes.box}>
-        {/*<Title size="1.25rem" fw={600} color="elv-gray.9" mb="16px">Playout</Title>*/}
+      <Box data-disabled={status !== STATUS_MAP.INACTIVE} mb="24px" maw="50%" className={classes.box}>
         <div className="form__section-header">Playout</div>
         <Select
           label="DRM"
@@ -149,7 +148,6 @@ const PlayoutPanel = observer(({
       </Box>
       <Box mb="24px" maw="60%">
         <Group mb={16}>
-          {/*<Title size="1.25rem" fw={600} color="elv-gray.9">Visible Watermark</Title>*/}
           <div style={{fontSize: "1.25rem", fontWeight: 400}}>Visible Watermark</div>
         </Group>
 
@@ -157,12 +155,6 @@ const PlayoutPanel = observer(({
         <Menu>
           <Menu.Target>
             <button type="button" className="button__secondary">Add Watermark</button>
-            {/*<Button*/}
-            {/*  variant="outline"*/}
-            {/*  leftSection={<PlusIcon width={12}/>}*/}
-            {/*>*/}
-            {/*  Add Watermark*/}
-            {/*</Button>*/}
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item onClick={() => {

@@ -56,7 +56,9 @@ class StreamStore {
         "input/audio/stream",
         "output/audio/bitrate",
         "output/audio/channel_layout",
-        "part_ttl"
+        "part_ttl",
+        "drm",
+        "drm_type"
       ]
     });
     const customSettings = {};
@@ -69,6 +71,16 @@ class StreamStore {
     }
 
     yield this.client.StreamConfig({name: objectId, customSettings});
+
+    if(liveRecordingConfig?.drm) {
+      const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
+
+      yield client.StreamInitialize({
+        name: objectId,
+        drm: liveRecordingConfig?.drm === "clear" ? false : true,
+        format: drmOption?.format.join(",")
+      });
+    }
 
     // Update stream link in site after stream configuration
     yield editStore.UpdateStreamLink({objectId, slug});
