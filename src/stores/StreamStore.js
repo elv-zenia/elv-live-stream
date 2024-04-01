@@ -300,7 +300,7 @@ class StreamStore {
       const segmentPlaylistResponse = yield(yield this.FetchVideoPath(stream, lowestBitratePath));
 
       let segmentPlaylist;
-      if(segmentPlaylist?.status === 200) {
+      if(segmentPlaylistResponse?.status === 200) {
         segmentPlaylist = segmentPlaylistResponse.text();
       }
 

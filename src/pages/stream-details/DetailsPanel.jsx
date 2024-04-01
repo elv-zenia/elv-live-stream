@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {ActionIcon, Box, Flex, Grid, Modal, Skeleton, Stack, Text} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
-import {editStore, streamStore} from "Stores";
+import {dataStore, editStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
 import {FormatTime, Pluralize} from "Stores/helpers/Misc";
@@ -229,11 +229,12 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
   );
 });
 
-const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
+const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState(false);
   const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
+  const [recordingInfo, setRecordingInfo] = useState(null);
   const params = useParams();
   const currentTimeMs = new Date().getTime();
 
@@ -248,12 +249,28 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
         });
         setStatus(statusResponse);
 
+        GetEdgeWriteTokenMeta();
         GetLiveRecordingCopies();
       }
     };
 
     LoadDetails();
   }, [params]);
+
+  const GetEdgeWriteTokenMeta = async() => {
+    const metadata = await dataStore.LoadEdgeWriteTokenMeta({
+      objectId: params.id
+    });
+
+    if(metadata) {
+      metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
+        ...item,
+        id: i
+      }));
+
+      setRecordingInfo(metadata);
+    }
+  };
 
   const GetLiveRecordingCopies = async() => {
     let liveRecordingCopies = await streamStore.FetchLiveRecordingCopies({
@@ -301,11 +318,9 @@ const DetailsPanel = observer(({slug, embedUrl, recordingInfo, title}) => {
         <Grid.Col span={8}>
           <Flex direction="column" style={{flexGrow: "1"}}>
             <Box mb="24px" maw="60%">
-              {/*<Title size="1.25rem" fw={400} color="elv-gray.9" mb="16px">Quality</Title>*/}
               <div className="form__section-header">Quality</div>
             </Box>
             <Box mb="24px" maw="60%">
-              {/*<Title size="1.25rem" fw={400} color="elv-gray.9" mb="16px">Recording Info</Title>*/}
               <div className="form__section-header">Recording Info</div>
               <Text>
                 Started: {status?.recording_period?.start_time_epoch_sec ? new Date(status?.recording_period?.start_time_epoch_sec * 1000).toString() : "--"}

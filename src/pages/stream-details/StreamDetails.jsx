@@ -62,47 +62,16 @@ const StreamDeleteModal = ({show, close, Callback}) => {
 const StreamDetails = observer(() => {
   const navigate = useNavigate();
   const params = useParams();
-  const [stream, setStream] = useState(null);
-  const [recordingInfo, setRecordingInfo] = useState(null);
-  let streamSlug;
+  let streamSlug, stream;
   const [showModal, {open, close}] = useDisclosure(false);
 
-  useEffect(() => {
-    const LoadStream = () => {
-      if(params?.id && streamStore.streams) {
-        streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
-          streamStore.streams[slug].objectId === params.id
-        ));
+  streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
+    streamStore.streams[slug].objectId === params.id
+  ));
 
-        if(streamSlug) {
-          setStream(streamStore.streams[streamSlug]);
-        }
-      }
-    };
-
-    LoadStream();
-  }, [params.id, streamStore.streams]);
-
-  useEffect(() => {
-    const LoadData = async() => {
-      if(stream) {
-        const metadata = await dataStore.LoadEdgeWriteTokenMeta({
-          objectId: params.id
-        });
-
-        if(metadata) {
-          metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
-            ...item,
-            id: i
-          }));
-
-          setRecordingInfo(metadata);
-        }
-      }
-    };
-
-    LoadData();
-  }, [stream]);
+  if(streamSlug) {
+    stream = streamStore.streams[streamSlug];
+  }
 
   if(!stream) {
     return <Loader />;
@@ -112,7 +81,7 @@ const StreamDetails = observer(() => {
     <>
       <PageHeader
         title={`Edit ${stream.title || stream.objectId}`}
-        status={stream?.status}
+        status={streamStore.streams?.[streamSlug]?.status}
         actions={[
           {
             label: "Back",
@@ -149,7 +118,6 @@ const StreamDetails = observer(() => {
                 imageWatermark={stream.imageWatermark}
                 title={stream.title}
                 embedUrl={stream.embedUrl}
-                recordingInfo={recordingInfo}
               />
             </Tabs.Panel>
           ))
