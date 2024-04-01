@@ -578,7 +578,8 @@ class StreamStore {
 
   CopyToVod = flow(function * ({
     objectId,
-    selectedPeriods=[]
+    selectedPeriods=[],
+    title
   }) {
     let recordingPeriod, startTime, endTime;
     // Used to save start and end times in stream object meta
@@ -601,6 +602,10 @@ class StreamStore {
       timeSeconds.endTime = firstPeriod?.end_time_epoch_sec;
     }
 
+    if(!timeSeconds.endTime) {
+      timeSeconds.endTime = timeSeconds.startTime;
+    }
+
     // Create content object
     const contentTypes = yield client.ContentTypes();
     const titleType = Object.keys(contentTypes || {}).find(id => contentTypes[id]?.name?.toLowerCase().includes("title"));
@@ -617,7 +622,7 @@ class StreamStore {
           type: titleType,
           meta: {
             public: {
-              name: `${this.streams[streamSlug]?.title || objectId} VoD`
+              name: title || `${this.streams[streamSlug]?.title || objectId} VoD`
             }
           }
         } :

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {ActionIcon, Box, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
+import {ActionIcon, Box, Flex, Grid, Modal, Skeleton, Stack, Text} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
 import {editStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
@@ -12,17 +12,80 @@ import {RECORDING_STATUS_TEXT} from "Data/HumanReadableText";
 import {IconCheck, IconExternalLink} from "@tabler/icons-react";
 import {Loader} from "Components/Loader";
 import {notifications} from "@mantine/notifications";
+import {useDisclosure} from "@mantine/hooks";
+import {TextInput} from "Components/Inputs";
+
+const CopyModal = observer(({show, close, title, setTitle, Callback}) => {
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <Modal
+      opened={show}
+      onClose={close}
+      title="Copy to VoD"
+      padding="32px"
+      radius="6px"
+      size="lg"
+      centered
+    >
+      <Box w="100%">
+        <TextInput
+          label="Enter a title for the VoD"
+          required={true}
+          value={title}
+          onChange={event => setTitle(event.target.value)}
+          style={{width: "100%"}}
+        />
+        <Text mt={16}>This process takes around 20 seconds per hour of content.</Text>
+      </Box>
+      {
+        !error ? null :
+          <div className="modal__error">
+            Error: { error }
+          </div>
+      }
+      <Flex direction="row" align="center" className="modal__actions">
+        <button type="button" className="button__secondary" onClick={close}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={loading}
+          className="button__primary"
+          onClick={async () => {
+            try {
+              setError(undefined);
+              setLoading(true);
+              await Callback(title);
+            } catch(error) {
+              console.error(error);
+              setError(error?.message || error.kind || error.toString());
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          {loading ? <Loader loader="inline" className="modal__loader"/> : "Copy"}
+        </button>
+      </Flex>
+    </Modal>
+  );
+});
 
 const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [copyingToVod, setCopyingToVod] = useState(false);
+  const [showCopyModal, {open, close}] = useDisclosure(false);
+  const [vodTitle, setVodTitle] = useState(`${title} VoD`);
 
-  const HandleCopy = async () => {
+  const HandleCopy = async ({title}) => {
     try {
       setCopyingToVod(true);
       const response = await streamStore.CopyToVod({
         objectId,
-        selectedPeriods: selectedRecords
+        selectedPeriods: selectedRecords,
+        title
       });
 
       await CopyCallback();
@@ -32,6 +95,7 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
         message: `${response?.target_object_id} successfully created`,
         autoClose: false
       });
+      close();
     } catch(error) {
       notifications.show({
         title: "Error",
@@ -45,11 +109,11 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
     }
   };
 
-  const RecordingStatusText = ({item, text=true}) => {
+  const RecordingStatus = ({item, text=true, startTime, endTime}) => {
     let status;
     const videoIsEmpty = (item?.sources?.video || []).length === 0;
 
-    if(videoIsEmpty) {
+    if(videoIsEmpty || !MeetsDurationMin({startTime, endTime})) {
       status = "NOT_AVAILABLE";
     } else if(!videoIsEmpty && item?.sources?.video_trimmed > 0) {
       status = "PARTIALLY_AVAILABLE";
@@ -60,7 +124,7 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
     return text ? RECORDING_STATUS_TEXT[status] : status;
   };
 
-  const CheckDurationMin = ({startTime, endTime}) => {
+  const MeetsDurationMin = ({startTime, endTime}) => {
     if(endTime === 0 || startTime === 0) { return true; }
 
     return (endTime - startTime) >= 61000;
@@ -77,7 +141,7 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
           className="button__primary"
           disabled={selectedRecords.length === 0 || copyingToVod}
           style={{marginLeft: "auto"}}
-          onClick={HandleCopy}
+          onClick={open}
         >
           {copyingToVod ? <Loader loader="inline" className="modal__loader"/> : "Copy to VoD"}
         </button>
@@ -129,7 +193,11 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
             title: "Status",
             render: record => (
               <Text>
-                {RecordingStatusText({item: record})}
+                {RecordingStatus({
+                  item: record,
+                  startTime: record.start_time_epoch_sec * 1000,
+                  endTime: record.end_time_epoch_sec * 1000
+                })}
               </Text>
             )
           }
@@ -139,11 +207,23 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
         records={records}
         selectedRecords={selectedRecords}
         onSelectedRecordsChange={setSelectedRecords}
-        isRecordSelectable={record => (
-          RecordingStatusText({item: record, text: false}) === "AVAILABLE" && CheckDurationMin({startTime: record.start_time_epoch_sec * 1000, endTime: record.end_time_epoch_sec * 1000})
+        isRecordSelectable={(record) => (
+          RecordingStatus({
+            item: record,
+            text: false,
+            startTime: record.start_time_epoch_sec * 1000,
+            endTime: record.end_time_epoch_sec * 1000
+          }) === "AVAILABLE"
         )}
         withTableBorder
         highlightOnHover
+      />
+      <CopyModal
+        show={showCopyModal}
+        close={close}
+        Callback={(title) => HandleCopy({title})}
+        title={vodTitle}
+        setTitle={setVodTitle}
       />
     </>
   );
