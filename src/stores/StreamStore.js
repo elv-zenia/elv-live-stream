@@ -544,7 +544,8 @@ class StreamStore {
     yield client.FinalizeContentObject({
       objectId,
       libraryId,
-      writeToken
+      writeToken,
+      commitMessage: "Update drm type metadata"
     });
 
     const response = yield client.StreamInitialize({
@@ -585,6 +586,7 @@ class StreamStore {
     // Used to save start and end times in stream object meta
     const timeSeconds = {};
     const firstPeriod = selectedPeriods[0];
+    const currentDateTime = new Date();
 
     if(selectedPeriods.length > 1) {
       // Multiple periods
@@ -603,7 +605,7 @@ class StreamStore {
     }
 
     if(!timeSeconds.endTime) {
-      timeSeconds.endTime = Math.floor(new Date().getTime() / 1000);
+      timeSeconds.endTime = Math.floor(currentDateTime.getTime() / 1000);
     }
 
     // Create content object
@@ -614,6 +616,7 @@ class StreamStore {
     const streamSlug = Object.keys(this.streams || {}).find(slug => (
       this.streams[slug].objectId === objectId
     ));
+    const targetTitle = title || `${this.streams[streamSlug]?.title || objectId} VoD`;
 
     const createResponse = yield client.CreateContentObject({
       libraryId: targetLibraryId,
@@ -622,7 +625,7 @@ class StreamStore {
           type: titleType,
           meta: {
             public: {
-              name: title || `${this.streams[streamSlug]?.title || objectId} VoD`
+              name: targetTitle
             }
           }
         } :
@@ -680,7 +683,9 @@ class StreamStore {
 
       copiesMetadata[targetObjectId] = {
         startTime: timeSeconds.startTime,
-        endTime: timeSeconds.endTime
+        endTime: timeSeconds.endTime,
+        create_time: currentDateTime.getTime(),
+        title: targetTitle
       };
 
       yield client.ReplaceMetadata({

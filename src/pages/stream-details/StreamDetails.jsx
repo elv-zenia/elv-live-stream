@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import PageHeader from "Components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
-import {streamStore, editStore, dataStore} from "Stores";
+import {streamStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import {Flex, Modal, Tabs, Text} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";

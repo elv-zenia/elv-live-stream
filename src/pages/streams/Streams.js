@@ -13,7 +13,7 @@ import {
 
 import Modal from "Components/Modal";
 import {dataStore, editStore, streamStore} from "Stores";
-import {StatusIndicator, VideoBitrateReadable} from "Stores/helpers/Misc";
+import {SortTable, StatusIndicator, VideoBitrateReadable} from "Stores/helpers/Misc";
 import {StreamIsActive} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import {CODEC_TEXT, FORMAT_TEXT, STATUS_TEXT} from "Data/HumanReadableText";
@@ -43,27 +43,6 @@ const StreamModal = observer(({
     />
   );
 });
-
-export const SortTable = ({sortStatus, AdditionalCondition}) => {
-  return (a, b) => {
-    if(AdditionalCondition && typeof AdditionalCondition(a, b) !== "undefined") {
-      return AdditionalCondition(a, b);
-    }
-
-    a = a[sortStatus.columnAccessor];
-    b = b[sortStatus.columnAccessor];
-
-    if(typeof a === "number") {
-      a = a || 0;
-      b = b || 0;
-    } else {
-      a = a?.toLowerCase?.() || a || "";
-      b = b?.toLowerCase?.() || b || "";
-    }
-
-    return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
-  };
-};
 
 const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});

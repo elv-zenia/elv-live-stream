@@ -9,7 +9,7 @@ import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
 import ImageIcon from "Components/ImageIcon";
 import {Loader} from "Components/Loader";
-import {SortTable} from "Pages/streams/Streams";
+import {SortTable} from "Stores/helpers/Misc";
 import PlayIcon from "Assets/icons/play circle.svg";
 import {STATUS_TEXT} from "Data/HumanReadableText";
 

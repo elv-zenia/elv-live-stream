@@ -132,3 +132,24 @@ export const FileInfo = async ({path, fileList}) => {
 export const Pluralize = ({base, suffix="s", count}) => {
   return `${count} ${base}${count > 1 ? suffix : ""}`;
 };
+
+export const SortTable = ({sortStatus, AdditionalCondition}) => {
+  return (a, b) => {
+    if(AdditionalCondition && typeof AdditionalCondition(a, b) !== "undefined") {
+      return AdditionalCondition(a, b);
+    }
+
+    a = a[sortStatus.columnAccessor];
+    b = b[sortStatus.columnAccessor];
+
+    if(typeof a === "number") {
+      a = a || 0;
+      b = b || 0;
+    } else {
+      a = a?.toLowerCase?.() || a || "";
+      b = b?.toLowerCase?.() || b || "";
+    }
+
+    return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
+  };
+};

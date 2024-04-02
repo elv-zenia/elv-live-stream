@@ -3,8 +3,8 @@ import {ActionIcon, Box, Flex, Grid, Modal, Skeleton, Stack, Text} from "@mantin
 import {DataTable} from "mantine-datatable";
 import {dataStore, editStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
-import {useParams} from "react-router-dom";
-import {FormatTime, Pluralize} from "Stores/helpers/Misc";
+import {Link, useParams} from "react-router-dom";
+import {FormatTime, Pluralize, SortTable} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import ClipboardIcon from "Assets/icons/ClipboardIcon";
 import {CopyToClipboard} from "Stores/helpers/Actions";
@@ -237,6 +237,10 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [copied, setCopied] = useState(false);
   const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
   const [recordingInfo, setRecordingInfo] = useState(null);
+  const [sortStatus, setSortStatus] = useState({
+    columnAccessor: "title",
+    direction: "asc"
+  });
   const params = useParams();
   const currentTimeMs = new Date().getTime();
 
@@ -314,6 +318,9 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
     return `Available: ${time}`;
   };
 
+  const records = Object.values(liveRecordingCopies || {})
+    .sort(SortTable({sortStatus}));
+
   return (
     <>
       <Grid>
@@ -342,18 +349,26 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                 }
               </Text>
             </Box>
-            <Box mb="24px" maw="60%">
+            <Box mb="24px" maw="70%">
               <div className="form__section-header">Live Recording Copies</div>
               <DataTable
                 idAccessor="_id"
                 noRecordsText="No live recording copies found"
                 minHeight={Object.values(liveRecordingCopies || {}) ? 150 : 75}
+                sortStatus={sortStatus}
+                onSortStatusChange={setSortStatus}
                 columns={[
                   {
-                    accessor: "id",
-                    title: "Object ID",
+                    accessor: "title",
+                    title: "Title",
+                    sortable: true,
                     render: record => (
-                      <Text>{record._id}</Text>
+                      <div className="table__multi-line">
+                        <Link to={`/streams/${record.objectId}`}>
+                          <Text>{record.title}</Text>
+                        </Link>
+                        <Text c="dimmed" fz="xs">{record._id}</Text>
+                      </div>
                     )
                   },
                   {
@@ -381,6 +396,19 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                     )
                   },
                   {
+                    accessor: "create_time",
+                    title: "Date Added",
+                    sortable: true,
+                    render: record => (
+                      <Text>
+                        {
+                          record.create_time ?
+                            new Date(record.create_time).toLocaleString() : ""
+                        }
+                      </Text>
+                    )
+                  },
+                  {
                     accessor: "actions",
                     title: "",
                     render: record => (
@@ -401,7 +429,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                     )
                   }
                 ]}
-                records={Object.values(liveRecordingCopies || {})}
+                records={records}
               />
             </Box>
           </Flex>
