@@ -1,65 +1,16 @@
-import React, {useState} from "react";
+import React from "react";
 import PageHeader from "Components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore} from "Stores";
 import {observer} from "mobx-react";
-import {Flex, Modal, Tabs, Text} from "@mantine/core";
+import {Tabs, Text} from "@mantine/core";
 import {useDisclosure} from "@mantine/hooks";
-import {DETAILS_TABS} from "Data/StreamData";
+import {DETAILS_TABS, STATUS_MAP} from "Data/StreamData";
 import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
 import {Loader} from "Components/Loader";
+import ConfirmModal from "Components/ConfirmModal";
 
-// TODO: Create ConfirmModal component and consolidate this with Modal
-const StreamDeleteModal = ({show, close, Callback}) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
-
-  return (
-    <Modal
-      opened={show}
-      onClose={close}
-      title="Delete Stream"
-      padding="32px"
-      radius="6px"
-      size="lg"
-      centered
-    >
-      <Text>Are you sure you want to delete the stream? This action cannot be undone.</Text>
-      {
-        !error ? null :
-          <div className="modal__error">
-            Error: { error }
-          </div>
-      }
-      <Flex direction="row" align="center" className="modal__actions">
-        <button type="button" className="button__secondary" onClick={close}>
-          Cancel
-        </button>
-        <button
-          type="button"
-          disabled={loading}
-          className="button__primary"
-          onClick={async () => {
-            try {
-              setError(undefined);
-              setLoading(true);
-              await Callback();
-            } catch(error) {
-              console.error(error);
-              setError(error?.message || error.kind || error.toString());
-            } finally {
-              setLoading(false);
-            }
-          }}
-        >
-          {loading ? <Loader loader="inline" className="modal__loader"/> : "Delete"}
-        </button>
-      </Flex>
-    </Modal>
-  );
-};
-
-const StreamDetails = observer(() => {
+const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
   const params = useParams();
   let streamSlug, stream;
@@ -93,6 +44,7 @@ const StreamDetails = observer(() => {
             label: "Delete",
             variant: "outline",
             uppercase: true,
+            disabled: streamStore.streams?.[streamSlug]?.status !== STATUS_MAP.INACTIVE,
             onClick: open
           }
         ]}
@@ -123,13 +75,16 @@ const StreamDetails = observer(() => {
           ))
         }
       </Tabs>
-      <StreamDeleteModal
+      <ConfirmModal
+        title="Delete Stream"
+        message="Are you sure you want to delete the stream? This action cannot be undone."
+        confirmText="Delete"
         show={showModal}
-        close={close}
-        Callback={async () => await editStore.DeleteStream({objectId: stream.objectId})}
+        CloseCallback={close}
+        ConfirmCallback={async () => await editStore.DeleteStream({objectId: stream.objectId})}
       />
     </>
   );
 });
 
-export default StreamDetails;
+export default StreamDetailsPage;

@@ -1,19 +1,20 @@
 import React, {useEffect, useState} from "react";
-import {ActionIcon, Box, Flex, Grid, Modal, Skeleton, Stack, Text} from "@mantine/core";
+import {ActionIcon, Box, Flex, Grid, Group, Modal, Skeleton, Stack, Text} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
 import {dataStore, editStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
-import {Link, useParams} from "react-router-dom";
-import {FormatTime, Pluralize, SortTable} from "Stores/helpers/Misc";
+import {useParams} from "react-router-dom";
+import {DateFormat, FormatTime, Pluralize, SortTable} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import ClipboardIcon from "Assets/icons/ClipboardIcon";
 import {CopyToClipboard} from "Stores/helpers/Actions";
 import {RECORDING_STATUS_TEXT} from "Data/HumanReadableText";
-import {IconCheck, IconExternalLink} from "@tabler/icons-react";
+import {IconCheck, IconExternalLink, IconTrash} from "@tabler/icons-react";
 import {Loader} from "Components/Loader";
 import {notifications} from "@mantine/notifications";
 import {useDisclosure} from "@mantine/hooks";
 import {TextInput} from "Components/Inputs";
+import ConfirmModal from "Components/ConfirmModal";
 
 const CopyModal = observer(({show, close, title, setTitle, Callback}) => {
   const [error, setError] = useState();
@@ -158,7 +159,7 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
               <Text>
                 {
                   record.recording_start_time_epoch_sec ?
-                    new Date(record.recording_start_time_epoch_sec * 1000).toLocaleTimeString() : ""
+                    DateFormat({time: record.recording_start_time_epoch_sec}) : ""
                 }
               </Text>
             )
@@ -170,7 +171,7 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
               <Text>
                 {
                   record.end_time_epoch_sec ?
-                    new Date(record.end_time_epoch_sec * 1000).toLocaleTimeString() : ""
+                    DateFormat({time: record.end_time_epoch_sec}) : ""
                 }
               </Text>
             )
@@ -241,6 +242,8 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
     columnAccessor: "title",
     direction: "asc"
   });
+  const [showDeleteModal, {open, close}] = useDisclosure(false);
+
   const params = useParams();
   const currentTimeMs = new Date().getTime();
 
@@ -326,13 +329,13 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
       <Grid>
         <Grid.Col span={8}>
           <Flex direction="column" style={{flexGrow: "1"}}>
-            <Box mb="24px" maw="60%">
+            <Box mb="24px" maw="70%">
               <div className="form__section-header">Quality</div>
             </Box>
-            <Box mb="24px" maw="60%">
+            <Box mb="24px" maw="70%">
               <div className="form__section-header">Recording Info</div>
               <Text>
-                Started: {status?.recording_period?.start_time_epoch_sec ? new Date(status?.recording_period?.start_time_epoch_sec * 1000).toString() : "--"}
+                Started: {status?.recording_period?.start_time_epoch_sec ? new Date(status?.recording_period?.start_time_epoch_sec * 1000).toLocaleString() : "--"}
               </Text>
               <Text>
                 {
@@ -349,7 +352,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                 }
               </Text>
             </Box>
-            <Box mb="24px" maw="70%">
+            <Box mb="24px" maw="85%">
               <div className="form__section-header">Live Recording Copies</div>
               <DataTable
                 idAccessor="_id"
@@ -364,9 +367,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                     sortable: true,
                     render: record => (
                       <div className="table__multi-line">
-                        <Link to={`/streams/${record.objectId}`}>
-                          <Text>{record.title}</Text>
-                        </Link>
+                        <Text>{record.title}</Text>
                         <Text c="dimmed" fz="xs">{record._id}</Text>
                       </div>
                     )
@@ -378,7 +379,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                       <Text>
                         {
                           record.startTime ?
-                            new Date(record.startTime * 1000).toLocaleTimeString() : ""
+                            DateFormat({time: record.startTime}) : ""
                         }
                       </Text>
                     )
@@ -390,7 +391,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                       <Text>
                         {
                           record.endTime ?
-                            new Date(record.endTime * 1000).toLocaleTimeString() : ""
+                            DateFormat({time: record.endTime}) : ""
                         }
                       </Text>
                     )
@@ -403,7 +404,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                       <Text>
                         {
                           record.create_time ?
-                            new Date(record.create_time).toLocaleString() : ""
+                            DateFormat({time: record.create_time, seconds: false}) : ""
                         }
                       </Text>
                     )
@@ -412,20 +413,30 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                     accessor: "actions",
                     title: "",
                     render: record => (
-                      <ActionIcon
-                        title="Open in Fabric Browser"
-                        variant="subtle"
-                        color="gray.6"
-                        onClick={() => editStore.client.SendMessage({
-                          options: {
-                            operation: "OpenLink",
-                            objectId: record._id
-                          },
-                          noResponse: true
-                        })}
-                      >
-                        <IconExternalLink />
-                      </ActionIcon>
+                      <Group>
+                        <ActionIcon
+                          title="Open in Fabric Browser"
+                          variant="subtle"
+                          color="gray.6"
+                          onClick={() => editStore.client.SendMessage({
+                            options: {
+                              operation: "OpenLink",
+                              objectId: record._id
+                            },
+                            noResponse: true
+                          })}
+                        >
+                          <IconExternalLink />
+                        </ActionIcon>
+                        <ActionIcon
+                          title="Delete Live Recording Copy"
+                          variant="subtle"
+                          color="gray.6"
+                          onClick={open}
+                        >
+                          <IconTrash />
+                        </ActionIcon>
+                      </Group>
                     )
                   }
                 ]}
@@ -478,6 +489,14 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
         records={recordingInfo?.live_offering}
         title={title}
         CopyCallback={GetLiveRecordingCopies}
+      />
+      <ConfirmModal
+        show={showDeleteModal}
+        title="Delete Live Recording Copy"
+        confirmText="Delete"
+        message="Are you sure you want to delete the live recording copy? This action cannot be undone."
+        ConfirmCallback={() => {}}
+        CloseCallback={close}
       />
     </>
   );

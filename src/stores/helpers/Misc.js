@@ -153,3 +153,9 @@ export const SortTable = ({sortStatus, AdditionalCondition}) => {
     return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
   };
 };
+
+export const DateFormat = ({time, seconds=true}) => {
+  if(seconds) { time = time * 1000; }
+
+  return new Date(time).toLocaleString();
+};

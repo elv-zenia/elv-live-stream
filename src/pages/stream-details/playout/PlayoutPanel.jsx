@@ -187,7 +187,7 @@ const PlayoutPanel = observer(({
                   size={20}
                   variant="transparent"
                   color="gray"
-                  onClick={() => setShowTextWatermarkInput(true)}
+                  onClick={() => setShowTextWatermarkInput(!showTextWatermarkInput)}
                 >
                   <EditIcon />
                 </ActionIcon>

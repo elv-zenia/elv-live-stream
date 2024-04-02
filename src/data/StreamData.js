@@ -1,5 +1,5 @@
-import DetailsPanel from "Pages/stream-details/DetailsPanel";
-import PlayoutPanel from "Pages/stream-details/PlayoutPanel";
+import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
+import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
 
 export const AV_STREAM = {
   DEFAULT: "default",

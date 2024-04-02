@@ -6,22 +6,16 @@ const HeaderTopActions = ({actions=[]}) => {
   return (
     <Flex direction="row" gap="sm">
       {
-        actions.map(({label, variant = "filled", onClick}) => (
+        actions.map(({label, variant = "filled", onClick, disabled}) => (
           <button
             type="button"
             className={variant === "filled" ? "button__primary" : "button__secondary"}
             onClick={onClick}
             key={`top-action-${label}`}
+            disabled={disabled}
           >
             {label}
           </button>
-          // <Button
-          //   variant={variant}
-          //   key={`top-action-${label}`}
-          //   onClick={onClick}
-          // >
-          //   <Text tt={uppercase ? "uppercase" : "unset"} size="xs" fw="600">{label}</Text>
-          // </Button>
         ))
       }
     </Flex>

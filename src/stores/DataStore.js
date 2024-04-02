@@ -13,6 +13,7 @@ class DataStore {
   libraries;
   accessGroups;
   contentType;
+  titleContentType;
   siteId;
   siteLibraryId;
   liveStreamUrls;
@@ -73,13 +74,18 @@ class DataStore {
         metadataSubtree: "public",
         select: [
           "sites/live_streams",
-          "content_types/live_stream"
+          "content_types/live_stream",
+          "content_types/title"
         ]
       });
       const {sites, content_types} = response;
 
       if(content_types?.live_stream) {
         this.contentType = content_types.live_stream;
+      }
+
+      if(content_types?.title) {
+        this.titleContentType = content_types.title;
       }
 
       return sites?.live_streams;

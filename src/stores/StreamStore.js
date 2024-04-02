@@ -554,11 +554,15 @@ class StreamStore {
       format: drmOption.format.join(",")
     });
 
+    const statusResponse = yield this.CheckStatus({
+      objectId
+    });
+
     if(response) {
       this.UpdateStream({
         key: slug,
         value: {
-          status: response.state,
+          status: statusResponse.state,
           drm: drmType
         }
       });
@@ -609,8 +613,7 @@ class StreamStore {
     }
 
     // Create content object
-    const contentTypes = yield client.ContentTypes();
-    const titleType = Object.keys(contentTypes || {}).find(id => contentTypes[id]?.name?.toLowerCase().includes("title"));
+    const titleType = dataStore.titleContentType;
 
     const targetLibraryId = yield client.ContentObjectLibraryId({objectId});
     const streamSlug = Object.keys(this.streams || {}).find(slug => (
