@@ -603,7 +603,7 @@ class StreamStore {
     }
 
     if(!timeSeconds.endTime) {
-      timeSeconds.endTime = timeSeconds.startTime;
+      timeSeconds.endTime = Math.floor(new Date().getTime() / 1000);
     }
 
     // Create content object
