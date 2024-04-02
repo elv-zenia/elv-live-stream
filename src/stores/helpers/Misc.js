@@ -14,7 +14,7 @@ export const ParseLiveConfigData = ({
   const {audioChannelLayout, audioBitrate} = outputFormData;
 
   const config = {
-    drm: encryption.includes("drm") ? "drm" : "clear",
+    drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
     drm_type: encryption,
     input: {
       audio: {

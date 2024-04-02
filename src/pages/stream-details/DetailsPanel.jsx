@@ -104,6 +104,8 @@ const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}
       });
 
       console.error("Unable to copy to VoD", error);
+      setCopyingToVod(false);
+      close();
     } finally {
       setCopyingToVod(false);
     }

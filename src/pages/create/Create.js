@@ -227,7 +227,7 @@ const Create = observer(() => {
   });
 
   const [drmFormData, setDrmFormData] = useState({
-    encryption: "drm-public"
+    encryption: ""
   });
 
   const navigate = useNavigate();

@@ -656,6 +656,7 @@ class StreamStore {
       });
     } catch(error) {
       console.error("Unable to copy to VoD.", error);
+      throw error(error);
     }
 
     if(!response) {
