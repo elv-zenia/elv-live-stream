@@ -154,8 +154,12 @@ export const SortTable = ({sortStatus, AdditionalCondition}) => {
   };
 };
 
-export const DateFormat = ({time, seconds=true}) => {
-  if(seconds) { time = time * 1000; }
+export const DateFormat = ({time, format="sec"}) => {
+  if(!["sec", "iso", "ms"].includes(format)) { throw Error("Invalid format type provided."); }
+
+  if(format === "sec") {
+    time = time * 1000;
+  }
 
   return new Date(time).toLocaleString();
 };

@@ -1,236 +1,15 @@
 import React, {useEffect, useState} from "react";
-import {ActionIcon, Box, Flex, Grid, Group, Modal, Skeleton, Stack, Text} from "@mantine/core";
-import {DataTable} from "mantine-datatable";
-import {dataStore, editStore, streamStore} from "Stores";
+import {Box, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
+import {dataStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
-import {DateFormat, FormatTime, Pluralize, SortTable} from "Stores/helpers/Misc";
+import {DateFormat, FormatTime} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import ClipboardIcon from "Assets/icons/ClipboardIcon";
 import {CopyToClipboard} from "Stores/helpers/Actions";
-import {RECORDING_STATUS_TEXT} from "Data/HumanReadableText";
-import {IconCheck, IconExternalLink, IconTrash} from "@tabler/icons-react";
-import {Loader} from "Components/Loader";
-import {notifications} from "@mantine/notifications";
-import {useDisclosure} from "@mantine/hooks";
-import {TextInput} from "Components/Inputs";
-import ConfirmModal from "Components/ConfirmModal";
-
-const CopyModal = observer(({show, close, title, setTitle, Callback}) => {
-  const [error, setError] = useState();
-  const [loading, setLoading] = useState(false);
-
-  return (
-    <Modal
-      opened={show}
-      onClose={close}
-      title="Copy to VoD"
-      padding="32px"
-      radius="6px"
-      size="lg"
-      centered
-    >
-      <Box w="100%">
-        <TextInput
-          label="Enter a title for the VoD"
-          required={true}
-          value={title}
-          onChange={event => setTitle(event.target.value)}
-          style={{width: "100%"}}
-        />
-        <Text mt={16}>This process takes around 20 seconds per hour of content.</Text>
-      </Box>
-      {
-        !error ? null :
-          <div className="modal__error">
-            Error: { error }
-          </div>
-      }
-      <Flex direction="row" align="center" className="modal__actions">
-        <button type="button" className="button__secondary" onClick={close}>
-          Cancel
-        </button>
-        <button
-          type="button"
-          disabled={loading}
-          className="button__primary"
-          onClick={async () => {
-            try {
-              setError(undefined);
-              setLoading(true);
-              await Callback(title);
-            } catch(error) {
-              console.error(error);
-              setError(error?.message || error.kind || error.toString());
-            } finally {
-              setLoading(false);
-            }
-          }}
-        >
-          {loading ? <Loader loader="inline" className="modal__loader"/> : "Copy"}
-        </button>
-      </Flex>
-    </Modal>
-  );
-});
-
-const StreamPeriodsTable = observer(({records=[], objectId, title, CopyCallback}) => {
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [copyingToVod, setCopyingToVod] = useState(false);
-  const [showCopyModal, {open, close}] = useDisclosure(false);
-  const [vodTitle, setVodTitle] = useState(`${title} VoD`);
-
-  const HandleCopy = async ({title}) => {
-    try {
-      setCopyingToVod(true);
-      const response = await streamStore.CopyToVod({
-        objectId,
-        selectedPeriods: selectedRecords,
-        title
-      });
-
-      await CopyCallback();
-
-      notifications.show({
-        title: `${title || objectId} copied to VoD`,
-        message: `${response?.target_object_id} successfully created`,
-        autoClose: false
-      });
-      close();
-    } catch(error) {
-      notifications.show({
-        title: "Error",
-        color: "red",
-        message: "Unable to copy to VoD"
-      });
-
-      console.error("Unable to copy to VoD", error);
-      setCopyingToVod(false);
-      close();
-    } finally {
-      setCopyingToVod(false);
-    }
-  };
-
-  const RecordingStatus = ({item, text=true, startTime, endTime}) => {
-    let status;
-    const videoIsEmpty = (item?.sources?.video || []).length === 0;
-
-    if(videoIsEmpty || !MeetsDurationMin({startTime, endTime})) {
-      status = "NOT_AVAILABLE";
-    } else if(!videoIsEmpty && item?.sources?.video_trimmed > 0) {
-      status = "PARTIALLY_AVAILABLE";
-    } else {
-      status = "AVAILABLE";
-    }
-
-    return text ? RECORDING_STATUS_TEXT[status] : status;
-  };
-
-  const MeetsDurationMin = ({startTime, endTime}) => {
-    if(endTime === 0 || startTime === 0) { return true; }
-
-    return (endTime - startTime) >= 61000;
-  };
-
-  return (
-    <>
-      <Flex direction="row" justify="space-between">
-        {
-          selectedRecords.length === 0 ? "" : `${Pluralize({base: "item", count: selectedRecords.length})} selected`
-        }
-        <button
-          type="button"
-          className="button__primary"
-          disabled={selectedRecords.length === 0 || copyingToVod}
-          style={{marginLeft: "auto"}}
-          onClick={open}
-        >
-          {copyingToVod ? <Loader loader="inline" className="modal__loader"/> : "Copy to VoD"}
-        </button>
-      </Flex>
-      <DataTable
-        mb="4rem"
-        columns={[
-          {
-            accessor: "recording_start_time_epoch_sec",
-            title: "Start Time",
-            render: record => (
-              <Text>
-                {
-                  record.recording_start_time_epoch_sec ?
-                    DateFormat({time: record.recording_start_time_epoch_sec}) : ""
-                }
-              </Text>
-            )
-          },
-          {
-            accessor: "end_time_epoch_sec",
-            title: "End Time",
-            render: record => (
-              <Text>
-                {
-                  record.end_time_epoch_sec ?
-                    DateFormat({time: record.end_time_epoch_sec}) : ""
-                }
-              </Text>
-            )
-          },
-          {
-            accessor: "runtime",
-            title: "Runtime",
-            render: record => (
-              <Text>
-                {
-                  record.end_time_epoch_sec && record.start_time_epoch_sec ?
-                    FormatTime({
-                      milliseconds: record.end_time_epoch_sec * 1000 - record.start_time_epoch_sec * 1000,
-                      format: "hh:mm:ss"
-                    }) : ""
-                }
-              </Text>
-            )
-          },
-          {
-            accessor: "status",
-            title: "Status",
-            render: record => (
-              <Text>
-                {RecordingStatus({
-                  item: record,
-                  startTime: record.start_time_epoch_sec * 1000,
-                  endTime: record.end_time_epoch_sec * 1000
-                })}
-              </Text>
-            )
-          }
-        ]}
-        minHeight={!records || records.length === 0 ? 150 : 75}
-        noRecordsText="No recording periods found"
-        records={records}
-        selectedRecords={selectedRecords}
-        onSelectedRecordsChange={setSelectedRecords}
-        isRecordSelectable={(record) => (
-          RecordingStatus({
-            item: record,
-            text: false,
-            startTime: record.start_time_epoch_sec * 1000,
-            endTime: record.end_time_epoch_sec * 1000
-          }) === "AVAILABLE"
-        )}
-        withTableBorder
-        highlightOnHover
-      />
-      <CopyModal
-        show={showCopyModal}
-        close={close}
-        Callback={(title) => HandleCopy({title})}
-        title={vodTitle}
-        setTitle={setVodTitle}
-      />
-    </>
-  );
-});
+import {IconCheck} from "@tabler/icons-react";
+import DetailsPeriodsTable from "Pages/stream-details/details/DetailsPeriodsTable";
+import DetailsRecordingCopiesTable from "Pages/stream-details/details/DetailsRecordingCopiesTable";
 
 const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
@@ -238,11 +17,6 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [copied, setCopied] = useState(false);
   const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
   const [recordingInfo, setRecordingInfo] = useState(null);
-  const [sortStatus, setSortStatus] = useState({
-    columnAccessor: "title",
-    direction: "asc"
-  });
-  const [showDeleteModal, {open, close}] = useDisclosure(false);
 
   const params = useParams();
   const currentTimeMs = new Date().getTime();
@@ -321,9 +95,6 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
     return `Available: ${time}`;
   };
 
-  const records = Object.values(liveRecordingCopies || {})
-    .sort(SortTable({sortStatus}));
-
   return (
     <>
       <Grid>
@@ -335,7 +106,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
             <Box mb="24px" maw="70%">
               <div className="form__section-header">Recording Info</div>
               <Text>
-                Started: {status?.recording_period?.start_time_epoch_sec ? new Date(status?.recording_period?.start_time_epoch_sec * 1000).toLocaleString() : "--"}
+                Started: {status?.recording_period?.start_time_epoch_sec ? DateFormat({time: status?.recording_period?.start_time_epoch_sec, format: "sec"}) : "--"}
               </Text>
               <Text>
                 {
@@ -352,97 +123,9 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                 }
               </Text>
             </Box>
-            <Box mb="24px" maw="85%">
-              <div className="form__section-header">Live Recording Copies</div>
-              <DataTable
-                idAccessor="_id"
-                noRecordsText="No live recording copies found"
-                minHeight={Object.values(liveRecordingCopies || {}) ? 150 : 75}
-                sortStatus={sortStatus}
-                onSortStatusChange={setSortStatus}
-                columns={[
-                  {
-                    accessor: "title",
-                    title: "Title",
-                    sortable: true,
-                    render: record => (
-                      <div className="table__multi-line">
-                        <Text>{record.title}</Text>
-                        <Text c="dimmed" fz="xs">{record._id}</Text>
-                      </div>
-                    )
-                  },
-                  {
-                    accessor: "startTime",
-                    title: "Start Time",
-                    render: record => (
-                      <Text>
-                        {
-                          record.startTime ?
-                            DateFormat({time: record.startTime}) : ""
-                        }
-                      </Text>
-                    )
-                  },
-                  {
-                    accessor: "endTime",
-                    title: "End Time",
-                    render: record => (
-                      <Text>
-                        {
-                          record.endTime ?
-                            DateFormat({time: record.endTime}) : ""
-                        }
-                      </Text>
-                    )
-                  },
-                  {
-                    accessor: "create_time",
-                    title: "Date Added",
-                    sortable: true,
-                    render: record => (
-                      <Text>
-                        {
-                          record.create_time ?
-                            DateFormat({time: record.create_time, seconds: false}) : ""
-                        }
-                      </Text>
-                    )
-                  },
-                  {
-                    accessor: "actions",
-                    title: "",
-                    render: record => (
-                      <Group>
-                        <ActionIcon
-                          title="Open in Fabric Browser"
-                          variant="subtle"
-                          color="gray.6"
-                          onClick={() => editStore.client.SendMessage({
-                            options: {
-                              operation: "OpenLink",
-                              objectId: record._id
-                            },
-                            noResponse: true
-                          })}
-                        >
-                          <IconExternalLink />
-                        </ActionIcon>
-                        <ActionIcon
-                          title="Delete Live Recording Copy"
-                          variant="subtle"
-                          color="gray.6"
-                          onClick={open}
-                        >
-                          <IconTrash />
-                        </ActionIcon>
-                      </Group>
-                    )
-                  }
-                ]}
-                records={records}
-              />
-            </Box>
+            <DetailsRecordingCopiesTable
+              liveRecordingCopies={liveRecordingCopies}
+            />
           </Flex>
         </Grid.Col>
         <Grid.Col span={4}>
@@ -484,19 +167,11 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
         </Grid.Col>
       </Grid>
       <div className="form__section-header">Recording Periods</div>
-      <StreamPeriodsTable
+      <DetailsPeriodsTable
         objectId={params.id}
         records={recordingInfo?.live_offering}
         title={title}
         CopyCallback={GetLiveRecordingCopies}
-      />
-      <ConfirmModal
-        show={showDeleteModal}
-        title="Delete Live Recording Copy"
-        confirmText="Delete"
-        message="Are you sure you want to delete the live recording copy? This action cannot be undone."
-        ConfirmCallback={() => {}}
-        CloseCallback={close}
       />
     </>
   );
