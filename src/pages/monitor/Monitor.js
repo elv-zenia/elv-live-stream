@@ -20,7 +20,7 @@ export const VideoContainer = observer(({slug, index, showPreview}) => {
   const status = streamStore.streams?.[slug]?.status;
 
   useEffect(() => {
-    if(!streamStore.showMonitorPreviews || play || status !== "running") {
+    if(!showPreview || play || status !== "running") {
       return;
     }
 
@@ -39,7 +39,7 @@ export const VideoContainer = observer(({slug, index, showPreview}) => {
     }, delay);
 
     return () => clearTimeout(frameTimeout);
-  }, [play, frameKey, status, streamStore.showMonitorPreviews]);
+  }, [play, frameKey, status, showPreview]);
 
   // Reload frame every minute after initial frame load
   useEffect(() => {
@@ -132,7 +132,7 @@ const Monitor = observer(() => {
                     .map((stream, index) => {
                       return (
                         <div key={stream.slug} className="monitor__grid-item-container">
-                          <VideoContainer index={index} slug={stream.slug} showPreview={!streamStore.showMonitorPreviews} />
+                          <VideoContainer index={index} slug={stream.slug} showPreview={streamStore.showMonitorPreviews} />
                           <div className="monitor__grid-item-details">
                             <div className="monitor__grid-item-details-content">
                               <div className="monitor__grid-item-details-top">
