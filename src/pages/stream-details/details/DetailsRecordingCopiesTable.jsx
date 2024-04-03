@@ -19,7 +19,7 @@ const DetailsRecordingCopiesTable = observer(({liveRecordingCopies}) => {
     .sort(SortTable({sortStatus}));
 
   return (
-    <Box mb="24px" maw="85%">
+    <Box mb="24px" maw="97%">
       <div className="form__section-header">Live Recording Copies</div>
       <DataTable
         idAccessor="_id"
