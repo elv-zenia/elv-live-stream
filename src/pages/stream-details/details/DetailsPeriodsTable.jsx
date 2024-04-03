@@ -126,7 +126,8 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
                     Runtime({
                       startTime: new Date(record.start_time).getTime(),
                       endTime: new Date(record.end_time).getTime(),
-                      currentTimeMs
+                      currentTimeMs,
+                      format: "hh:mm:ss"
                     }) : "--"
                 }
               </Text>

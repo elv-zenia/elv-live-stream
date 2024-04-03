@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
 import {Link} from "react-router-dom";
 import {
@@ -21,7 +21,7 @@ import {CODEC_TEXT, FORMAT_TEXT} from "Data/HumanReadableText";
 import {useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
-import {StatusText} from "Components/header/PageHeader";
+import PageHeader, {StatusText} from "Components/header/PageHeader";
 
 const StreamModal = observer(({
   open,
@@ -49,6 +49,7 @@ const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
+  const [pageVersion, setPageVersion] = useState(0);
 
   const ResetModal = () => {
     setModalData({
@@ -70,14 +71,31 @@ const Streams = observer(() => {
     CloseCallback: null
   });
 
+  useEffect(() => {
+    const LoadStatus = async () => {
+      await streamStore.AllStreamsStatus();
+    };
+
+    LoadStatus();
+  }, [pageVersion]);
+
   const records = Object.values(streamStore.streams || {})
     .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
     .sort(SortTable({sortStatus}));
 
   return (
-    <>
+    <div key={`streams-${pageVersion}`}>
       <div className="streams">
-        <div className="page-header">Streams</div>
+        <PageHeader
+          title="Streams"
+          actions={[
+            {
+              label: "Refresh",
+              variant: "outline",
+              onClick: () => setPageVersion(prev => prev + 1)
+            }
+          ]}
+        />
         <TextInput
           maw={400}
           placeholder="Filter"
@@ -305,7 +323,7 @@ const Streams = observer(() => {
         onOpenChange={modalData.CloseCallback}
         ConfirmCallback={modalData.ConfirmCallback}
       />
-    </>
+    </div>
   );
 });
 

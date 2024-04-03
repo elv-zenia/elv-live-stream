@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import PageHeader from "Components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore} from "Stores";
@@ -15,6 +15,8 @@ const StreamDetailsPage = observer(() => {
   const params = useParams();
   let streamSlug, stream;
   const [showModal, {open, close}] = useDisclosure(false);
+  const [pageVersion, setPageVersion] = useState(0);
+  const [activeTab, setActiveTab] = useState("details");
 
   streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
     streamStore.streams[slug].objectId === params.id
@@ -29,7 +31,7 @@ const StreamDetailsPage = observer(() => {
   }
 
   return (
-    <>
+    <div key={`stream-details-${pageVersion}`}>
       <PageHeader
         title={`Edit ${stream.title || stream.objectId}`}
         status={streamStore.streams?.[streamSlug]?.status}
@@ -47,10 +49,15 @@ const StreamDetailsPage = observer(() => {
             uppercase: true,
             disabled: streamStore.streams?.[streamSlug]?.status !== STATUS_MAP.INACTIVE,
             onClick: open
+          },
+          {
+            label: "Refresh",
+            variant: "outline",
+            onClick: () => setPageVersion(prev => prev + 1)
           }
         ]}
       />
-      <Tabs className={classes.root} defaultValue="details">
+      <Tabs className={classes.root} value={activeTab} onChange={setActiveTab}>
         <Tabs.List className={classes.list}>
           {
             DETAILS_TABS.map(tab => (
@@ -84,7 +91,7 @@ const StreamDetailsPage = observer(() => {
         CloseCallback={close}
         ConfirmCallback={async () => await editStore.DeleteStream({objectId: stream.objectId})}
       />
-    </>
+    </div>
   );
 });
 

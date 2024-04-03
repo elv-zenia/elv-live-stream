@@ -14,7 +14,7 @@ import {QUALITY_TEXT} from "Data/HumanReadableText";
 import {IconAlertCircle} from "@tabler/icons-react";
 import {VideoContainer} from "Pages/monitor/Monitor";
 
-export const Runtime = ({startTime, endTime, currentTimeMs}) => {
+export const Runtime = ({startTime, endTime, currentTimeMs, format="hh:mm"}) => {
   let time;
 
   if(!endTime) {
@@ -25,7 +25,8 @@ export const Runtime = ({startTime, endTime, currentTimeMs}) => {
     time = "--";
   } else {
     time = FormatTime({
-      milliseconds: endTime - startTime
+      milliseconds: endTime - startTime,
+      format
     });
   }
 
