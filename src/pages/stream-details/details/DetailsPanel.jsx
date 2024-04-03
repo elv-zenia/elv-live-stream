@@ -12,6 +12,7 @@ import DetailsPeriodsTable from "Pages/stream-details/details/DetailsPeriodsTabl
 import DetailsRecordingCopiesTable from "Pages/stream-details/details/DetailsRecordingCopiesTable";
 import {QUALITY_TEXT} from "Data/HumanReadableText";
 import {IconAlertCircle} from "@tabler/icons-react";
+import {VideoContainer} from "Pages/monitor/Monitor";
 
 const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
@@ -77,7 +78,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
     let time;
     const running = status?.state === STATUS_MAP.RUNNING;
 
-    if(!running) {
+    if(!running || !startTime) {
       time = "--";
     } else {
       time = FormatTime({
@@ -113,18 +114,20 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
               <div className="form__section-header">Recording Info</div>
               <Text>
                 Created: {
-                  DateFormat({
-                    time: recordingInfo?.live_offering?.[0]?.start_time,
-                    format: "iso"
-                  })
+                  recordingInfo?.live_offering?.[0]?.start_time ?
+                    DateFormat({
+                      time: recordingInfo?.live_offering?.[0]?.start_time,
+                      format: "iso"
+                    }) : "--"
                 }
               </Text>
               <Text>
                 Current Period Started: {
-                  DateFormat({
-                    time: status?.recording_period?.start_time_epoch_sec,
-                    format: "sec"
-                  })
+                  status?.recording_period?.start_time_epoch_sec ?
+                    DateFormat({
+                      time: status?.recording_period?.start_time_epoch_sec,
+                      format: "sec"
+                    }) : "--"
                 }
               </Text>
               <Text>
@@ -147,7 +150,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
               <Skeleton visible={!frameSegmentUrl || !status} height={200} width={350}>
                 {
                   (status?.state === STATUS_MAP.RUNNING && frameSegmentUrl) ?
-                    <video src={frameSegmentUrl} height={200} style={{paddingRight: "32px"}}/> :
+                    <VideoContainer index={0} slug={slug} showPreview /> :
                     <Box bg="gray.3" h="100%" margin="auto" ta="center" style={{borderRadius: "4px"}}>
                       <Text lh="200px">Preview is not available</Text>
                     </Box>

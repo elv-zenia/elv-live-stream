@@ -13,7 +13,7 @@ import {SortTable} from "Stores/helpers/Misc";
 import PlayIcon from "Assets/icons/play circle.svg";
 import {STATUS_TEXT} from "Data/HumanReadableText";
 
-const VideoContainer = observer(({slug, index}) => {
+export const VideoContainer = observer(({slug, index, showPreview}) => {
   const [play, setPlay] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
   const [frameSegmentUrl, setFrameSegmentUrl] = useState(streamStore.streamFrameUrls[slug]?.url);
@@ -65,7 +65,7 @@ const VideoContainer = observer(({slug, index}) => {
             >
               <ImageIcon icon={PlayIcon} label="Play" className="monitor__video-placeholder-icon" />
               {
-                !streamStore.showMonitorPreviews || !frameSegmentUrl ? null :
+                (!showPreview || !frameSegmentUrl) ? null :
                   <video src={frameSegmentUrl} className="monitor__video-frame" />
               }
             </button> :
@@ -132,7 +132,7 @@ const Monitor = observer(() => {
                     .map((stream, index) => {
                       return (
                         <div key={stream.slug} className="monitor__grid-item-container">
-                          <VideoContainer index={index} slug={stream.slug} />
+                          <VideoContainer index={index} slug={stream.slug} showPreview={!streamStore.showMonitorPreviews} />
                           <div className="monitor__grid-item-details">
                             <div className="monitor__grid-item-details-content">
                               <div className="monitor__grid-item-details-top">
