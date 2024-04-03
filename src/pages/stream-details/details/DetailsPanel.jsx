@@ -24,42 +24,44 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const currentTimeMs = new Date().getTime();
 
   useEffect(() => {
-    const LoadDetails = async () => {
-      if(streamStore) {
-        const frameUrl = await streamStore.StreamFrameURL(slug);
-        setFrameSegmentUrl(frameUrl);
-      }
+    const LoadFrameUrl = async() => {
+      const frameUrl = await streamStore.StreamFrameURL(slug);
+      setFrameSegmentUrl(frameUrl);
+    };
 
-      if(params.id) {
-        const statusResponse = await streamStore.CheckStatus({
-          objectId: params.id
-        });
-        setStatus(statusResponse);
+    LoadFrameUrl();
+  }, []);
 
-        GetEdgeWriteTokenMeta();
-        GetLiveRecordingCopies();
+  useEffect(() => {
+    const LoadStatus = async () => {
+      const statusResponse = await streamStore.CheckStatus({
+        objectId: params.id
+      });
+      setStatus(statusResponse);
+    };
+
+    const LoadEdgeWriteTokenMeta = async() => {
+      const metadata = await dataStore.LoadEdgeWriteTokenMeta({
+        objectId: params.id
+      });
+
+      if(metadata) {
+        metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
+          ...item,
+          id: i
+        }));
+
+        setRecordingInfo(metadata);
       }
     };
 
-    LoadDetails();
-  }, [params, streamStore]);
+    LoadEdgeWriteTokenMeta();
+    LoadLiveRecordingCopies();
+    LoadStatus();
+  }, [params.id]);
 
-  const GetEdgeWriteTokenMeta = async() => {
-    const metadata = await dataStore.LoadEdgeWriteTokenMeta({
-      objectId: params.id
-    });
 
-    if(metadata) {
-      metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
-        ...item,
-        id: i
-      }));
-
-      setRecordingInfo(metadata);
-    }
-  };
-
-  const GetLiveRecordingCopies = async() => {
+  const LoadLiveRecordingCopies = async() => {
     let liveRecordingCopies = await streamStore.FetchLiveRecordingCopies({
       objectId: params.id
     });
@@ -142,7 +144,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
           <Flex>
             <Stack gap={0}>
               <div className="form__section-header">Preview</div>
-              <Skeleton visible={!frameSegmentUrl && status?.state === STATUS_MAP.RUNNING} height={200} width={350}>
+              <Skeleton visible={!frameSegmentUrl || !status} height={200} width={350}>
                 {
                   (status?.state === STATUS_MAP.RUNNING && frameSegmentUrl) ?
                     <video src={frameSegmentUrl} height={200} style={{paddingRight: "32px"}}/> :
@@ -181,7 +183,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
         objectId={params.id}
         records={recordingInfo?.live_offering}
         title={title}
-        CopyCallback={GetLiveRecordingCopies}
+        CopyCallback={LoadLiveRecordingCopies}
       />
     </>
   );

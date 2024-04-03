@@ -68,7 +68,10 @@ module.exports = {
     fallback: {
       "url": require.resolve("url"),
       "stream": require.resolve("stream-browserify"),
-      "vm": false
+      "vm": false,
+      "browser": false,
+      "console": require.resolve("console-browserify"),
+      "assert": false
     }
   },
   module: {
