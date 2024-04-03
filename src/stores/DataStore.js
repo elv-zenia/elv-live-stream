@@ -307,6 +307,8 @@ class DataStore {
         metadataSubtree: "/live_recording/fabric_config/edge_write_token"
       });
 
+      if(!edgeWriteToken) { return {}; }
+
       const metadata = yield this.client.ContentObjectMetadata({
         libraryId,
         objectId,
