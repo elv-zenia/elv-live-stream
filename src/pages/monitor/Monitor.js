@@ -66,7 +66,7 @@ export const VideoContainer = observer(({slug, index, showPreview}) => {
               <ImageIcon icon={PlayIcon} label="Play" className="monitor__video-placeholder-icon" />
               {
                 (!showPreview || !frameSegmentUrl) ? null :
-                  <video src={frameSegmentUrl} className="monitor__video-frame" />
+                  <video src={frameSegmentUrl} className="monitor__video-frame" controls={false} onContextMenu={e => e.preventDefault()} />
               }
             </button> :
             <>
