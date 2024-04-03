@@ -5,12 +5,13 @@ import {streamStore} from "Stores";
 import {notifications} from "@mantine/notifications";
 import {RECORDING_STATUS_TEXT} from "Data/HumanReadableText";
 import {Flex, Text} from "@mantine/core";
-import {DateFormat, FormatTime, Pluralize} from "Stores/helpers/Misc";
+import {DateFormat, Pluralize} from "Stores/helpers/Misc";
 import {Loader} from "Components/Loader";
 import {DataTable} from "mantine-datatable";
 import DetailsCopyModal from "Pages/stream-details/details/DetailsCopyModal";
+import {Runtime} from "Pages/stream-details/details/DetailsPanel";
 
-const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) => {
+const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, currentTimeMs}) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [copyingToVod, setCopyingToVod] = useState(false);
   const [showCopyModal, {open, close}] = useDisclosure(false);
@@ -98,7 +99,7 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
               <Text>
                 {
                   record.start_time ?
-                    DateFormat({time: record.start_time, format: "iso"}) : ""
+                    DateFormat({time: record.start_time, format: "iso"}) : "--"
                 }
               </Text>
             )
@@ -110,7 +111,7 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
               <Text>
                 {
                   record.end_time ?
-                    DateFormat({time: record.end_time, format: "iso"}) : ""
+                    DateFormat({time: record.end_time, format: "iso"}) : "--"
                 }
               </Text>
             )
@@ -121,11 +122,12 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
             render: record => (
               <Text>
                 {
-                  record.end_time && record.start_time ?
-                    FormatTime({
-                      iso: new Date(record.end_time).getTime() - new Date(record.start_time).getTime(),
-                      format: "hh:mm:ss"
-                    }) : ""
+                  record.start_time ?
+                    Runtime({
+                      startTime: new Date(record.start_time).getTime(),
+                      endTime: new Date(record.end_time).getTime(),
+                      currentTimeMs
+                    }) : "--"
                 }
               </Text>
             )

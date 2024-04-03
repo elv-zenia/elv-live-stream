@@ -14,6 +14,24 @@ import {QUALITY_TEXT} from "Data/HumanReadableText";
 import {IconAlertCircle} from "@tabler/icons-react";
 import {VideoContainer} from "Pages/monitor/Monitor";
 
+export const Runtime = ({startTime, endTime, currentTimeMs}) => {
+  let time;
+
+  if(!endTime) {
+    endTime = currentTimeMs;
+  }
+
+  if(!startTime) {
+    time = "--";
+  } else {
+    time = FormatTime({
+      milliseconds: endTime - startTime
+    });
+  }
+
+  return time;
+};
+
 const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
   const [status, setStatus] = useState(null);
@@ -74,21 +92,6 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
     setLiveRecordingCopies(liveRecordingCopies || {});
   };
 
-  const Runtime = ({startTime}) => {
-    let time;
-    const running = status?.state === STATUS_MAP.RUNNING;
-
-    if(!running || !startTime) {
-      time = "--";
-    } else {
-      time = FormatTime({
-        milliseconds: currentTimeMs - startTime
-      });
-    }
-
-    return `Current Period Runtime: ${time}`;
-  };
-
   return (
     <>
       <Grid>
@@ -114,10 +117,10 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
               <div className="form__section-header">Recording Info</div>
               <Text>
                 Created: {
-                  recordingInfo?.live_offering?.[0]?.start_time ?
+                  recordingInfo?._recordingStartTime ?
                     DateFormat({
-                      time: recordingInfo?.live_offering?.[0]?.start_time,
-                      format: "iso"
+                      time: recordingInfo?._recordingStartTime,
+                      format: "sec"
                     }) : "--"
                 }
               </Text>
@@ -131,10 +134,13 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
                 }
               </Text>
               <Text>
-                {
-                  Runtime({
-                    startTime: status?.recording_period?.start_time_epoch_sec * 1000
-                  })
+                Current Period Runtime: {
+                  status?.state !== STATUS_MAP.RUNNING ?
+                    "--" :
+                    Runtime({
+                      startTime: status?.recording_period?.start_time_epoch_sec * 1000,
+                      currentTimeMs
+                    })
                 }
               </Text>
             </Box>
@@ -187,6 +193,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
         records={recordingInfo?.live_offering}
         title={title}
         CopyCallback={LoadLiveRecordingCopies}
+        currentTimeMs={currentTimeMs}
       />
     </>
   );

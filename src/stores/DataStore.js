@@ -313,10 +313,14 @@ class DataStore {
         libraryId,
         objectId,
         writeToken: edgeWriteToken,
-        metadataSubtree: "live_recording/recordings"
+        metadataSubtree: "live_recording",
+        select: ["recordings", "recording_config"]
       });
 
-      return metadata;
+      return {
+        _recordingStartTime: metadata?.recording_config?.recording_start_time,
+        ...metadata.recordings
+      };
     } catch(error) {
       console.error("Unable to load metadata with edge write token", error);
     }
