@@ -81,20 +81,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
       });
     }
 
-    return `Runtime: ${time}`;
-  };
-
-  const AvailableTime = ({endTime}) => {
-    let time;
-    const running = status?.state === STATUS_MAP.RUNNING;
-
-    if(!running || !endTime) {
-      time = "--";
-    } else {
-      time = endTime - currentTimeMs;
-    }
-
-    return `Available: ${time}`;
+    return `Current Period Runtime: ${time}`;
   };
 
   return (
@@ -108,7 +95,6 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
               {
                 status?.warnings &&
                 <>
-                  <Text>Warnings:</Text>
                   <Box mt={16}>
                     <Code block icon={<IconAlertCircle />} color="rgba(250, 176, 5, 0.07)" style={{borderLeft: "4px solid var(--mantine-color-yellow-filled)", borderRadius: 0}}>
                       {(status?.warnings || []).map(item => (
@@ -122,19 +108,25 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
             <Box mb="24px" maw="70%">
               <div className="form__section-header">Recording Info</div>
               <Text>
-                Started: {status?.recording_period?.start_time_epoch_sec ? DateFormat({time: status?.recording_period?.start_time_epoch_sec, format: "sec"}) : "--"}
+                Created: {
+                  DateFormat({
+                    time: recordingInfo?.live_offering?.[0]?.start_time,
+                    format: "iso"
+                  })
+                }
               </Text>
               <Text>
-                {
-                  Runtime({
-                    startTime: status?.recording_period?.start_time_epoch_sec * 1000
+                Current Period Started: {
+                  DateFormat({
+                    time: status?.recording_period?.start_time_epoch_sec,
+                    format: "sec"
                   })
                 }
               </Text>
               <Text>
                 {
-                  AvailableTime({
-                    endTime: status?.recording_period?.end_time_epoch_sec
+                  Runtime({
+                    startTime: status?.recording_period?.start_time_epoch_sec * 1000
                   })
                 }
               </Text>
