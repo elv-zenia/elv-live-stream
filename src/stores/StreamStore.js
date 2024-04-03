@@ -261,11 +261,33 @@ class StreamStore {
     const searchParams = new URLSearchParams(params);
     searchParams.delete("authorization");
 
+    const browserSupportedDrms = (await this.client.AvailableDRMs() || []).filter(drm => ["clear", "aes-128"].includes(drm));
+
+    let playoutOptions, playoutMethods, playoutMethod;
+    playoutOptions = await this.client.PlayoutOptions({
+      objectId: stream.objectId,
+      protocols: ["hls"],
+      drms: browserSupportedDrms,
+      offering: "default"
+    });
+
+    playoutMethods = playoutOptions?.hls?.playoutMethods;
+
+    if(playoutMethods["clear"]) {
+      playoutMethod = "hls-clear";
+    } else if(playoutMethods["aes-128"]) {
+      playoutMethod = "hls-aes128";
+    } else if(playoutMethods["fairplay"]) {
+      playoutMethod = "hls-fairplay";
+    } else if(playoutMethods["sample-aes"]) {
+      playoutMethod = "hls-sample-aes";
+    }
+
     const url = new URL(
       await this.client.FabricUrl({
         libraryId: await this.client.ContentObjectLibraryId({objectId: stream.objectId}),
         objectId: stream.objectId,
-        rep: UrlJoin("/playout/default/hls-clear", path),
+        rep: UrlJoin(`/playout/default/${playoutMethod}`, path),
         queryParams: Object.fromEntries(searchParams),
         noAuth: true,
         channelAuth: true
@@ -282,7 +304,6 @@ class StreamStore {
   }
 
   FetchStreamFrameURL = flow(function * (slug) {
-    console.time(`Load Frame: ${slug}`);
     try {
       const stream = this.streams[slug];
 
@@ -301,12 +322,7 @@ class StreamStore {
         return;
       }
 
-      const segmentPlaylistResponse = yield(yield this.FetchVideoPath(stream, lowestBitratePath));
-
-      let segmentPlaylist;
-      if(segmentPlaylistResponse?.status === 200) {
-        segmentPlaylist = segmentPlaylistResponse.text();
-      }
+      const segmentPlaylist = yield(yield this.FetchVideoPath(stream, lowestBitratePath)).text();
 
       if(!segmentPlaylist) {
         return;
