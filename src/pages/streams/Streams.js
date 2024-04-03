@@ -13,14 +13,15 @@ import {
 
 import Modal from "Components/Modal";
 import {dataStore, editStore, streamStore} from "Stores";
-import {SortTable, StatusIndicator, VideoBitrateReadable} from "Stores/helpers/Misc";
+import {SortTable, VideoBitrateReadable} from "Stores/helpers/Misc";
 import {StreamIsActive} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
-import {CODEC_TEXT, FORMAT_TEXT, STATUS_TEXT} from "Data/HumanReadableText";
+import {CODEC_TEXT, FORMAT_TEXT} from "Data/HumanReadableText";
 
 import {useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
-import {Text, ActionIcon, Group, TextInput, Indicator} from "@mantine/core";
+import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import {StatusText} from "Components/header/PageHeader";
 
 const StreamModal = observer(({
   open,
@@ -127,11 +128,10 @@ const Streams = observer(() => {
               title: "Status",
               sortable: true,
               render: record => !record.status ? null :
-                <Indicator color={StatusIndicator(record.status)} position="middle-start" size={7}>
-                  <Text fz="sm" ml="sm">
-                    {STATUS_TEXT[record.status]}
-                  </Text>
-                </Indicator>
+                <StatusText
+                  status={record.status}
+                  quality={record.quality}
+                />
             },
             {
               accessor: "actions",

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Box, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
+import {Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
 import {dataStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
@@ -10,6 +10,8 @@ import {CopyToClipboard} from "Stores/helpers/Actions";
 import {IconCheck} from "@tabler/icons-react";
 import DetailsPeriodsTable from "Pages/stream-details/details/DetailsPeriodsTable";
 import DetailsRecordingCopiesTable from "Pages/stream-details/details/DetailsRecordingCopiesTable";
+import {QUALITY_TEXT} from "Data/HumanReadableText";
+import {IconAlertCircle} from "@tabler/icons-react";
 
 const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
@@ -101,7 +103,21 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
         <Grid.Col span={8}>
           <Flex direction="column" style={{flexGrow: "1"}}>
             <Box mb="24px" maw="70%">
-              <div className="form__section-header">Quality</div>
+              <div className="form__section-header">State</div>
+              <Text>Quality: {QUALITY_TEXT[status?.quality] || "--"}</Text>
+              {
+                status?.warnings &&
+                <>
+                  <Text>Warnings:</Text>
+                  <Box mt={16}>
+                    <Code block icon={<IconAlertCircle />} color="rgba(250, 176, 5, 0.07)" style={{borderLeft: "4px solid var(--mantine-color-yellow-filled)", borderRadius: 0}}>
+                      {(status?.warnings || []).map(item => (
+                        <Text key={`warning-${item}`}>{item}</Text>
+                      ))}
+                    </Code>
+                  </Box>
+                </>
+              }
             </Box>
             <Box mb="24px" maw="70%">
               <div className="form__section-header">Recording Info</div>

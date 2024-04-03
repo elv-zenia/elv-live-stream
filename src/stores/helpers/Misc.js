@@ -76,7 +76,11 @@ export const StatusIndicator = (status) => {
   }
 };
 
-export const FormatTime = ({milliseconds, format="hh:mm"}) => {
+export const FormatTime = ({milliseconds, iso, format="hh:mm"}) => {
+  if(iso) {
+    milliseconds = new Date(iso).getTime();
+  }
+
   if(!milliseconds) { return ""; }
 
   const hours = new Fraction(milliseconds, 1000)

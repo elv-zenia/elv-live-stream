@@ -33,6 +33,7 @@ const StreamDetailsPage = observer(() => {
       <PageHeader
         title={`Edit ${stream.title || stream.objectId}`}
         status={streamStore.streams?.[streamSlug]?.status}
+        quality={streamStore.streams?.[streamSlug]?.quality}
         actions={[
           {
             label: "Back",

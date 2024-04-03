@@ -28,3 +28,9 @@ export const RECORDING_STATUS_TEXT = {
   PARTIALLY_AVAILABLE: "Partially Available",
   AVAILABLE: "Available"
 };
+
+export const QUALITY_TEXT = {
+  "good": "Good",
+  "severe": "Severe",
+  "degraded": "Degraded"
+};

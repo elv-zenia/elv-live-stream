@@ -97,6 +97,8 @@ class StreamStore {
       key: slug,
       value: {
         status: response.state,
+        warnings: response.warnings,
+        quality: response.quality,
         ...streamDetails
       }
     });
@@ -225,6 +227,8 @@ class StreamStore {
               key: slug,
               value: {
                 status: response.state,
+                warnings: response.warnings,
+                quality: response.quality,
                 embedUrl: response?.playout_urls?.embed_url
               }
             });

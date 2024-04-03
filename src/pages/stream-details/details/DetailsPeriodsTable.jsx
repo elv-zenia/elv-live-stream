@@ -64,11 +64,13 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
   };
 
   const MeetsDurationMin = ({startTime, endTime}) => {
+    startTime = new Date(startTime).getTime();
+    endTime = new Date(endTime).getTime();
+
     if(endTime === 0 || startTime === 0) { return true; }
 
     return (endTime - startTime) >= 61000;
   };
-  console.log("records", records)
 
   return (
     <>
@@ -102,13 +104,13 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
             )
           },
           {
-            accessor: "end_time_epoch_sec",
+            accessor: "end_time",
             title: "End Time",
             render: record => (
               <Text>
                 {
-                  record.end_time_epoch_sec ?
-                    DateFormat({time: record.end_time_epoch_sec, format: "sec"}) : ""
+                  record.end_time ?
+                    DateFormat({time: record.end_time, format: "iso"}) : ""
                 }
               </Text>
             )
@@ -119,9 +121,9 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
             render: record => (
               <Text>
                 {
-                  record.end_time_epoch_sec && record.start_time_epoch_sec ?
+                  record.end_time && record.start_time ?
                     FormatTime({
-                      milliseconds: record.end_time_epoch_sec * 1000 - record.start_time_epoch_sec * 1000,
+                      iso: new Date(record.end_time).getTime() - new Date(record.start_time).getTime(),
                       format: "hh:mm:ss"
                     }) : ""
                 }
@@ -135,8 +137,8 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
               <Text>
                 {RecordingStatus({
                   item: record,
-                  startTime: record.start_time_epoch_sec * 1000,
-                  endTime: record.end_time_epoch_sec * 1000
+                  startTime: record.start_time,
+                  endTime: record.end_time
                 })}
               </Text>
             )
@@ -152,8 +154,8 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback}) 
           RecordingStatus({
             item: record,
             text: false,
-            startTime: record.start_time_epoch_sec * 1000,
-            endTime: record.end_time_epoch_sec * 1000
+            startTime: record.start_time,
+            endTime: record.end_time
           }) === "AVAILABLE"
         )}
         withTableBorder

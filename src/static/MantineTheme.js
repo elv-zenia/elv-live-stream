@@ -144,6 +144,13 @@ const theme = createTheme({
           "fontSize": "1.25rem"
         }
       })
+    },
+    Indicator: {
+      styles: () => ({
+        root: {
+          "lgg": "16px"
+        }
+      })
     }
   }
 });

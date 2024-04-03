@@ -46,3 +46,9 @@ export const ENCRYPTION_OPTIONS = [
   {value: "drm-fairplay", label: "DRM - Fairplay", title: "Playout Formats - HLS Fairplay", format: DRM_MAP.FAIRPLAY, id: "drm-fairplay"},
   {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear", format: DRM_MAP.CLEAR, id: "clear"}
 ];
+
+export const QUALITY_MAP = {
+  DEGRADED: "degraded",
+  SEVERE: "severe",
+  GOOD: "good"
+};
