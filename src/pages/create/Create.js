@@ -190,7 +190,8 @@ const Create = observer(() => {
   useEffect(() => {
     Promise.all([
       dataStore.LoadAccessGroups(),
-      dataStore.LoadLibraries()
+      dataStore.LoadLibraries(),
+      dataStore.LoadStreamUrls()
     ])
       .finally(() => setLoading(false));
   }, []);

@@ -49,8 +49,7 @@ class DataStore {
     }
 
     yield this.LoadStreams();
-    const streamUrls = yield this.LoadStreamUrls();
-    yield this.rootStore.streamStore.AllStreamsStatus({urls: streamUrls});
+    yield this.rootStore.streamStore.AllStreamsStatus();
   });
 
   LoadTenantInfo = flow(function * () {
@@ -273,26 +272,21 @@ class DataStore {
   });
 
   LoadStreamUrls = flow(function * () {
+    this.UpdateStreamUrls({});
     try {
-      const response = yield this.client.ContentObjectMetadata({
-        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
-        objectId: this.siteId,
-        metadataSubtree: "/live_stream_urls",
-        resolveLinks: true,
-        resolveIgnoreErrors: true
-      });
+      const response = yield this.client.StreamListUrls({siteId: this.siteId});
 
       const urls = {};
       Object.keys(response || {}).forEach(protocol => {
-        response[protocol].forEach(url => {
-          urls[url] = {
-            url,
+        response[protocol].forEach(protocolObject => {
+          urls[protocolObject.url] = {
+            ...protocolObject,
             protocol
           };
         });
       });
 
-      return urls;
+      this.UpdateStreamUrls({urls});
     } catch(error) {
       console.error("Unable to load stream URLs", error);
     }

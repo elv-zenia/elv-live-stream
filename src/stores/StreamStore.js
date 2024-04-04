@@ -209,7 +209,7 @@ class StreamStore {
     }
   })
 
-  AllStreamsStatus = flow(function * ({urls}={}) {
+  AllStreamsStatus = flow(function * () {
     if(this.loadingStatus) { return; }
 
     try {
@@ -234,23 +234,11 @@ class StreamStore {
                 embedUrl: response?.playout_urls?.embed_url
               }
             });
-
-            if(urls) {
-              const key = streamMeta?.referenceUrl || streamMeta?.originUrl;
-
-              if(Object.hasOwn(urls, key)) {
-                urls[key].active = StreamIsActive(response.state);
-              }
-            }
           } catch(error) {
             console.error(`Failed to load status for ${this.streams?.[slug].objectId}.`, error);
           }
         }
       );
-
-      if(urls) {
-        dataStore.UpdateStreamUrls({urls});
-      }
     } catch(error) {
       console.error(error);
     } finally {
