@@ -220,7 +220,7 @@ class StreamStore {
         Object.keys(this.streams || {}),
         async slug => {
           try {
-            const streamMeta = this.streams[slug];
+            const streamMeta = this.streams?.[slug];
             const response = await this.CheckStatus({
               objectId: streamMeta.objectId
             });
@@ -243,7 +243,7 @@ class StreamStore {
               }
             }
           } catch(error) {
-            console.error(`Failed to load status for ${this.streams[slug].objectId}.`, error);
+            console.error(`Failed to load status for ${this.streams?.[slug].objectId}.`, error);
           }
         }
       );

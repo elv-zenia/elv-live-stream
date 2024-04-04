@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {observer} from "mobx-react";
 import {Link} from "react-router-dom";
 import {
@@ -49,7 +49,6 @@ const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
-  const [pageVersion, setPageVersion] = useState(0);
 
   const ResetModal = () => {
     setModalData({
@@ -71,20 +70,12 @@ const Streams = observer(() => {
     CloseCallback: null
   });
 
-  useEffect(() => {
-    const LoadStatus = async () => {
-      await streamStore.AllStreamsStatus();
-    };
-
-    LoadStatus();
-  }, [pageVersion]);
-
   const records = Object.values(streamStore.streams || {})
     .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
     .sort(SortTable({sortStatus}));
 
   return (
-    <div key={`streams-${pageVersion}`}>
+    <div>
       <div className="streams">
         <PageHeader
           title="Streams"
@@ -92,7 +83,9 @@ const Streams = observer(() => {
             {
               label: "Refresh",
               variant: "outline",
-              onClick: () => setPageVersion(prev => prev + 1)
+              onClick: async () => {
+                await dataStore.Initialize();
+              }
             }
           ]}
         />

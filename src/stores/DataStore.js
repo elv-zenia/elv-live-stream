@@ -40,8 +40,13 @@ class DataStore {
 
   Initialize = flow(function * () {
     const tenantContractId = yield this.LoadTenantInfo();
-    this.siteId = yield this.LoadTenantData({tenantContractId});
-    this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
+    if(!this.siteId) {
+      this.siteId = yield this.LoadTenantData({tenantContractId});
+    }
+
+    if(!this.siteLibraryId) {
+      this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
+    }
 
     yield this.LoadStreams();
     const streamUrls = yield this.LoadStreamUrls();
@@ -97,6 +102,7 @@ class DataStore {
   });
 
   LoadStreams = flow(function * () {
+    streamStore.UpdateStreams({});
     let streamMetadata;
     try {
       const siteMetadata = yield this.client.ContentObjectMetadata({
