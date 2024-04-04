@@ -4,7 +4,7 @@ import {editStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
 import {FileInfo, StreamIsActive} from "Stores/helpers/Misc";
-import {ENCRYPTION_OPTIONS, STATUS_MAP} from "Data/StreamData";
+import {ENCRYPTION_OPTIONS} from "Data/StreamData";
 
 configure({
   enforceActions: "always"
@@ -193,6 +193,8 @@ class StreamStore {
   DeactivateStream = flow(function * ({objectId, slug}) {
     try {
       const response = yield this.client.StreamStopSession({name: objectId});
+
+      if(!response) { return; }
 
       this.UpdateStream({key: slug, value: { status: response.state }});
 
@@ -467,7 +469,9 @@ class StreamStore {
       };
 
       payload["imageWatermark"] = imageWatermark;
-    } else if(textWatermark) {
+    }
+
+    if(textWatermark) {
       payload["simpleWatermark"] = textWatermark;
     }
 
@@ -488,28 +492,28 @@ class StreamStore {
     imageWatermark,
     existingImageWatermark,
     objectId,
-    slug,
-    status
+    slug
   }) {
     const removeTypes = [];
+    const payload = {
+      objectId,
+      slug
+    };
+
     if(existingTextWatermark && !textWatermark) {
       removeTypes.push("text");
     } else if(textWatermark) {
-      yield this.AddWatermark({
-        objectId,
-        slug,
-        textWatermark: textWatermark ? JSON.parse(textWatermark) : null
-      });
+      payload["textWatermark"] = textWatermark ? JSON.parse(textWatermark) : null;
     }
 
     if(existingImageWatermark && !imageWatermark) {
       removeTypes.push("image");
     } else if(imageWatermark) {
-      yield this.AddWatermark({
-        objectId,
-        slug,
-        imageWatermarkFile: imageWatermark
-      });
+      payload["imageWatermarkFile"] = imageWatermark;
+    }
+
+    if(imageWatermark || textWatermark) {
+      yield this.AddWatermark(payload);
     }
 
     if(removeTypes.length > 0) {
@@ -517,14 +521,6 @@ class StreamStore {
         objectId,
         slug,
         types: removeTypes
-      });
-    }
-
-    if(status === STATUS_MAP.RUNNING) {
-      yield this.OperateLRO({
-        objectId,
-        slug,
-        operation: "RESET"
       });
     }
 
@@ -543,8 +539,11 @@ class StreamStore {
   DrmConfiguration = flow(function * ({
     objectId,
     slug,
-    drmType
+    drmType,
+    existingDrmType
   }) {
+    if(existingDrmType === drmType) { return; }
+
     const drmOption = ENCRYPTION_OPTIONS.find(option => option.value === drmType);
 
     const libraryId = yield client.ContentObjectLibraryId({objectId});

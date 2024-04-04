@@ -52,6 +52,7 @@ const PlayoutPanel = observer(({
   title
 }) => {
   const [drm, setDrm] = useState(currentDrm);
+  const [formDrm, setFormDrm] = useState(currentDrm ? currentDrm : undefined);
   const [formWatermarks, setFormWatermarks] = useState(
     {
       image: imageWatermark ? imageWatermark : undefined,
@@ -101,6 +102,7 @@ const PlayoutPanel = observer(({
       await streamStore.DrmConfiguration({
         objectId,
         slug,
+        existingDrmType: currentDrm,
         drmType: drm
       });
 
