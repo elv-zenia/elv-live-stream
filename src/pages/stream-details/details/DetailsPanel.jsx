@@ -44,20 +44,18 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
   const currentTimeMs = new Date().getTime();
 
   useEffect(() => {
-    const LoadFrameUrl = async() => {
-      const frameUrl = await streamStore.StreamFrameURL(slug);
-      setFrameSegmentUrl(frameUrl);
-    };
-
-    LoadFrameUrl();
-  }, []);
-
-  useEffect(() => {
     const LoadStatus = async () => {
       const statusResponse = await streamStore.CheckStatus({
         objectId: params.id
       });
+
+      let frameUrl = "";
+      if(statusResponse?.state === STATUS_MAP.RUNNING) {
+        streamStore.StreamFrameURL(slug).then(url => setFrameSegmentUrl(url));
+      }
+
       setStatus(statusResponse);
+      setFrameSegmentUrl(frameUrl || "");
     };
 
     const LoadEdgeWriteTokenMeta = async() => {
@@ -154,7 +152,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
           <Flex>
             <Stack gap={0}>
               <div className="form__section-header">Preview</div>
-              <Skeleton visible={!frameSegmentUrl || !status} height={200} width={350}>
+              <Skeleton visible={frameSegmentUrl === undefined || !status} height={200} width={350}>
                 {
                   (status?.state === STATUS_MAP.RUNNING && frameSegmentUrl) ?
                     <VideoContainer index={0} slug={slug} showPreview /> :

@@ -38,6 +38,7 @@ export const StatusText = ({status, quality, withBorder=false}) => {
 
 const PageHeader = observer(({
   title,
+  subtitle,
   showSearchBar=false,
   actions=[],
   status,
@@ -55,10 +56,18 @@ const PageHeader = observer(({
       {
         title &&
         <div className="page-header" style={{marginTop: "32px"}}>
-          <Group>
-            {title}
-            <StatusText status={status} quality={quality} withBorder />
-          </Group>
+          <Flex direction="column">
+            <Group>
+              {title}
+              <StatusText status={status} quality={quality} withBorder />
+            </Group>
+            <Box display="block">
+              {
+                subtitle &&
+                <Text size="sm" c="gray" mt={6}>{subtitle}</Text>
+              }
+            </Box>
+          </Flex>
         </div>
       }
     </Flex>

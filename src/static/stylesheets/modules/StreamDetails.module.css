@@ -11,7 +11,7 @@
 
   &:first-child {
     /* Align left-most tab with title and content */
-    padding-left: 0;
+    /*padding-left: 0;*/
   }
 
   /*&[aria-selected="false"] {*/

@@ -34,6 +34,7 @@ const StreamDetailsPage = observer(() => {
     <div key={`stream-details-${pageVersion}`}>
       <PageHeader
         title={`Edit ${stream.title || stream.objectId}`}
+        subtitle={stream.objectId}
         status={streamStore.streams?.[streamSlug]?.status}
         quality={streamStore.streams?.[streamSlug]?.quality}
         actions={[
