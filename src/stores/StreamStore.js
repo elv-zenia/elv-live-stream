@@ -3,7 +3,7 @@ import {configure, flow, makeAutoObservable} from "mobx";
 import {editStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
-import {FileInfo, StreamIsActive} from "Stores/helpers/Misc";
+import {FileInfo} from "Stores/helpers/Misc";
 import {ENCRYPTION_OPTIONS} from "Data/StreamData";
 
 configure({
@@ -178,13 +178,6 @@ class StreamStore {
       });
 
       this.UpdateStream({key: slug, value: { status: response.state }});
-
-      dataStore.UpdateStreamUrl({
-        key: response.reference_url,
-        value: {
-          active: StreamIsActive(response.state)
-        }
-      });
     } catch(error) {
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }
@@ -197,13 +190,6 @@ class StreamStore {
       if(!response) { return; }
 
       this.UpdateStream({key: slug, value: { status: response.state }});
-
-      dataStore.UpdateStreamUrl({
-        key: response.reference_url,
-        value: {
-          active: StreamIsActive(response.state)
-        }
-      });
     } catch(error) {
       console.error("Unable to deactivate stream", error);
     }

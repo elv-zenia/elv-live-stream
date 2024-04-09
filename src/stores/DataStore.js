@@ -340,16 +340,6 @@ class DataStore {
   UpdateStreamUrls = ({urls}) => {
     this.liveStreamUrls = urls;
   };
-
-  UpdateStreamUrl = ({key, value={}}) => {
-    // Do not add custom stream urls to pre-allocated urls
-    if(!Object.hasOwn(this.liveStreamUrls, key)) { return; }
-
-    this.liveStreamUrls[key] = {
-      ...(this.liveStreamUrls[key] || {}),
-      ...value
-    };
-  };
 }
 
 export default DataStore;
