@@ -1,56 +1,31 @@
 import React from "react";
 import {observer} from "mobx-react";
-import {HashRouter, Navigate, Route, Routes} from "react-router-dom";
+import {HashRouter} from "react-router-dom";
 import {rootStore} from "Stores";
 
-import {MantineProvider, ActionIcon} from "@mantine/core";
-import {IconX} from "@tabler/icons-react";
+import "@mantine/core/styles.css";
+import "mantine-datatable/styles.css";
+import "@mantine/notifications/styles.css";
+import {MantineProvider} from "@mantine/core";
+import {Notifications} from "@mantine/notifications";
 
+import AppRoutes from "Routes";
+import MantineTheme from "Assets/MantineTheme";
 import {PageLoader} from "Components/Loader";
 import LeftNavigation from "Components/LeftNavigation";
 import DataWrapper from "Components/DataWrapper";
-
-import Create from "Pages/create/Create";
-import Streams from "Pages/streams/Streams";
-import Monitor from "Pages/monitor/Monitor";
-import StreamPreview from "Pages/streams/StreamPreview";
-
-const AppRoutes = observer(() => {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate replace to="/streams" />} />
-      <Route path="/create" element={<Create />} />
-      <Route path="/streams" element={<Streams />} />
-      <Route path="/monitor" element={<Monitor />} />
-      <Route path="/streams/:id" element={<StreamPreview />} />
-    </Routes>
-  );
-});
-
-const ErrorBanner = observer(() => {
-  if(!rootStore.errorMessage) { return null; }
-
-  return (
-    <div className="error-banner">
-      <div className="error-banner__message">
-        {rootStore.errorMessage}
-      </div>
-      <ActionIcon className="error-banner__close" onClick={() => rootStore.SetErrorMessage(undefined)}>
-        <IconX />
-      </ActionIcon>
-    </div>
-  );
-});
+import ErrorBanner from "Components/error/ErrorBanner";
 
 const App = observer(() => {
   if(!rootStore.loaded) { return <PageLoader />; }
 
   return (
-    <MantineProvider withGlobalStyles withNormalizeCSS withCSSVariables>
+    <MantineProvider withCSSVariables theme={MantineTheme}>
       <HashRouter>
         <LeftNavigation />
         <main>
           <ErrorBanner />
+          <Notifications zIndex={1000} position="top-right" autoClose={false} />
           <div className="main-content">
             <DataWrapper>
               { rootStore.loaded ? <AppRoutes /> : null}

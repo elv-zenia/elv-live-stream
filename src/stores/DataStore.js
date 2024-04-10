@@ -13,6 +13,7 @@ class DataStore {
   libraries;
   accessGroups;
   contentType;
+  titleContentType;
   siteId;
   siteLibraryId;
   liveStreamUrls;
@@ -39,12 +40,16 @@ class DataStore {
 
   Initialize = flow(function * () {
     const tenantContractId = yield this.LoadTenantInfo();
-    this.siteId = yield this.LoadTenantData({tenantContractId});
-    this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
+    if(!this.siteId) {
+      this.siteId = yield this.LoadTenantData({tenantContractId});
+    }
+
+    if(!this.siteLibraryId) {
+      this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
+    }
 
     yield this.LoadStreams();
-    const streamUrls = yield this.LoadStreamUrls();
-    yield this.rootStore.streamStore.AllStreamsStatus({urls: streamUrls});
+    yield this.rootStore.streamStore.AllStreamsStatus();
   });
 
   LoadTenantInfo = flow(function * () {
@@ -73,13 +78,18 @@ class DataStore {
         metadataSubtree: "public",
         select: [
           "sites/live_streams",
-          "content_types/live_stream"
+          "content_types/live_stream",
+          "content_types/title"
         ]
       });
       const {sites, content_types} = response;
 
       if(content_types?.live_stream) {
         this.contentType = content_types.live_stream;
+      }
+
+      if(content_types?.title) {
+        this.titleContentType = content_types.title;
       }
 
       return sites?.live_streams;
@@ -91,6 +101,7 @@ class DataStore {
   });
 
   LoadStreams = flow(function * () {
+    streamStore.UpdateStreams({});
     let streamMetadata;
     try {
       const siteMetadata = yield this.client.ContentObjectMetadata({
@@ -130,6 +141,7 @@ class DataStore {
           streamMetadata[slug].versionHash = versionHash;
           streamMetadata[slug].libraryId = libraryId;
           streamMetadata[slug].title = stream.display_title || stream.title;
+          streamMetadata[slug].embedUrl = await this.EmbedUrl({objectId});
 
           const streamDetails = await this.LoadStreamMetadata({
             objectId,
@@ -213,8 +225,11 @@ class DataStore {
           "live_recording/probe_info/format/filename",
           "live_recording/probe_info/streams",
           "live_recording/recording_config/recording_params/origin_url",
+          "live_recording/recording_config/recording_params/simple_watermark",
+          "live_recording/recording_config/recording_params/image_watermark",
           "live_recording_config/reference_url",
-          "live_recording_config/url"
+          "live_recording_config/url",
+          "live_recording_config/drm_type"
         ]
       });
       let probeMeta = streamMeta?.live_recording?.probe_info;
@@ -246,7 +261,10 @@ class DataStore {
         videoBitrate: videoStream?.bit_rate,
         codecName: videoStream?.codec_name,
         audioStreamCount,
-        referenceUrl: streamMeta?.live_recording_config?.reference_url
+        referenceUrl: streamMeta?.live_recording_config?.reference_url,
+        drm: streamMeta?.live_recording_config?.drm_type,
+        simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
+        imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark
       };
     } catch(error) {
       console.error("Unable to load stream metadata", error);
@@ -254,28 +272,57 @@ class DataStore {
   });
 
   LoadStreamUrls = flow(function * () {
+    this.UpdateStreamUrls({});
     try {
-      const response = yield this.client.ContentObjectMetadata({
-        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
-        objectId: this.siteId,
-        metadataSubtree: "/live_stream_urls",
-        resolveLinks: true,
-        resolveIgnoreErrors: true
-      });
+      const response = yield this.client.StreamListUrls({siteId: this.siteId});
 
       const urls = {};
       Object.keys(response || {}).forEach(protocol => {
-        response[protocol].forEach(url => {
-          urls[url] = {
-            url,
+        response[protocol].forEach(protocolObject => {
+          urls[protocolObject.url] = {
+            ...protocolObject,
             protocol
           };
         });
       });
 
-      return urls;
+      this.UpdateStreamUrls({urls});
     } catch(error) {
       console.error("Unable to load stream URLs", error);
+    }
+  });
+
+  LoadEdgeWriteTokenMeta = flow(function * ({
+    objectId,
+    libraryId
+  }) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      const edgeWriteToken = yield this.client.ContentObjectMetadata({
+        objectId,
+        libraryId,
+        metadataSubtree: "/live_recording/fabric_config/edge_write_token"
+      });
+
+      if(!edgeWriteToken) { return {}; }
+
+      const metadata = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        writeToken: edgeWriteToken,
+        metadataSubtree: "live_recording",
+        select: ["recordings", "recording_config"]
+      });
+
+      return {
+        _recordingStartTime: metadata?.recording_config?.recording_start_time,
+        ...metadata.recordings
+      };
+    } catch(error) {
+      console.error("Unable to load metadata with edge write token", error);
     }
   });
 
@@ -292,16 +339,6 @@ class DataStore {
 
   UpdateStreamUrls = ({urls}) => {
     this.liveStreamUrls = urls;
-  };
-
-  UpdateStreamUrl = ({key, value={}}) => {
-    // Do not add custom stream urls to pre-allocated urls
-    if(!Object.hasOwn(this.liveStreamUrls, key)) { return; }
-
-    this.liveStreamUrls[key] = {
-      ...(this.liveStreamUrls[key] || {}),
-      ...value
-    };
   };
 }
 

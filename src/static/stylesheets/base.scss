@@ -24,10 +24,6 @@ body {
   font-size: 16px;
   margin: 0;
   padding: 0;
-
-  * {
-    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  }
 }
 
 html,
@@ -113,7 +109,8 @@ textarea {
 
 input[type="submit"],
 .button__primary,
-.button__secondary {
+.button__secondary,
+.button__dark {
   font-size: 0.85rem;
 }
 
@@ -154,6 +151,26 @@ a.button {
     height: 100%;
     overflow: hidden;
     white-space: nowrap;
+  }
+}
+
+.button__dark {
+  background-color: $gray-3;
+  border: 1px solid $gray-6;
+  color: $white;
+  cursor: pointer;
+  min-height: 35px;
+  min-width: 7.5rem;
+  padding: 3px 10px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: $gray-5;
+    color: $white;
   }
 }
 

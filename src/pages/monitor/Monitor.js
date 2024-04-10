@@ -1,36 +1,26 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
+import {IconX} from "@tabler/icons-react";
+import {ActionIcon, TextInput} from "@mantine/core";
+import {useDebouncedValue} from "@mantine/hooks";
+
 import {dataStore, streamStore} from "Stores";
 import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
 import ImageIcon from "Components/ImageIcon";
-import {ActionIcon, TextInput} from "@mantine/core";
-
-import PlayIcon from "Assets/icons/play circle.svg";
-
-import {IconX} from "@tabler/icons-react";
 import {Loader} from "Components/Loader";
-import {SortTable} from "Pages/streams/Streams";
-import {useDebouncedValue} from "@mantine/hooks";
+import {SortTable} from "Stores/helpers/Misc";
+import PlayIcon from "Assets/icons/play circle.svg";
+import {STATUS_TEXT} from "Data/HumanReadableText";
 
-const STATUS_TEXT = {
-  unconfigured: "Not Configured",
-  uninitialized: "Uninitialized",
-  inactive: "Inactive",
-  stopped: "Stopped",
-  starting: "Starting",
-  running: "Running",
-  stalled: "Stalled"
-};
-
-const VideoContainer = observer(({slug, index}) => {
+export const VideoContainer = observer(({slug, index, showPreview}) => {
   const [play, setPlay] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
   const [frameSegmentUrl, setFrameSegmentUrl] = useState(streamStore.streamFrameUrls[slug]?.url);
   const status = streamStore.streams?.[slug]?.status;
 
   useEffect(() => {
-    if(!streamStore.showMonitorPreviews || play || status !== "running") {
+    if(!showPreview || play || status !== "running") {
       return;
     }
 
@@ -49,7 +39,7 @@ const VideoContainer = observer(({slug, index}) => {
     }, delay);
 
     return () => clearTimeout(frameTimeout);
-  }, [play, frameKey, status, streamStore.showMonitorPreviews]);
+  }, [play, frameKey, status, showPreview]);
 
   // Reload frame every minute after initial frame load
   useEffect(() => {
@@ -75,8 +65,8 @@ const VideoContainer = observer(({slug, index}) => {
             >
               <ImageIcon icon={PlayIcon} label="Play" className="monitor__video-placeholder-icon" />
               {
-                !streamStore.showMonitorPreviews || !frameSegmentUrl ? null :
-                  <video src={frameSegmentUrl} className="monitor__video-frame" />
+                (!showPreview || !frameSegmentUrl) ? null :
+                  <video src={frameSegmentUrl} className="monitor__video-frame" controls={false} onContextMenu={e => e.preventDefault()} />
               }
             </button> :
             <>
@@ -142,7 +132,7 @@ const Monitor = observer(() => {
                     .map((stream, index) => {
                       return (
                         <div key={stream.slug} className="monitor__grid-item-container">
-                          <VideoContainer index={index} slug={stream.slug} />
+                          <VideoContainer index={index} slug={stream.slug} showPreview={streamStore.showMonitorPreviews} />
                           <div className="monitor__grid-item-details">
                             <div className="monitor__grid-item-details-content">
                               <div className="monitor__grid-item-details-top">

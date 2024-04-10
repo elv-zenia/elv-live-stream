@@ -1,13 +1,6 @@
 import React, {useState} from "react";
 import {observer} from "mobx-react";
-import {dataStore, editStore, streamStore} from "Stores";
-import Modal from "Components/Modal";
-import {STATUS_MAP, StreamIsActive} from "Stores/helpers/Misc";
-
-import {DataTable} from "mantine-datatable";
-import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import {Link} from "react-router-dom";
-
 import {
   IconPlayerPlay,
   IconPlayerStop,
@@ -17,32 +10,18 @@ import {
   IconListCheck,
   IconCircleX
 } from "@tabler/icons-react";
+
+import Modal from "Components/Modal";
+import {dataStore, editStore, streamStore} from "Stores";
+import {SortTable, VideoBitrateReadable} from "Stores/helpers/Misc";
+import {StreamIsActive} from "Stores/helpers/Misc";
+import {STATUS_MAP} from "Data/StreamData";
+import {CODEC_TEXT, FORMAT_TEXT} from "Data/HumanReadableText";
+
 import {useDebouncedValue} from "@mantine/hooks";
-import {VideoBitrateReadable} from "Stores/helpers/Misc";
-
-const STATUS_TEXT = {
-  unconfigured: "Not Configured",
-  uninitialized: "Uninitialized",
-  inactive: "Inactive",
-  stopped: "Stopped",
-  starting: "Starting",
-  running: "Running",
-  stalled: "Stalled",
-  terminating: "Terminating"
-};
-
-const FORMAT_TEXT = {
-  udp: "MPEGTS",
-  srt: "SRT",
-  "srt-caller": "SRT Caller",
-  rtmp: "RTMP"
-};
-
-const CODEC_TEXT = {
-  h264: "H.264",
-  h265: "H.265",
-  mpeg2video: "MPEG-2"
-};
+import {DataTable} from "mantine-datatable";
+import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import PageHeader, {StatusText} from "Components/header/PageHeader";
 
 const StreamModal = observer(({
   open,
@@ -65,27 +44,6 @@ const StreamModal = observer(({
     />
   );
 });
-
-export const SortTable = ({sortStatus, AdditionalCondition}) => {
-  return (a, b) => {
-    if(AdditionalCondition && typeof AdditionalCondition(a, b) !== "undefined") {
-      return AdditionalCondition(a, b);
-    }
-
-    a = a[sortStatus.columnAccessor];
-    b = b[sortStatus.columnAccessor];
-
-    if(typeof a === "number") {
-      a = a || 0;
-      b = b || 0;
-    } else {
-      a = a?.toLowerCase?.() || a || "";
-      b = b?.toLowerCase?.() || b || "";
-    }
-
-    return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
-  };
-};
 
 const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
@@ -117,9 +75,20 @@ const Streams = observer(() => {
     .sort(SortTable({sortStatus}));
 
   return (
-    <>
+    <div>
       <div className="streams">
-        <div className="page-header">Streams</div>
+        <PageHeader
+          title="Streams"
+          actions={[
+            {
+              label: "Refresh",
+              variant: "outline",
+              onClick: async () => {
+                await dataStore.Initialize();
+              }
+            }
+          ]}
+        />
         <TextInput
           maw={400}
           placeholder="Filter"
@@ -128,7 +97,7 @@ const Streams = observer(() => {
           onChange={event => setFilter(event.target.value)}
         />
         <DataTable
-          withBorder
+          withTableBorder
           highlightOnHover
           idAccessor="objectId"
           minHeight={!records || records.length === 0 ? 150 : 75}
@@ -155,25 +124,38 @@ const Streams = observer(() => {
           columns={[
             { accessor: "title", title: "Name", sortable: true, render: record => (
               <div className="table__multi-line">
-                <Text fw={600}>{record.title}</Text>
-                <Text color="dimmed" fz="xs">{record.objectId}</Text>
+                <Link to={`/streams/${record.objectId}`}>
+                  <Text fw={600}>{record.title}</Text>
+                </Link>
+                <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
             )},
             { accessor: "originUrl", title: "URL", render: record => <Text>{record.originUrl}</Text> },
             { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
             { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
             { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
-            { accessor: "status", title: "Status", sortable: true, render: record => !record.status ? null : <Text fz="sm">{STATUS_TEXT[record.status]}</Text> },
+            {
+              accessor: "status",
+              title: "Status",
+              sortable: true,
+              render: record => !record.status ? null :
+                <StatusText
+                  status={record.status}
+                  quality={record.quality}
+                />
+            },
             {
               accessor: "actions",
               title: "",
               render: record => {
                 return (
-                  <Group spacing={5} align="top" position="right">
+                  <Group gap="xxs" justify="right">
                     {
                       ![STATUS_MAP.UNINITIALIZED, STATUS_MAP.INACTIVE].includes(record.status) ? null :
                         <ActionIcon
                           title="Check Stream"
+                          variant="subtle"
+                          color="gray.6"
                           onClick={async () => {
                             const url = await streamStore.client.ContentObjectMetadata({
                               libraryId: await streamStore.client.ContentObjectLibraryId({objectId: record.objectId}),
@@ -204,6 +186,8 @@ const Streams = observer(() => {
                       !record.status || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(record.status) ? null :
                         <ActionIcon
                           title="Start Stream"
+                          variant="subtle"
+                          color="gray.6"
                           onClick={() => {
                             setModalData({
                               objectId: record.objectId,
@@ -224,6 +208,8 @@ const Streams = observer(() => {
                       !record.status || record.status !== STATUS_MAP.STOPPED ? null :
                         <ActionIcon
                           title="Deactivate Stream"
+                          variant="subtle"
+                          color="gray.6"
                           onClick={() => {
                             setModalData({
                               objectId: record.objectId,
@@ -248,13 +234,17 @@ const Streams = observer(() => {
                         <>
                           <ActionIcon
                             component={Link}
-                            to={`/streams/${record.objectId}`}
+                            to={`/streams/${record.objectId}/preview`}
                             title="View Stream"
+                            variant="subtle"
+                            color="gray.6"
                           >
                             <IconDeviceAnalytics />
                           </ActionIcon>
                           <ActionIcon
                             title="Stop Stream"
+                            variant="subtle"
+                            color="gray.6"
                             onClick={() => {
                               setModalData({
                                 objectId: record.objectId,
@@ -278,6 +268,8 @@ const Streams = observer(() => {
                     }
                     <ActionIcon
                       title="Open in Fabric Browser"
+                      variant="subtle"
+                      color="gray.6"
                       onClick={() => editStore.client.SendMessage({
                         options: {
                           operation: "OpenLink",
@@ -291,6 +283,8 @@ const Streams = observer(() => {
                     </ActionIcon>
                     <ActionIcon
                       title="Delete Stream"
+                      variant="subtle"
+                      color="gray.6"
                       disabled={StreamIsActive(record.status)}
                       onClick={() => {
                         setModalData({
@@ -322,7 +316,7 @@ const Streams = observer(() => {
         onOpenChange={modalData.CloseCallback}
         ConfirmCallback={modalData.ConfirmCallback}
       />
-    </>
+    </div>
   );
 });
 

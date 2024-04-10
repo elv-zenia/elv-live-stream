@@ -27,6 +27,10 @@
     top: 5px;
     transition: opacity 0.25s ease;
     z-index: 1;
+
+    &.mantine-ActionIcon-root {
+      position: absolute;
+    }
   }
 
   &__video-wrapper {

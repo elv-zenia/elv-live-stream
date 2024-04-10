@@ -1,6 +1,7 @@
 const Path = require("path");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 let plugins = [
   new HtmlWebpackPlugin({
@@ -8,6 +9,11 @@ let plugins = [
     template: Path.join(__dirname, "src", "index.html"),
     filename: "index.html",
     inject: "body"
+  }),
+  new CopyWebpackPlugin({
+    patterns: [
+      { from: Path.join(__dirname, "configuration.js"), to: Path.join(__dirname, "dist", "configuration.js") }
+    ]
   })
 ];
 
@@ -54,13 +60,18 @@ module.exports = {
       Pages: Path.resolve(__dirname, "src/pages"),
       Routes: Path.resolve(__dirname, "src/routes"),
       Stores: Path.resolve(__dirname, "src/stores"),
+      Data: Path.resolve(__dirname, "src/data"),
       // Force webpack to use *one* copy of bn.js instead of 8
       "bn.js": Path.resolve(Path.join(__dirname, "node_modules", "bn.js"))
     },
     extensions: [".js", ".jsx", ".mjs", ".scss", ".png", ".svg"],
     fallback: {
       "url": require.resolve("url"),
-      "stream": require.resolve("stream-browserify")
+      "stream": require.resolve("stream-browserify"),
+      "vm": false,
+      "browser": false,
+      "console": require.resolve("console-browserify"),
+      "assert": false
     }
   },
   module: {

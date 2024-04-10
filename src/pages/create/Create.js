@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from "react";
-import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
-import {dataStore, editStore} from "Stores";
 import {observer} from "mobx-react";
+import {dataStore, editStore} from "Stores";
+import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
+import {ENCRYPTION_OPTIONS} from "Data/StreamData";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -44,12 +45,7 @@ const Permissions = observer(({permission, UpdateCallback}) => {
 });
 
 const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
-  const options = [
-    {value: "drm-public", label: "DRM - Public Access", title: "Playout Formats - Dash Widevine, HLS Sample AES, HLS AES-128"},
-    {value: "drm-all", label: "DRM - All Formats", title: "Playout Formats - Dash Widevine, HLS Sample AES, HLS AES-128, HLS Fairplay"},
-    {value: "drm-restricted", label: "DRM - Widevine and Fairplay", title: "Playout Formats - Dash Widevine, HLS Fairplay"},
-    {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear"}
-  ];
+  const options = ENCRYPTION_OPTIONS;
 
   return (
     <Select
@@ -64,8 +60,8 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
       value={drmFormData.encryption}
       onChange={event => UpdateCallback({event, key: "encryption"})}
       tooltip={
-        options.map(({label, title, value}) =>
-          <div key={`encryption-info-${value}`} className="form__tooltip-item">
+        options.map(({label, title, id}) =>
+          <div key={`encryption-info-${id}`} className="form__tooltip-item">
             <div className="form__tooltip-item__encryption-title">{ label }:</div>
             <div>{ title }</div>
           </div>
@@ -122,7 +118,7 @@ const AdvancedSection = observer(({
           <Select
             label="Retention"
             labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-            formName="playbackEncryption"
+            formName="retention"
             options={[
               {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
               {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
@@ -194,7 +190,8 @@ const Create = observer(() => {
   useEffect(() => {
     Promise.all([
       dataStore.LoadAccessGroups(),
-      dataStore.LoadLibraries()
+      dataStore.LoadLibraries(),
+      dataStore.LoadStreamUrls()
     ])
       .finally(() => setLoading(false));
   }, []);
@@ -231,7 +228,7 @@ const Create = observer(() => {
   });
 
   const [drmFormData, setDrmFormData] = useState({
-    encryption: "DRM"
+    encryption: ""
   });
 
   const navigate = useNavigate();
@@ -332,7 +329,7 @@ const Create = observer(() => {
             },
             {
               optionLabel: "Custom",
-              id: "custom",
+              id: "customProtocol",
               value: "custom",
               checked: basicFormData.protocol === "custom",
               onChange: event => UpdateFormData({

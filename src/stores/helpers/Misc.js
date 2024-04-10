@@ -1,3 +1,6 @@
+import {AV_STREAM, STATUS_MAP} from "Data/StreamData";
+import Fraction from "fraction.js";
+
 export const ParseLiveConfigData = ({
   inputFormData,
   outputFormData,
@@ -10,18 +13,9 @@ export const ParseLiveConfigData = ({
   const {audioStreamIndex} = inputFormData;
   const {audioChannelLayout, audioBitrate} = outputFormData;
 
-  const AV_STREAM = {
-    DEFAULT: "default",
-    CUSTOM: "specific"
-  };
-
-  const ENCRYPTION_TYPES = {
-    DRM: "drm",
-    CLEAR: "clear"
-  };
-
   const config = {
-    drm: ENCRYPTION_TYPES[encryption],
+    drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
+    drm_type: encryption,
     input: {
       audio: {
         stream: AV_STREAM[avProperties],
@@ -60,16 +54,6 @@ export const VideoBitrateReadable = (bitrate) => {
   return `${value}Mbps`;
 };
 
-export const STATUS_MAP = {
-  UNCONFIGURED: "unconfigured",
-  UNINITIALIZED: "uninitialized",
-  INACTIVE: "inactive",
-  STOPPED: "stopped",
-  STARTING: "starting",
-  RUNNING: "running",
-  STALLED: "stalled",
-};
-
 export const StreamIsActive = (state) => {
   let active = false;
 
@@ -78,4 +62,108 @@ export const StreamIsActive = (state) => {
   }
 
   return active;
+};
+
+export const StatusIndicator = (status) => {
+  if(status === STATUS_MAP.STOPPED) {
+    return "elv-orange.6";
+  } else if(status === STATUS_MAP.RUNNING) {
+    return "elv-green.5";
+  } else if([STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED, STATUS_MAP.UNINITIALIZED, STATUS_MAP.STALLED].includes(status)) {
+    return "elv-red.4";
+  } else if(status === STATUS_MAP.DEGRADED) {
+    return "elv-yellow.6";
+  }
+};
+
+export const FormatTime = ({milliseconds, iso, format="hh:mm"}) => {
+  if(iso) {
+    milliseconds = new Date(iso).getTime();
+  }
+
+  if(!milliseconds) { return ""; }
+
+  const hours = new Fraction(milliseconds, 1000)
+    .div(3600)
+    .mod(24)
+    .floor(0)
+    .toString();
+  const minutes = new Fraction(milliseconds, 1000)
+    .div(60)
+    .mod(60)
+    .floor(0)
+    .toString();
+  const seconds = new Fraction(milliseconds, 1000)
+    .mod(60)
+    .floor(0)
+    .toString();
+
+  let timeString = `${hours}h ${minutes}min`;
+
+  if(format === "hh:mm:ss") {
+    const arrayValue = [
+      hours.padStart(2, "0"),
+      minutes.padStart(2, "0"),
+      seconds.padStart(2, "0")
+    ];
+
+    timeString = arrayValue.join(":");
+    // timeString = `${hours}h ${minutes}min ${seconds}sec`
+  } else if(format === "hh:mm") {
+    timeString = `${hours}h ${minutes}min`;
+  }
+
+  return timeString;
+};
+
+// Convert a FileList to file info
+export const FileInfo = async ({path, fileList}) => {
+  return Promise.all(
+    Array.from(fileList).map(async file => {
+      const data = file;
+      const filePath = file.webkitRelativePath || file.name;
+      return {
+        path: `${path}${filePath}`.replace(/^\/+/g, ""),
+        type: "file",
+        size: file.size,
+        mime_type: file.type,
+        data
+      };
+    })
+  );
+};
+
+export const Pluralize = ({base, suffix="s", count}) => {
+  return `${count} ${base}${count > 1 ? suffix : ""}`;
+};
+
+export const SortTable = ({sortStatus, AdditionalCondition}) => {
+  return (a, b) => {
+    if(AdditionalCondition && typeof AdditionalCondition(a, b) !== "undefined") {
+      return AdditionalCondition(a, b);
+    }
+
+    a = a[sortStatus.columnAccessor];
+    b = b[sortStatus.columnAccessor];
+
+    if(typeof a === "number") {
+      a = a || 0;
+      b = b || 0;
+    } else {
+      a = a?.toLowerCase?.() || a || "";
+      b = b?.toLowerCase?.() || b || "";
+    }
+
+    return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
+  };
+};
+
+export const DateFormat = ({time, format="sec"}) => {
+  if(!["sec", "iso", "ms"].includes(format)) { throw Error("Invalid format type provided."); }
+
+  if(format === "sec") {
+    time = time * 1000;
+  }
+
+  return new Date(time).toLocaleString();
 };
