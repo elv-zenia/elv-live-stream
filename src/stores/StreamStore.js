@@ -574,6 +574,35 @@ class StreamStore {
     });
   });
 
+  DeleteLiveRecordingCopy = flow(function * ({streamId, recordingCopyId}) {
+    const liveRecordingCopies = yield this.FetchLiveRecordingCopies({objectId: streamId});
+
+    delete liveRecordingCopies[recordingCopyId];
+
+    const libraryId = yield client.ContentObjectLibraryId({objectId: streamId});
+    const {writeToken} = yield client.EditContentObject({
+      objectId: streamId,
+      libraryId
+    });
+
+    yield client.ReplaceMetadata({
+      objectId: streamId,
+      libraryId,
+      writeToken,
+      metadataSubtree: "live_recording_copies",
+      metadata: liveRecordingCopies
+    });
+
+    const response = yield client.FinalizeContentObject({
+      objectId: streamId,
+      libraryId,
+      writeToken,
+      commitMessage: "Remove live recording copy"
+    });
+
+    return response;
+  });
+
   CopyToVod = flow(function * ({
     objectId,
     selectedPeriods=[],

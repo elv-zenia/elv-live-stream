@@ -3,17 +3,21 @@ import {observer} from "mobx-react";
 import {DataTable} from "mantine-datatable";
 import {ActionIcon, Box, Group, Text} from "@mantine/core";
 import {DateFormat, SortTable} from "Stores/helpers/Misc";
-import {editStore} from "Stores";
+import {editStore, streamStore} from "Stores";
 import {IconExternalLink, IconTrash} from "@tabler/icons-react";
 import {useDisclosure} from "@mantine/hooks";
 import ConfirmModal from "Components/ConfirmModal";
+import {useParams} from "react-router-dom";
+import {notifications} from "@mantine/notifications";
 
-const DetailsRecordingCopiesTable = observer(({liveRecordingCopies}) => {
+const DetailsRecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallback}) => {
   const [showDeleteModal, {open, close}] = useDisclosure(false);
   const [sortStatus, setSortStatus] = useState({
     columnAccessor: "title",
     direction: "asc"
   });
+  const [deleteId, setDeleteId] = useState("");
+  const params = useParams();
 
   const records = Object.values(liveRecordingCopies || {})
     .sort(SortTable({sortStatus}));
@@ -99,7 +103,10 @@ const DetailsRecordingCopiesTable = observer(({liveRecordingCopies}) => {
                   title="Delete Live Recording Copy"
                   variant="subtle"
                   color="gray.6"
-                  onClick={open}
+                  onClick={() => {
+                    open();
+                    setDeleteId(record._id);
+                  }}
                 >
                   <IconTrash />
                 </ActionIcon>
@@ -114,7 +121,20 @@ const DetailsRecordingCopiesTable = observer(({liveRecordingCopies}) => {
         title="Delete Live Recording Copy"
         confirmText="Delete"
         message="Are you sure you want to delete the live recording copy? This action cannot be undone."
-        ConfirmCallback={() => {}}
+        ConfirmCallback={async () => {
+          await streamStore.DeleteLiveRecordingCopy({streamId: params.id, recordingCopyId: deleteId});
+
+          setDeleteId("");
+          notifications.show({
+            title: "Live recording copy deleted",
+            message: `${deleteId} successfully deleted`,
+            autoClose: false
+          });
+
+          DeleteCallback();
+
+          close();
+        }}
         CloseCallback={close}
       />
     </Box>
