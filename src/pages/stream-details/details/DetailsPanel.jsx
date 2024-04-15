@@ -78,7 +78,6 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
     LoadStatus();
   }, [params.id]);
 
-
   const LoadLiveRecordingCopies = async() => {
     let liveRecordingCopies = await streamStore.FetchLiveRecordingCopies({
       objectId: params.id
@@ -145,6 +144,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
             </Box>
             <DetailsRecordingCopiesTable
               liveRecordingCopies={liveRecordingCopies}
+              DeleteCallback={LoadLiveRecordingCopies}
             />
           </Flex>
         </Grid.Col>
