@@ -1,11 +1,6 @@
 import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
 import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
 
-export const AV_STREAM = {
-  DEFAULT: "default",
-  CUSTOM: "specific"
-};
-
 export const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
   UNINITIALIZED: "uninitialized",

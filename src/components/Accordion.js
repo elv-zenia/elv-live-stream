@@ -10,6 +10,7 @@ const Accordion = ({
   disabled,
   children,
   title,
+  value,
   ...rest
 }) => {
   return (
@@ -18,6 +19,7 @@ const Accordion = ({
       collapsible={true}
       orientation={orientation}
       disabled={disabled}
+      value={value}
       {...rest}
     >
       <AccordionPrimitive.Item value={id} disabled={disabled} className="accordion__item">

@@ -1,4 +1,4 @@
-import {AV_STREAM, STATUS_MAP} from "Data/StreamData";
+import {STATUS_MAP} from "Data/StreamData";
 import Fraction from "fraction.js";
 
 export const ParseLiveConfigData = ({
@@ -7,7 +7,7 @@ export const ParseLiveConfigData = ({
   url,
   referenceUrl,
   encryption,
-  avProperties,
+  useAdvancedSettings,
   retention
 }) => {
   const {audioStreamIndex} = inputFormData;
@@ -18,7 +18,7 @@ export const ParseLiveConfigData = ({
     drm_type: encryption,
     input: {
       audio: {
-        stream: AV_STREAM[avProperties],
+        stream: useAdvancedSettings ? "specific" : "default",
         stream_index: parseInt(audioStreamIndex)
       }
     },
@@ -26,7 +26,7 @@ export const ParseLiveConfigData = ({
       audio: {
         bitrate: parseInt(audioBitrate),
         channel_layout: parseInt(audioChannelLayout),
-        quality: AV_STREAM[avProperties]
+        quality: useAdvancedSettings ? "specific" : "default"
       }
     },
     part_ttl: parseInt(retention),

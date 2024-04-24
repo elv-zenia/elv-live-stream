@@ -31,10 +31,11 @@ class EditStore {
     inputFormData,
     outputFormData,
     advancedData,
-    drmFormData
+    drmFormData,
+    useAdvancedSettings
   }) {
     const {libraryId, url, name, description, displayName, accessGroup, permission, protocol} = basicFormData;
-    const {avProperties, retention} = advancedData;
+    const {retention} = advancedData;
     const {encryption} = drmFormData;
 
     const response = yield this.CreateContentObject({
@@ -56,7 +57,7 @@ class EditStore {
       outputFormData,
       url,
       encryption,
-      avProperties,
+      useAdvancedSettings,
       retention,
       referenceUrl: protocol === "custom" ? undefined : url
     });

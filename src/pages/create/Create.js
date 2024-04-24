@@ -79,41 +79,19 @@ const AdvancedSection = observer(({
   advancedData,
   AdvancedUpdateCallback,
   drmFormData,
-  DrmUpdateCallback
+  DrmUpdateCallback,
+  useAdvancedSettings,
+  AdvancedSettingsCallback
 }) => {
   return (
     <Accordion
       title="Advanced Settings"
       id="advanced-section"
+      value={useAdvancedSettings}
+      onValueChange={AdvancedSettingsCallback}
     >
-      <Radio
-        label="Audio/Video Properties"
-        options={[
-          {
-            optionLabel: "Default",
-            id: "default",
-            value: "DEFAULT",
-            checked: advancedData.avProperties === "DEFAULT",
-            onChange: (event) => AdvancedUpdateCallback({
-              key: "avProperties",
-              event
-            })
-          },
-          {
-            optionLabel: "Custom",
-            id: "custom",
-            value: "CUSTOM",
-            checked: advancedData.avProperties === "CUSTOM",
-            onChange: (event) => AdvancedUpdateCallback({
-              key: "avProperties",
-              event
-            })
-          }
-        ]}
-      />
-
       {
-        advancedData.avProperties === "CUSTOM" &&
+        useAdvancedSettings &&
         <>
           <Select
             label="Retention"
@@ -223,9 +201,10 @@ const Create = observer(() => {
   });
 
   const [advancedData, setAdvancedData] = useState({
-    retention: 3600,
-    avProperties: "DEFAULT"
+    retention: 3600
   });
+
+  const [useAdvancedSettings, setUseAdvancedSettings] = useState();
 
   const [drmFormData, setDrmFormData] = useState({
     encryption: ""
@@ -278,7 +257,8 @@ const Create = observer(() => {
         inputFormData,
         outputFormData,
         advancedData,
-        drmFormData
+        drmFormData,
+        useAdvancedSettings
       });
 
       navigate("/streams");
@@ -465,6 +445,7 @@ const Create = observer(() => {
           outputFormData={outputFormData}
           advancedData={advancedData}
           drmFormData={drmFormData}
+          useAdvancedSettings={useAdvancedSettings}
           DrmUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
@@ -480,11 +461,12 @@ const Create = observer(() => {
             value: event.target.value,
             formKey: FORM_KEYS.OUTPUT
           })}
-          AdvancedUpdateCallback={({event, key}) => UpdateFormData({
+          AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
             key,
-            value: event.target.value,
+            value: value ? value : event?.target?.value,
             formKey: FORM_KEYS.ADVANCED
           })}
+          AdvancedSettingsCallback={setUseAdvancedSettings}
         />
 
         <div style={{maxWidth: "200px"}}>
