@@ -26,7 +26,7 @@ const Accordion = ({
         <AccordionPrimitive.Header className="accordion__header">
           <AccordionPrimitive.Trigger className="accordion__trigger">
             { title }
-            <ImageIcon className="accordion__icon" icon={icon} aria-hidden />
+            <ImageIcon className={`accordion__icon ${disabled ? "accordion__icon--disabled" : ""}`} icon={icon} aria-hidden />
           </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
         <AccordionPrimitive.Content className="accordion__content">

@@ -51,6 +51,10 @@
     [data-state="open"] & {
       transform: rotate(135deg);
     }
+
+    &--disabled {
+      opacity: 0.3;
+    }
   }
 
   &__content {

@@ -6,6 +6,9 @@ import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
 import {ENCRYPTION_OPTIONS} from "Data/StreamData";
+import {Alert} from "@mantine/core";
+import {IconAlertCircle} from "@tabler/icons-react";
+import ConfirmModal from "Components/ConfirmModal";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -14,6 +17,17 @@ const FORM_KEYS = {
   ADVANCED: "ADVANCED",
   DRM: "DRM"
 };
+
+const ProbeConfirmation = observer(({show, CloseCallback}) => {
+  return (
+    <ConfirmModal
+      show={show}
+      CloseCallback={CloseCallback}
+      title="Create and Probe Stream"
+      message="Are you sure you want to probe the stream? This will also create the content object."
+    />
+  );
+});
 
 const Permissions = observer(({permission, UpdateCallback}) => {
   const permissionLevels = rootStore.client.permissionLevels;
@@ -81,84 +95,94 @@ const AdvancedSection = observer(({
   drmFormData,
   DrmUpdateCallback,
   useAdvancedSettings,
-  AdvancedSettingsCallback
+  AdvancedSettingsCallback,
+  disabled=true
 }) => {
   return (
-    <Accordion
-      title="Advanced Settings"
-      id="advanced-section"
-      value={useAdvancedSettings}
-      onValueChange={AdvancedSettingsCallback}
-    >
+    <>
       {
-        useAdvancedSettings &&
-        <>
-          <Select
-            label="Retention"
-            labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-            formName="retention"
-            options={[
-              {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
-              {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
-              {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
-              {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
-              {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
-            ]}
-            value={advancedData.retention}
-            onChange={event => AdvancedUpdateCallback({
-              key: "retention",
-              event
-            })
-            }
-          />
-          <PlaybackEncryption
-            drmFormData={drmFormData}
-            UpdateCallback={({event, key}) => DrmUpdateCallback({
-              key,
-              event
-            })}
-          />
-
-          <div className="form__section-header">Audio Output</div>
-          <Select
-            label="Channel Layout"
-            options={[
-              {label: "Stereo (2)", value: 2},
-              {label: "Surround (5.1)", value: 6}
-            ]}
-            onChange={(event) => OutputUpdateCallback({
-              key: "audioChannelLayout",
-              event
-            })}
-          />
-          <Select
-            label="Bitrate"
-            value={outputFormData.audioBitrate}
-            options={[
-              {label: "128000", value: "128000"},
-              {label: "192000", value: "192000"},
-              {label: "256000", value: "256000"},
-              {label: "384000", value: "384000"}
-            ]}
-            onChange={(event) => OutputUpdateCallback({
-              key: "audioBitrate",
-              event
-            })}
-          />
-
-          <div className="form__section-header">Audio Input</div>
-          <NumberInput
-            label="Stream Index"
-            min={0}
-            value={inputFormData.audioStreamIndex}
-            onChange={(event) => InputUpdateCallback({
-              key: "audioStreamIndex",
-              event
-            })}
-          />
-        </>
+        disabled &&
+        <Alert variant="light" color="blue" mt={24} icon={<IconAlertCircle />}>
+          To apply advanced settings, object must be probed first.
+        </Alert>
       }
-    </Accordion>
+      <Accordion
+        title="Advanced Settings"
+        id="advanced-section"
+        value={useAdvancedSettings}
+        onValueChange={AdvancedSettingsCallback}
+        disabled={disabled}
+      >
+        {
+          useAdvancedSettings &&
+          <>
+            <Select
+              label="Retention"
+              labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+              formName="retention"
+              options={[
+                {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
+                {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
+                {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
+                {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
+                {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
+              ]}
+              value={advancedData.retention}
+              onChange={event => AdvancedUpdateCallback({
+                key: "retention",
+                event
+              })
+              }
+            />
+            <PlaybackEncryption
+              drmFormData={drmFormData}
+              UpdateCallback={({event, key}) => DrmUpdateCallback({
+                key,
+                event
+              })}
+            />
+
+            <div className="form__section-header">Audio Output</div>
+            <Select
+              label="Channel Layout"
+              options={[
+                {label: "Stereo (2)", value: 2},
+                {label: "Surround (5.1)", value: 6}
+              ]}
+              onChange={(event) => OutputUpdateCallback({
+                key: "audioChannelLayout",
+                event
+              })}
+            />
+            <Select
+              label="Bitrate"
+              value={outputFormData.audioBitrate}
+              options={[
+                {label: "128000", value: "128000"},
+                {label: "192000", value: "192000"},
+                {label: "256000", value: "256000"},
+                {label: "384000", value: "384000"}
+              ]}
+              onChange={(event) => OutputUpdateCallback({
+                key: "audioBitrate",
+                event
+              })}
+            />
+
+            <div className="form__section-header">Audio Input</div>
+            <NumberInput
+              label="Stream Index"
+              min={0}
+              value={inputFormData.audioStreamIndex}
+              onChange={(event) => InputUpdateCallback({
+                key: "audioStreamIndex",
+                event
+              })}
+            />
+          </>
+        }
+      </Accordion>
+    </>
   );
 });
 
@@ -209,6 +233,8 @@ const Create = observer(() => {
   const [drmFormData, setDrmFormData] = useState({
     encryption: ""
   });
+
+  const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
 
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
@@ -440,6 +466,8 @@ const Create = observer(() => {
           })}
         />
 
+        <button className="button__secondary" type="button" onClick={() => setShowProbeConfirmation(true)}>Probe</button>
+
         <AdvancedSection
           inputFormData={inputFormData}
           outputFormData={outputFormData}
@@ -477,6 +505,7 @@ const Create = observer(() => {
           <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Create"} />
         </div>
       </form>
+      <ProbeConfirmation show={showProbeConfirmation} CloseCallback={() => setShowProbeConfirmation(false)} />
     </div>
   );
 });
