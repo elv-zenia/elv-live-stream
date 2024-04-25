@@ -108,7 +108,10 @@ class EditStore {
       value: streamValue
     });
 
-    return objectId;
+    return {
+      objectId,
+      slug: Slugify(name)
+    };
   });
 
   CreateContentObject = flow(function * ({

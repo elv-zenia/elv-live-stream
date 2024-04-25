@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
-import {dataStore, editStore} from "Stores";
+import {dataStore, editStore, streamStore} from "Stores";
 import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
@@ -18,13 +18,44 @@ const FORM_KEYS = {
   DRM: "DRM"
 };
 
-const ProbeConfirmation = observer(({show, CloseCallback}) => {
+const ProbeConfirmation = observer(({
+  show,
+  CloseCallback,
+  basicFormData,
+  inputFormData,
+  outputFormData,
+  advancedData,
+  drmFormData,
+  useAdvancedSettings,
+  setObjectData
+}) => {
   return (
     <ConfirmModal
       show={show}
       CloseCallback={CloseCallback}
       title="Create and Probe Stream"
       message="Are you sure you want to probe the stream? This will also create the content object."
+      ConfirmCallback={async () => {
+        try {
+          const {objectId, slug} = await editStore.InitLiveStreamObject({
+            basicFormData,
+            inputFormData,
+            outputFormData,
+            advancedData,
+            drmFormData,
+            useAdvancedSettings
+          });
+
+          await streamStore.ConfigureStream({objectId, slug});
+
+          setObjectData({objectId, slug});
+        } catch(error) {
+          console.error("Unable to probe stream", error);
+          throw Error(error);
+        } finally {
+          CloseCallback();
+        }
+      }}
     />
   );
 });
@@ -96,12 +127,12 @@ const AdvancedSection = observer(({
   DrmUpdateCallback,
   useAdvancedSettings,
   AdvancedSettingsCallback,
-  disabled=true
+  objectProbed=false
 }) => {
   return (
     <>
       {
-        disabled &&
+        !objectProbed &&
         <Alert variant="light" color="blue" mt={24} icon={<IconAlertCircle />}>
           To apply advanced settings, object must be probed first.
         </Alert>
@@ -111,7 +142,7 @@ const AdvancedSection = observer(({
         id="advanced-section"
         value={useAdvancedSettings}
         onValueChange={AdvancedSettingsCallback}
-        disabled={disabled}
+        disabled={!objectProbed}
       >
         {
           useAdvancedSettings &&
@@ -238,6 +269,8 @@ const Create = observer(() => {
 
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
+  const [objectData, setObjectData] = useState(null);
+
   const urls = basicFormData.protocol === "custom" ?
     [] :
     Object.keys(dataStore.liveStreamUrls || {})
@@ -466,7 +499,9 @@ const Create = observer(() => {
           })}
         />
 
-        <button className="button__secondary" type="button" onClick={() => setShowProbeConfirmation(true)}>Probe</button>
+        <button className="button__secondary" type="button" onClick={() => setShowProbeConfirmation(true)} disabled={objectData !== null}>
+          Probe
+        </button>
 
         <AdvancedSection
           inputFormData={inputFormData}
@@ -495,6 +530,7 @@ const Create = observer(() => {
             formKey: FORM_KEYS.ADVANCED
           })}
           AdvancedSettingsCallback={setUseAdvancedSettings}
+          objectProbed={objectData !== null}
         />
 
         <div style={{maxWidth: "200px"}}>
@@ -502,10 +538,19 @@ const Create = observer(() => {
         </div>
 
         <div className="form__actions">
-          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Create"} />
+          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : objectData === null ? "Create" : "Save"} />
         </div>
       </form>
-      <ProbeConfirmation show={showProbeConfirmation} CloseCallback={() => setShowProbeConfirmation(false)} />
+      <ProbeConfirmation
+        show={showProbeConfirmation}
+        CloseCallback={() => setShowProbeConfirmation(false)}
+        basicFormData={basicFormData}
+        inputFormData={inputFormData}
+        outputFormData={outputFormData}
+        advancedData={advancedData}
+        drmFormData={drmFormData}
+        setObjectData={setObjectData}
+      />
     </div>
   );
 });
