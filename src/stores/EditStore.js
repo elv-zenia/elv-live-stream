@@ -28,8 +28,6 @@ class EditStore {
 
   InitLiveStreamObject = flow(function * ({
     basicFormData,
-    inputFormData,
-    outputFormData,
     advancedData,
     drmFormData,
     useAdvancedSettings
@@ -53,8 +51,6 @@ class EditStore {
     }
 
     const config = ParseLiveConfigData({
-      inputFormData,
-      outputFormData,
       url,
       encryption,
       useAdvancedSettings,
@@ -116,11 +112,11 @@ class EditStore {
 
   UpdateLiveStreamObject = flow(function * ({
     basicFormData,
-    inputFormData,
-    outputFormData,
     advancedData,
     drmFormData,
-    useAdvancedSettings
+    audioFormData,
+    objectId,
+    slug
   }) {
     const {libraryId, url, name, description, displayName, accessGroup, protocol} = basicFormData;
     const {retention} = advancedData;
@@ -134,13 +130,12 @@ class EditStore {
     }
 
     const config = ParseLiveConfigData({
-      inputFormData,
-      outputFormData,
       url,
       encryption,
-      useAdvancedSettings,
+      useAdvancedSettings: true,
       retention,
-      referenceUrl: protocol === "custom" ? undefined : url
+      referenceUrl: protocol === "custom" ? undefined : url,
+      audioFormData
     });
 
     yield this.AddMetadata({
@@ -149,8 +144,12 @@ class EditStore {
       name,
       description,
       displayName,
-      writeToken: write_token,
       config
+    });
+
+    yield streamStore.ConfigureStream({
+      objectId,
+      slug
     });
   });
 
@@ -194,6 +193,13 @@ class EditStore {
     description,
     displayName
   }) {
+    if(!writeToken) {
+      ({writeToken} = yield this.client.EditContentObject({
+        libraryId,
+        objectId
+      }));
+    }
+
     yield this.client.MergeMetadata({
       libraryId,
       objectId,

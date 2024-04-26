@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
 import {dataStore, editStore, streamStore} from "Stores";
-import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
+import {Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
@@ -10,11 +10,10 @@ import {Alert} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import ConfirmModal from "Components/ConfirmModal";
 import CreateAudioTracksTable from "Pages/create/CreateAudioTracksTable";
+import {notifications} from "@mantine/notifications";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
-  OUTPUT: "OUTPUT",
-  INPUT: "INPUT",
   ADVANCED: "ADVANCED",
   DRM: "DRM"
 };
@@ -23,8 +22,6 @@ const ProbeConfirmation = observer(({
   show,
   CloseCallback,
   basicFormData,
-  inputFormData,
-  outputFormData,
   advancedData,
   drmFormData,
   useAdvancedSettings,
@@ -40,8 +37,6 @@ const ProbeConfirmation = observer(({
         try {
           const {objectId, slug} = await editStore.InitLiveStreamObject({
             basicFormData,
-            inputFormData,
-            outputFormData,
             advancedData,
             drmFormData,
             useAdvancedSettings
@@ -50,6 +45,11 @@ const ProbeConfirmation = observer(({
           await streamStore.ConfigureStream({objectId, slug});
 
           setObjectData({objectId, slug});
+
+          notifications.show({
+            title: "Probed stream",
+            message: "Stream object was successfully created and probed"
+          });
         } catch(error) {
           console.error("Unable to probe stream", error);
           throw Error(error);
@@ -118,10 +118,6 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
 });
 
 const AdvancedSection = observer(({
-  outputFormData,
-  OutputUpdateCallback,
-  inputFormData,
-  InputUpdateCallback,
   advancedData,
   AdvancedUpdateCallback,
   drmFormData,
@@ -146,7 +142,7 @@ const AdvancedSection = observer(({
         id="advanced-section"
         value={useAdvancedSettings}
         onValueChange={AdvancedSettingsCallback}
-        // disabled={!objectProbed}
+        disabled={!objectProbed}
       >
         {
           useAdvancedSettings &&
@@ -177,47 +173,11 @@ const AdvancedSection = observer(({
               })}
             />
 
-            <div className="form__section-header">Audio Output</div>
+            <div className="form__section-header">Audio</div>
             <CreateAudioTracksTable
               objectLadderSpecs={objectLadderSpecs}
               audioFormData={audioFormData}
               setAudioFormData={setAudioFormData}
-            />
-            <Select
-              label="Channel Layout"
-              options={[
-                {label: "Stereo (2)", value: 2},
-                {label: "Surround (5.1)", value: 6}
-              ]}
-              onChange={(event) => OutputUpdateCallback({
-                key: "audioChannelLayout",
-                event
-              })}
-            />
-            <Select
-              label="Bitrate"
-              value={outputFormData.audioBitrate}
-              options={[
-                {label: "128000", value: "128000"},
-                {label: "192000", value: "192000"},
-                {label: "256000", value: "256000"},
-                {label: "384000", value: "384000"}
-              ]}
-              onChange={(event) => OutputUpdateCallback({
-                key: "audioBitrate",
-                event
-              })}
-            />
-
-            <div className="form__section-header">Audio Input</div>
-            <NumberInput
-              label="Stream Index"
-              min={0}
-              value={inputFormData.audioStreamIndex}
-              onChange={(event) => InputUpdateCallback({
-                key: "audioStreamIndex",
-                event
-              })}
             />
           </>
         }
@@ -247,21 +207,6 @@ const Create = observer(() => {
     libraryId: "",
     accessGroup: "",
     permission: "editable"
-  });
-
-  const [outputFormData, setOutputFormData] = useState({
-    videoHeight: "",
-    videoWidth: "",
-    videoBitrate: "",
-    audioChannelLayout: 2,
-    audioBitrate: 128000
-  });
-
-  const [inputFormData, setInputFormData] = useState({
-    videoStreamId: "0",
-    videoStreamIndex: "0",
-    audioStreamId: "0",
-    audioStreamIndex: "0"
   });
 
   const [advancedData, setAdvancedData] = useState({
@@ -311,11 +256,12 @@ const Create = observer(() => {
       });
 
       setObjectLadderSpecs(ladderSpecs);
-
       setAudioFormData(formData);
     };
 
-    LoadConfigData();
+    if(objectData !== null) {
+      LoadConfigData();
+    }
   }, [objectData, streamStore.streams]);
 
   const UpdateFormData = ({formKey, key, value}) => {
@@ -323,14 +269,6 @@ const Create = observer(() => {
       "BASIC": {
         data: basicFormData,
         callback: setBasicFormData
-      },
-      "OUTPUT": {
-        data: outputFormData,
-        callback: setOutputFormData
-      },
-      "INPUT": {
-        data: inputFormData,
-        callback: setInputFormData
       },
       "ADVANCED": {
         data: advancedData,
@@ -353,20 +291,31 @@ const Create = observer(() => {
     setIsCreating(true);
 
     try {
+      const formData = {
+        basicFormData,
+        advancedData,
+        drmFormData
+      };
+      let objectId;
+
       if(objectData === null) {
-        await editStore.InitLiveStreamObject({
-          basicFormData,
-          inputFormData,
-          outputFormData,
-          advancedData,
-          drmFormData,
+        const response = await editStore.InitLiveStreamObject({
+          ...formData,
           useAdvancedSettings
         });
+
+        objectId = response.objectId;
       } else {
-        // await streamStore.Con
+        objectId = objectData.objectId;
+        await editStore.UpdateLiveStreamObject({
+          objectId,
+          slug: objectData.slug,
+          audioFormData,
+          ...formData
+        });
       }
 
-      navigate("/streams");
+      navigate(`/streams/${objectId}`);
     } finally {
       setIsCreating(false);
     }
@@ -443,6 +392,7 @@ const Create = observer(() => {
           <Select
             label="URL"
             required={true}
+            disabled={objectData !== null}
             defaultValue={urls[0]}
             options={urls.map(url => (
               {
@@ -523,6 +473,7 @@ const Create = observer(() => {
 
         <Select
           label="Library"
+          disabled={objectData !== null}
           labelDescription="This is the library where your live stream object will be created."
           required={true}
           options={
@@ -550,8 +501,6 @@ const Create = observer(() => {
         </button>
 
         <AdvancedSection
-          inputFormData={inputFormData}
-          outputFormData={outputFormData}
           advancedData={advancedData}
           drmFormData={drmFormData}
           useAdvancedSettings={useAdvancedSettings}
@@ -559,16 +508,6 @@ const Create = observer(() => {
             key,
             value: event.target.value,
             formKey: FORM_KEYS.DRM
-          })}
-          InputUpdateCallback={({event, key}) => UpdateFormData({
-            key,
-            value: event.target.value,
-            formKey: FORM_KEYS.INPUT
-          })}
-          OutputUpdateCallback={({event, key}) => UpdateFormData({
-            key,
-            value: event.target.value,
-            formKey: FORM_KEYS.OUTPUT
           })}
           AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
             key,
@@ -587,15 +526,13 @@ const Create = observer(() => {
         </div>
 
         <div className="form__actions">
-          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : objectData === null ? "Create" : "Save"} />
+          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Save"} />
         </div>
       </form>
       <ProbeConfirmation
         show={showProbeConfirmation}
         CloseCallback={() => setShowProbeConfirmation(false)}
         basicFormData={basicFormData}
-        inputFormData={inputFormData}
-        outputFormData={outputFormData}
         advancedData={advancedData}
         drmFormData={drmFormData}
         setObjectData={setObjectData}

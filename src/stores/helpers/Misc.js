@@ -2,30 +2,24 @@ import {STATUS_MAP} from "Data/StreamData";
 import Fraction from "fraction.js";
 
 export const ParseLiveConfigData = ({
-  inputFormData,
-  outputFormData,
   url,
   referenceUrl,
   encryption,
   useAdvancedSettings,
-  retention
+  retention,
+  audioFormData
 }) => {
-  const {audioStreamIndex} = inputFormData;
-  const {audioChannelLayout, audioBitrate} = outputFormData;
-
   const config = {
     drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
     drm_type: encryption,
+    audio: audioFormData ? audioFormData : null,
     input: {
       audio: {
         stream: useAdvancedSettings ? "specific" : "default",
-        stream_index: parseInt(audioStreamIndex)
       }
     },
     output: {
       audio: {
-        bitrate: parseInt(audioBitrate),
-        channel_layout: parseInt(audioChannelLayout),
         quality: useAdvancedSettings ? "specific" : "default"
       }
     },

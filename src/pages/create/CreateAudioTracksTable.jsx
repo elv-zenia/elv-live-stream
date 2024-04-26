@@ -11,14 +11,23 @@ const CreateAudioTracksTable = observer(({
   audioFormData,
   setAudioFormData
 }) => {
-  const records = objectLadderSpecs;
+  const items = objectLadderSpecs;
+
+  const HandleFormChange = ({index, key, value}) => {
+    const audioIndexSpecific = audioFormData[index][key] = value;
+
+    setAudioFormData({
+      ...audioFormData,
+      ...audioIndexSpecific
+    });
+  };
 
   return (
     <DataTable
       idAccessor="stream_index"
       noRecordsText="No audio tracks found"
-      minHeight={records ? 150 : 75}
-      records={records}
+      minHeight={items ? 150 : 75}
+      records={items}
       withColumnBorders
       groups={[
         {
@@ -29,23 +38,23 @@ const CreateAudioTracksTable = observer(({
             {
               accessor: "stream_index",
               title: "Index",
-              render: record => (
-                <Text>{ record.stream_index }</Text>
+              render: item => (
+                <Text>{ item.stream_index }</Text>
               )
             },
             {
               accessor: "representation",
               title: "Codec",
-              render: record => (
+              render: item => (
                 <Text>
-                  { AudioCodec(record.representation) }</Text>
+                  { AudioCodec(item.representation) }</Text>
               )
             },
             {
               accessor: "input_bitrate",
               title: "Bitrate",
-              render: record => (
-                <Text>{ AudioBitrateReadable(record.bit_rate) }</Text>
+              render: item => (
+                <Text>{ AudioBitrateReadable(item.bit_rate) }</Text>
               )
             }
           ]
@@ -58,38 +67,55 @@ const CreateAudioTracksTable = observer(({
             {
               accessor: "stream_label",
               title: "Label",
-              render: record => (
-                <Text>{ record.stream_label }</Text>
+              render: item => (
+                <Text>{ item.stream_label }</Text>
               )
             },
             {
               accessor: "output_bitrate",
               title: "Bitrate",
-              render: record => (
+              render: item => (
                 <Select
                   label=""
                   options={[
-                    {label: "512 Kbps", value: "512000"},
-                    {label: "384 Kbps", value: "384000"},
-                    {label: "192 Kbps", value: "192000"},
-                    {label: "48 Kbps", value: "48000"},
+                    {label: "512 Kbps", value: 512000},
+                    {label: "384 Kbps", value: 384000},
+                    {label: "192 Kbps", value: 192000},
+                    {label: "48 Kbps", value: 48000},
                   ]}
-                  value={audioFormData.bitrate}
+                  onChange={(event) => {
+                    HandleFormChange({
+                      index: item.stream_index,
+                      key: "recording_bitrate",
+                      value: parseInt(event.target.value)
+                    });
+                  }}
+                  value={audioFormData[item.stream_index].recording_bitrate}
                 />
               )
             },
             {
               accessor: "action_record",
               title: "Record",
-              render: record => (
+              render: item => (
                 <Checkbox
-                  checked={audioFormData[record.stream_index].record}
+                  checked={audioFormData[item.stream_index].record}
                   onChange={(event) => {
-                    const audioPerIndex = audioFormData[record.stream_index].record = event.target.checked;
-                    setAudioFormData({
-                      ...audioFormData,
-                      ...audioPerIndex
+                    const value = event.target.checked;
+                    HandleFormChange({
+                      index: item.stream_index,
+                      key: "record",
+                      value
                     });
+
+                    // Make sure playout is set to false when record is false
+                    if(!value) {
+                      HandleFormChange({
+                        index: item.stream_index,
+                        key: "playout",
+                        value: false
+                      });
+                    }
                   }}
                 />
               )
@@ -97,17 +123,17 @@ const CreateAudioTracksTable = observer(({
             {
               accessor: "action_playout",
               title: "Playout",
-              render: record => (
+              render: item => (
                 <Checkbox
-                  checked={audioFormData[record.stream_index].playout}
+                  checked={audioFormData[item.stream_index].playout}
                   onChange={(event) => {
-                    const audioPerIndex = audioFormData[record.stream_index].playout = event.target.checked;
-                    setAudioFormData({
-                      ...audioFormData,
-                      ...audioPerIndex
+                    HandleFormChange({
+                      index: item.stream_index,
+                      key: "playout",
+                      value: event.target.checked
                     });
                   }}
-                  disabled={!audioFormData[record.stream_index].record}
+                  disabled={!audioFormData[item.stream_index].record}
                 />
               )
             }
