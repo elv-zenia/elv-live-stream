@@ -114,6 +114,46 @@ class EditStore {
     };
   });
 
+  UpdateLiveStreamObject = flow(function * ({
+    basicFormData,
+    inputFormData,
+    outputFormData,
+    advancedData,
+    drmFormData,
+    useAdvancedSettings
+  }) {
+    const {libraryId, url, name, description, displayName, accessGroup, protocol} = basicFormData;
+    const {retention} = advancedData;
+    const {encryption} = drmFormData;
+
+    if(accessGroup) {
+      this.AddAccessGroupPermission({
+        objectId,
+        accessGroup
+      });
+    }
+
+    const config = ParseLiveConfigData({
+      inputFormData,
+      outputFormData,
+      url,
+      encryption,
+      useAdvancedSettings,
+      retention,
+      referenceUrl: protocol === "custom" ? undefined : url
+    });
+
+    yield this.AddMetadata({
+      libraryId,
+      objectId,
+      name,
+      description,
+      displayName,
+      writeToken: write_token,
+      config
+    });
+  });
+
   CreateContentObject = flow(function * ({
     libraryId
   }) {

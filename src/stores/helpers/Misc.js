@@ -54,6 +54,14 @@ export const VideoBitrateReadable = (bitrate) => {
   return `${value}Mbps`;
 };
 
+export const AudioBitrateReadable = (bitrate) => {
+  if(!bitrate) { return ""; }
+  const denominator = 1000;
+  const value = (bitrate / denominator).toFixed(0);
+
+  return `${value} Kbps`;
+};
+
 export const StreamIsActive = (state) => {
   let active = false;
 

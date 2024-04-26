@@ -9,6 +9,7 @@ import {ENCRYPTION_OPTIONS} from "Data/StreamData";
 import {Alert} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import ConfirmModal from "Components/ConfirmModal";
+import CreateAudioTracksTable from "Pages/create/CreateAudioTracksTable";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -127,7 +128,10 @@ const AdvancedSection = observer(({
   DrmUpdateCallback,
   useAdvancedSettings,
   AdvancedSettingsCallback,
-  objectProbed=false
+  objectProbed=false,
+  objectLadderSpecs,
+  audioFormData,
+  setAudioFormData
 }) => {
   return (
     <>
@@ -142,7 +146,7 @@ const AdvancedSection = observer(({
         id="advanced-section"
         value={useAdvancedSettings}
         onValueChange={AdvancedSettingsCallback}
-        disabled={!objectProbed}
+        // disabled={!objectProbed}
       >
         {
           useAdvancedSettings &&
@@ -174,6 +178,11 @@ const AdvancedSection = observer(({
             />
 
             <div className="form__section-header">Audio Output</div>
+            <CreateAudioTracksTable
+              objectLadderSpecs={objectLadderSpecs}
+              audioFormData={audioFormData}
+              setAudioFormData={setAudioFormData}
+            />
             <Select
               label="Channel Layout"
               options={[
@@ -265,16 +274,49 @@ const Create = observer(() => {
     encryption: ""
   });
 
+  const [audioFormData, setAudioFormData] = useState(null);
+
   const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
 
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [objectData, setObjectData] = useState(null);
+  const [objectLadderSpecs, setObjectLadderSpecs] = useState([]);
 
   const urls = basicFormData.protocol === "custom" ?
     [] :
     Object.keys(dataStore.liveStreamUrls || {})
       .filter(url => dataStore.liveStreamUrls[url].protocol === basicFormData.protocol && !dataStore.liveStreamUrls[url].active);
+
+  useEffect(() => {
+    const LoadConfigData = async () => {
+      const ladderSpecs = await dataStore.LoadProbeStreamData({
+        objectId: objectData.objectId,
+        audioOnly: true
+      });
+
+      // Initialize audio track form data
+      const formData = {};
+      ladderSpecs.forEach(spec => {
+        formData[spec.stream_index] = {
+          tags: "",
+          codec: "",
+          record: true,
+          recording_bitrate: 192000,
+          recording_channels: spec.channels,
+          playout: true,
+          playout_label: spec.stream_label,
+          stream_index: spec.stream_index
+        };
+      });
+
+      setObjectLadderSpecs(ladderSpecs);
+
+      setAudioFormData(formData);
+    };
+
+    LoadConfigData();
+  }, [objectData, streamStore.streams]);
 
   const UpdateFormData = ({formKey, key, value}) => {
     const FORM_MAP = {
@@ -311,14 +353,18 @@ const Create = observer(() => {
     setIsCreating(true);
 
     try {
-      await editStore.InitLiveStreamObject({
-        basicFormData,
-        inputFormData,
-        outputFormData,
-        advancedData,
-        drmFormData,
-        useAdvancedSettings
-      });
+      if(objectData === null) {
+        await editStore.InitLiveStreamObject({
+          basicFormData,
+          inputFormData,
+          outputFormData,
+          advancedData,
+          drmFormData,
+          useAdvancedSettings
+        });
+      } else {
+        // await streamStore.Con
+      }
 
       navigate("/streams");
     } finally {
@@ -531,6 +577,9 @@ const Create = observer(() => {
           })}
           AdvancedSettingsCallback={setUseAdvancedSettings}
           objectProbed={objectData !== null}
+          objectLadderSpecs={objectLadderSpecs}
+          audioFormData={audioFormData}
+          setAudioFormData={setAudioFormData}
         />
 
         <div style={{maxWidth: "200px"}}>

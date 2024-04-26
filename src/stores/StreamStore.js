@@ -63,7 +63,6 @@ class StreamStore {
           "drm_type"
         ]
       });
-      console.log("liveRecodingconfig", liveRecordingConfig);
       const customSettings = {};
 
       if(liveRecordingConfig.input?.audio?.stream === "specific") {

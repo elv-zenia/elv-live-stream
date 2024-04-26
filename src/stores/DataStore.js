@@ -326,6 +326,34 @@ class DataStore {
     }
   });
 
+  LoadProbeStreamData = flow(function * ({
+    objectId,
+    libraryId,
+    audioOnly=false
+  }){
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      const metadata = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/recording_config/recording_params/ladder_specs",
+      });
+
+      if(audioOnly) {
+        const filteredMetadata = (metadata || []).filter(spec => spec.representation.includes("audio"));
+
+        return filteredMetadata;
+      } else {
+        return metadata;
+      }
+    } catch(error) {
+      console.error("Unable to load live_recording metadata", error);
+    }
+  });
+
   EmbedUrl = flow(function * ({
     objectId
   }) {
