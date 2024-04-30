@@ -111,7 +111,8 @@ class DataStore {
           "public/asset_metadata/live_streams"
         ],
         resolveLinks: true,
-        resolveIgnoreErrors: true
+        resolveIgnoreErrors: true,
+        resolveIncludeSource: true
       });
 
       streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
@@ -127,10 +128,7 @@ class DataStore {
       async slug => {
         const stream = streamMetadata[slug];
 
-        const versionHash = (
-          stream?.sources?.default?.["."]?.container ||
-          ((stream["/"] || "").match(/^\/?qfab\/([\w]+)\/?.+/) || [])[1]
-        );
+        const versionHash = stream?.["."]?.source;
 
         if(versionHash) {
           const objectId = this.client.utils.DecodeVersionHash(versionHash).objectId;
@@ -151,6 +149,8 @@ class DataStore {
           Object.keys(streamDetails).forEach(detail => {
             streamMetadata[slug][detail] = streamDetails[detail];
           });
+        } else {
+          console.error(`No version hash for ${slug}`);
         }
       }
     );
