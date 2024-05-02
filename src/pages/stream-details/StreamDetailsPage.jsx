@@ -80,6 +80,7 @@ const StreamDetailsPage = observer(() => {
                 imageWatermark={stream.imageWatermark}
                 title={stream.title}
                 embedUrl={stream.embedUrl}
+                url={stream.originUrl}
               />
             </Tabs.Panel>
           ))

@@ -5,6 +5,7 @@ import {DataTable} from "mantine-datatable";
 import {AudioCodec} from "Data/HumanReadableText";
 import {AudioBitrateReadable} from "Stores/helpers/Misc";
 import {Select} from "Components/Inputs";
+import {RECORDING_BITRATE_OPTIONS} from "Data/StreamData";
 
 const AudioTracksTable = observer(({
   objectLadderSpecs,
@@ -74,6 +75,7 @@ const AudioTracksTable = observer(({
                 return (
                   <TextInput
                     value={audioFormData[item.stream_index].playout_label}
+                    disabled={disabled}
                     onChange={(event) => {
                       HandleFormChange({
                         index: item.stream_index,
@@ -92,12 +94,8 @@ const AudioTracksTable = observer(({
                 <Select
                   label=""
                   style={{minWidth: "125px"}}
-                  options={[
-                    {label: "512 Kbps", value: 512000},
-                    {label: "384 Kbps", value: 384000},
-                    {label: "192 Kbps", value: 192000},
-                    {label: "48 Kbps", value: 48000},
-                  ]}
+                  options={RECORDING_BITRATE_OPTIONS}
+                  disabled={disabled}
                   onChange={(event) => {
                     HandleFormChange({
                       index: item.stream_index,
@@ -116,6 +114,7 @@ const AudioTracksTable = observer(({
               render: item => (
                 <Checkbox
                   checked={audioFormData[item.stream_index].record}
+                  disabled={disabled}
                   onChange={(event) => {
                     const value = event.target.checked;
                     HandleFormChange({
@@ -150,7 +149,7 @@ const AudioTracksTable = observer(({
                       value: event.target.checked
                     });
                   }}
-                  disabled={!audioFormData[item.stream_index].record}
+                  disabled={!audioFormData[item.stream_index].record || disabled}
                 />
               )
             }

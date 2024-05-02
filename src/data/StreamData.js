@@ -49,3 +49,11 @@ export const QUALITY_MAP = {
   SEVERE: "severe",
   GOOD: "good"
 };
+
+export const RECORDING_BITRATE_OPTIONS = [
+  {label: "512 Kbps", value: 512000},
+  {label: "384 Kbps", value: 384000},
+  {label: "256 Kbps", value: 256000},
+  {label: "192 Kbps", value: 192000},
+  {label: "48 Kbps", value: 48000}
+];

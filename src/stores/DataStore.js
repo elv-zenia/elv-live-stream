@@ -1,6 +1,7 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {streamStore} from "./index";
+import {RECORDING_BITRATE_OPTIONS} from "Data/StreamData";
 
 configure({
   enforceActions: "always"
@@ -345,15 +346,17 @@ class DataStore {
 
       // Map used for form data
       const audioData = {};
-      audioStreams.forEach(spec => (
+      audioStreams.forEach(spec => {
+        const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(spec.bit_rate) ? spec.bit_rate : 192000;
+
         audioData[spec.stream_index] = {
           ...spec,
           playout: !!spec.stream_label,
           record: !!spec.bit_rate,
-          recording_bitrate: spec.bit_rate,
+          recording_bitrate: initBitrate,
           playout_label: spec.stream_label || ""
-        }
-      ));
+        };
+      });
 
       return {
         ladderSpecs: audioStreams,
