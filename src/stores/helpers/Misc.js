@@ -5,7 +5,6 @@ export const ParseLiveConfigData = ({
   url,
   referenceUrl,
   encryption,
-  useAdvancedSettings,
   retention,
   audioFormData
 }) => {
@@ -13,16 +12,6 @@ export const ParseLiveConfigData = ({
     drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
     drm_type: encryption,
     audio: audioFormData ? audioFormData : null,
-    input: {
-      audio: {
-        stream: useAdvancedSettings ? "specific" : "default",
-      }
-    },
-    output: {
-      audio: {
-        quality: useAdvancedSettings ? "specific" : "default"
-      }
-    },
     part_ttl: parseInt(retention),
     url,
     reference_url: referenceUrl

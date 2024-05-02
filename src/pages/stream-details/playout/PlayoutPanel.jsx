@@ -108,7 +108,7 @@ const PlayoutPanel = observer(({
 
       notifications.show({
         title: `${title || params.id} updated`,
-        message: "Settings have been successfully applied"
+        message: "Settings have been applied successfully"
       });
     } catch(error) {
       notifications.show({

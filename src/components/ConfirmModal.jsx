@@ -9,6 +9,7 @@ const ConfirmModal = observer(({
   ConfirmCallback,
   CloseCallback,
   show,
+  loadingText,
   cancelText="Cancel",
   confirmText="Confirm"
 }) => {
@@ -26,6 +27,10 @@ const ConfirmModal = observer(({
       centered
     >
       <Text>{message}</Text>
+      {
+        loading && loadingText ?
+          <Text>{loadingText}</Text> : null
+      }
       {
         !error ? null :
           <div className="modal__error">

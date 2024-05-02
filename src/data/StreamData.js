@@ -1,5 +1,6 @@
 import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
 import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
+import AudioPanel from "Pages/stream-details/audio/AudioPanel";
 
 export const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
@@ -15,7 +16,8 @@ export const STATUS_MAP = {
 
 export const DETAILS_TABS = [
   {label: "Details", value: "details", Component: DetailsPanel},
-  {label: "Playout", value: "playout", Component: PlayoutPanel}
+  {label: "Playout", value: "playout", Component: PlayoutPanel},
+  {label: "Audio", value: "audio", Component: AudioPanel}
 ];
 
 export const DEFAULT_WATERMARK_TEXT = {

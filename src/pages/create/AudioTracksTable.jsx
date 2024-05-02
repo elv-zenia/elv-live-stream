@@ -1,24 +1,26 @@
 import React from "react";
 import {observer} from "mobx-react";
-import {Checkbox, Text} from "@mantine/core";
+import {Checkbox, Text, TextInput} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
 import {AudioCodec} from "Data/HumanReadableText";
 import {AudioBitrateReadable} from "Stores/helpers/Misc";
 import {Select} from "Components/Inputs";
 
-const CreateAudioTracksTable = observer(({
+const AudioTracksTable = observer(({
   objectLadderSpecs,
   audioFormData,
-  setAudioFormData
+  setAudioFormData,
+  disabled
 }) => {
   const items = objectLadderSpecs;
 
   const HandleFormChange = ({index, key, value}) => {
-    const audioIndexSpecific = audioFormData[index][key] = value;
+    const audioIndexSpecific = audioFormData[index];
+    audioIndexSpecific[key] = value;
 
     setAudioFormData({
       ...audioFormData,
-      ...audioIndexSpecific
+      [index]: audioIndexSpecific
     });
   };
 
@@ -26,7 +28,8 @@ const CreateAudioTracksTable = observer(({
     <DataTable
       idAccessor="stream_index"
       noRecordsText="No audio tracks found"
-      minHeight={items ? 150 : 75}
+      minHeight={items.length > 0 ? 350 : 200}
+      fetching={!disabled && !audioFormData}
       records={items}
       withColumnBorders
       groups={[
@@ -43,11 +46,11 @@ const CreateAudioTracksTable = observer(({
               )
             },
             {
-              accessor: "representation",
+              accessor: "codecs",
               title: "Codec",
               render: item => (
                 <Text>
-                  { AudioCodec(item.representation) }</Text>
+                  { AudioCodec(item.codecs) }</Text>
               )
             },
             {
@@ -65,11 +68,22 @@ const CreateAudioTracksTable = observer(({
           style: {fontStyle: "italic", fontSize: "1.125rem"},
           columns: [
             {
-              accessor: "stream_label",
+              accessor: "playout_label",
               title: "Label",
-              render: item => (
-                <Text>{ item.stream_label }</Text>
-              )
+              render: item => {
+                return (
+                  <TextInput
+                    value={audioFormData[item.stream_index].playout_label}
+                    onChange={(event) => {
+                      HandleFormChange({
+                        index: item.stream_index,
+                        key: "playout_label",
+                        value: event.target.value
+                      });
+                    }}
+                  />
+                );
+              }
             },
             {
               accessor: "output_bitrate",
@@ -77,6 +91,7 @@ const CreateAudioTracksTable = observer(({
               render: item => (
                 <Select
                   label=""
+                  style={{minWidth: "125px"}}
                   options={[
                     {label: "512 Kbps", value: 512000},
                     {label: "384 Kbps", value: 384000},
@@ -97,6 +112,7 @@ const CreateAudioTracksTable = observer(({
             {
               accessor: "action_record",
               title: "Record",
+              width: 75,
               render: item => (
                 <Checkbox
                   checked={audioFormData[item.stream_index].record}
@@ -123,6 +139,7 @@ const CreateAudioTracksTable = observer(({
             {
               accessor: "action_playout",
               title: "Playout",
+              width: 75,
               render: item => (
                 <Checkbox
                   checked={audioFormData[item.stream_index].playout}
@@ -144,4 +161,4 @@ const CreateAudioTracksTable = observer(({
   );
 });
 
-export default CreateAudioTracksTable;
+export default AudioTracksTable;

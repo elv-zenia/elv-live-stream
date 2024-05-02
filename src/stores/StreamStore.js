@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable} from "mobx";
-import {editStore} from "./index";
+import {editStore, streamStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
 import {FileInfo} from "Stores/helpers/Misc";
@@ -48,9 +48,9 @@ class StreamStore {
     slug
   }) {
     try {
-
+      const libraryId = yield this.client.ContentObjectLibraryId({objectId});
       const liveRecordingConfig = yield this.client.ContentObjectMetadata({
-        libraryId: yield this.client.ContentObjectLibraryId({objectId}),
+        libraryId,
         objectId,
         metadataSubtree: "live_recording_config",
         select: [
@@ -60,17 +60,13 @@ class StreamStore {
           "output/audio/channel_layout",
           "part_ttl",
           "drm",
-          "drm_type"
+          "drm_type",
+          "audio"
         ]
       });
       const customSettings = {};
 
-      if(liveRecordingConfig.input?.audio?.stream === "specific") {
-        customSettings["audioIndex"] = liveRecordingConfig.input?.audio?.stream_index;
-        customSettings["audioBitrate"] = liveRecordingConfig?.output?.audio?.bitrate;
-        customSettings["partTtl"] = liveRecordingConfig?.part_ttl;
-        customSettings["channelLayout"] = liveRecordingConfig?.output?.audio?.channel_layout;
-      }
+      customSettings["audio"] = liveRecordingConfig.audio ? liveRecordingConfig.audio : undefined;
 
       yield this.client.StreamConfig({name: objectId, customSettings});
 
@@ -737,6 +733,42 @@ class StreamStore {
 
       return response;
     }
+  });
+
+  UpdateStreamAudioSettings = flow(function * ({objectId, slug, audioData}) {
+    const libraryId = yield client.ContentObjectLibraryId({objectId});
+    const {writeToken} = yield client.EditContentObject({
+      libraryId,
+      objectId
+    });
+
+    // Remove audio stream from meta if playout=false
+    Object.keys(audioData || {}).forEach(index => {
+      if(!audioData[index].playout) {
+        delete audioData[index];
+      }
+    });
+
+    yield client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording_config/audio",
+      metadata: audioData
+    });
+
+    yield client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update metadata",
+      awaitCommitConfirmation: true
+    });
+
+    yield streamStore.ConfigureStream({
+      objectId,
+      slug
+    });
   });
 }
 

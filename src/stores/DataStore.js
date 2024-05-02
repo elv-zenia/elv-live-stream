@@ -326,10 +326,9 @@ class DataStore {
     }
   });
 
-  LoadProbeStreamData = flow(function * ({
+  LoadStreamProbeData = flow(function * ({
     objectId,
-    libraryId,
-    audioOnly=false
+    libraryId
   }){
     try {
       if(!libraryId) {
@@ -342,13 +341,24 @@ class DataStore {
         metadataSubtree: "live_recording/recording_config/recording_params/ladder_specs",
       });
 
-      if(audioOnly) {
-        const filteredMetadata = (metadata || []).filter(spec => spec.representation.includes("audio"));
+      const audioStreams = (metadata || []).filter(stream => stream.representation.includes("audio"));
 
-        return filteredMetadata;
-      } else {
-        return metadata;
-      }
+      // Map used for form data
+      const audioData = {};
+      audioStreams.forEach(spec => (
+        audioData[spec.stream_index] = {
+          ...spec,
+          playout: !!spec.stream_label,
+          record: !!spec.bit_rate,
+          recording_bitrate: spec.bit_rate,
+          playout_label: spec.stream_label || ""
+        }
+      ));
+
+      return {
+        ladderSpecs: audioStreams,
+        audioData: audioData
+      };
     } catch(error) {
       console.error("Unable to load live_recording metadata", error);
     }

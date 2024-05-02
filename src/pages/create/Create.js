@@ -6,11 +6,12 @@ import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
 import {ENCRYPTION_OPTIONS} from "Data/StreamData";
-import {Alert} from "@mantine/core";
+import {Alert, Button, Flex, Text} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import ConfirmModal from "Components/ConfirmModal";
-import CreateAudioTracksTable from "Pages/create/CreateAudioTracksTable";
+import AudioTracksTable from "Pages/create/AudioTracksTable";
 import {notifications} from "@mantine/notifications";
+import classes from "Assets/stylesheets/modules/CreatePage.module.css";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -24,7 +25,6 @@ const ProbeConfirmation = observer(({
   basicFormData,
   advancedData,
   drmFormData,
-  useAdvancedSettings,
   setObjectData
 }) => {
   return (
@@ -33,13 +33,13 @@ const ProbeConfirmation = observer(({
       CloseCallback={CloseCallback}
       title="Create and Probe Stream"
       message="Are you sure you want to probe the stream? This will also create the content object."
+      loadingText={`Please send your stream to ${basicFormData.url || "the URL you specified"}.`}
       ConfirmCallback={async () => {
         try {
           const {objectId, slug} = await editStore.InitLiveStreamObject({
             basicFormData,
             advancedData,
-            drmFormData,
-            useAdvancedSettings
+            drmFormData
           });
 
           await streamStore.ConfigureStream({objectId, slug});
@@ -122,27 +122,22 @@ const AdvancedSection = observer(({
   AdvancedUpdateCallback,
   drmFormData,
   DrmUpdateCallback,
-  useAdvancedSettings,
   AdvancedSettingsCallback,
   objectProbed=false,
   objectLadderSpecs,
   audioFormData,
-  setAudioFormData
+  setAudioFormData,
+  setShowProbeConfirmation,
+  objectData,
+  useAdvancedSettings
 }) => {
   return (
     <>
-      {
-        !objectProbed &&
-        <Alert variant="light" color="blue" mt={24} icon={<IconAlertCircle />}>
-          To apply advanced settings, object must be probed first.
-        </Alert>
-      }
       <Accordion
         title="Advanced Settings"
         id="advanced-section"
         value={useAdvancedSettings}
         onValueChange={AdvancedSettingsCallback}
-        disabled={!objectProbed}
       >
         {
           useAdvancedSettings &&
@@ -173,11 +168,38 @@ const AdvancedSection = observer(({
               })}
             />
 
+            {
+              !objectProbed &&
+              <Alert
+                variant="light"
+                color="blue"
+                mt={24}
+                mb={24}
+                icon={<IconAlertCircle/>}
+                classNames={{
+                  wrapper: classes.alertRoot
+                }}
+              >
+                <Flex justify="space-between" align="center">
+                  <Text>
+                    To apply audio stream settings, object must be probed first.
+                  </Text>
+                  <Button
+                    variant="subtle"
+                    onClick={() => setShowProbeConfirmation(true)}
+                    disabled={objectData !== null}
+                  >
+                    Probe
+                  </Button>
+                </Flex>
+              </Alert>
+            }
             <div className="form__section-header">Audio</div>
-            <CreateAudioTracksTable
+            <AudioTracksTable
               objectLadderSpecs={objectLadderSpecs}
               audioFormData={audioFormData}
               setAudioFormData={setAudioFormData}
+              disabled={!objectProbed}
             />
           </>
         }
@@ -226,6 +248,7 @@ const Create = observer(() => {
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [objectData, setObjectData] = useState(null);
+  // const [objectData, setObjectData] = useState({objectId: "iq__2REnmEsQkcatAya3g3LzZBLe21YT"});
   const [objectLadderSpecs, setObjectLadderSpecs] = useState([]);
 
   const urls = basicFormData.protocol === "custom" ?
@@ -235,28 +258,12 @@ const Create = observer(() => {
 
   useEffect(() => {
     const LoadConfigData = async () => {
-      const ladderSpecs = await dataStore.LoadProbeStreamData({
-        objectId: objectData.objectId,
-        audioOnly: true
-      });
-
-      // Initialize audio track form data
-      const formData = {};
-      ladderSpecs.forEach(spec => {
-        formData[spec.stream_index] = {
-          tags: "",
-          codec: "",
-          record: true,
-          recording_bitrate: 192000,
-          recording_channels: spec.channels,
-          playout: true,
-          playout_label: spec.stream_label,
-          stream_index: spec.stream_index
-        };
+      const {ladderSpecs, audioData} = await dataStore.LoadStreamProbeData({
+        objectId: objectData.objectId
       });
 
       setObjectLadderSpecs(ladderSpecs);
-      setAudioFormData(formData);
+      setAudioFormData(audioData);
     };
 
     if(objectData !== null) {
@@ -300,8 +307,7 @@ const Create = observer(() => {
 
       if(objectData === null) {
         const response = await editStore.InitLiveStreamObject({
-          ...formData,
-          useAdvancedSettings
+          ...formData
         });
 
         objectId = response.objectId;
@@ -315,7 +321,9 @@ const Create = observer(() => {
         });
       }
 
-      navigate(`/streams/${objectId}`);
+      navigate(`/streams/${objectId}`, {
+        state: {tab: objectData === null ? "details" : "audio"}
+      });
     } finally {
       setIsCreating(false);
     }
@@ -380,6 +388,7 @@ const Create = observer(() => {
             label="URL"
             required={basicFormData.protocol === "custom"}
             value={basicFormData.url}
+            disabled={objectData !== null}
             onChange={event => UpdateFormData({
               key: "url",
               value: event.target.value,
@@ -442,6 +451,7 @@ const Create = observer(() => {
 
         <Select
           label="Access Group"
+          disabled={objectData !== null}
           labelDescription="This is the Access Group that will manage your live stream object."
           options={
             Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
@@ -496,10 +506,6 @@ const Create = observer(() => {
           })}
         />
 
-        <button className="button__secondary" type="button" onClick={() => setShowProbeConfirmation(true)} disabled={objectData !== null}>
-          Probe
-        </button>
-
         <AdvancedSection
           advancedData={advancedData}
           drmFormData={drmFormData}
@@ -519,6 +525,8 @@ const Create = observer(() => {
           objectLadderSpecs={objectLadderSpecs}
           audioFormData={audioFormData}
           setAudioFormData={setAudioFormData}
+          setShowProbeConfirmation={setShowProbeConfirmation}
+          objectData={objectData}
         />
 
         <div style={{maxWidth: "200px"}}>

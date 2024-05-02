@@ -36,12 +36,14 @@ export const QUALITY_TEXT = {
 };
 
 export const AudioCodec = (value) => {
-  if(value.toLowerCase().includes("aac")) {
+  if(value === "aac") {
     return "AAC";
-  } else if(value.toLowerCase().includes("mp3")) {
+  } else if(value === "mp3") {
     return "MP3";
-  } else if(value.toLowerCase().includes("mp2")) {
+  } else if(value === "mp2") {
     return "MP2";
+  } else if(value?.includes("mp4a")) {
+    return "Mp4a";
   } else {
     return "--";
   }

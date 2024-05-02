@@ -29,8 +29,7 @@ class EditStore {
   InitLiveStreamObject = flow(function * ({
     basicFormData,
     advancedData,
-    drmFormData,
-    useAdvancedSettings
+    drmFormData
   }) {
     const {libraryId, url, name, description, displayName, accessGroup, permission, protocol} = basicFormData;
     const {retention} = advancedData;
@@ -53,7 +52,6 @@ class EditStore {
     const config = ParseLiveConfigData({
       url,
       encryption,
-      useAdvancedSettings,
       retention,
       referenceUrl: protocol === "custom" ? undefined : url
     });
@@ -129,10 +127,16 @@ class EditStore {
       });
     }
 
+    // Remove audio stream from meta if playout=false
+    Object.keys(audioFormData || {}).forEach(index => {
+      if(!audioFormData[index].playout) {
+        delete audioFormData[index];
+      }
+    });
+
     const config = ParseLiveConfigData({
       url,
       encryption,
-      useAdvancedSettings: true,
       retention,
       referenceUrl: protocol === "custom" ? undefined : url,
       audioFormData
