@@ -47,13 +47,8 @@ const AudioPanel = observer(({title, slug, url}) => {
         message: "Settings have been applied successfully"
       });
     } catch(error) {
-      notifications.show({
-        title: "Error",
-        color: "red",
-        message: "Unable to apply settings"
-      });
-
       console.error("Unable to configure audio settings", error);
+      throw error;
     } finally {
       setApplyingChanges(false);
     }
@@ -71,9 +66,10 @@ const AudioPanel = observer(({title, slug, url}) => {
       <button
         type="button"
         className="button__primary"
+        disabled={applyingChanges}
         onClick={() => setShowProbeConfirmation(true)}
       >
-        {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+        Apply
       </button>
 
       <ProbeConfirmation

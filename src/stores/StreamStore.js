@@ -742,9 +742,9 @@ class StreamStore {
       objectId
     });
 
-    // Remove audio stream from meta if playout=false
+    // Remove audio stream from meta if record=false
     Object.keys(audioData || {}).forEach(index => {
-      if(!audioData[index].playout) {
+      if(!audioData[index].record) {
         delete audioData[index];
       }
     });
@@ -765,9 +765,16 @@ class StreamStore {
       awaitCommitConfirmation: true
     });
 
+    const probeMetadata = yield client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: "live_recording/probe_info"
+    });
+
     yield streamStore.ConfigureStream({
       objectId,
-      slug
+      slug,
+      probeMetadata
     });
   });
 }

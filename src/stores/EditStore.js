@@ -127,9 +127,9 @@ class EditStore {
       });
     }
 
-    // Remove audio stream from meta if playout=false
+    // Remove audio stream from meta if record=false
     Object.keys(audioFormData || {}).forEach(index => {
-      if(!audioFormData[index].playout) {
+      if(!audioFormData[index].record) {
         delete audioFormData[index];
       }
     });
