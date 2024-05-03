@@ -48,7 +48,12 @@ const AudioPanel = observer(({title, slug, url}) => {
       });
     } catch(error) {
       console.error("Unable to configure audio settings", error);
-      throw error;
+
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: "Unable to apply settings"
+      });
     } finally {
       setApplyingChanges(false);
     }
@@ -67,17 +72,10 @@ const AudioPanel = observer(({title, slug, url}) => {
         type="button"
         className="button__primary"
         disabled={applyingChanges}
-        onClick={() => setShowProbeConfirmation(true)}
+        onClick={HandleSubmit}
       >
-        Apply
+        {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
       </button>
-
-      <ProbeConfirmation
-        show={showProbeConfirmation}
-        url={url}
-        CloseCallback={() => setShowProbeConfirmation(false)}
-        ConfirmCallback={HandleSubmit}
-      />
     </>
   );
 });
