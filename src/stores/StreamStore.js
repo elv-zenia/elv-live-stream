@@ -45,7 +45,8 @@ class StreamStore {
 
   ConfigureStream = flow(function * ({
     objectId,
-    slug
+    slug,
+    probeMetadata
   }) {
     try {
       const libraryId = yield this.client.ContentObjectLibraryId({objectId});
@@ -68,7 +69,7 @@ class StreamStore {
 
       customSettings["audio"] = liveRecordingConfig.audio ? liveRecordingConfig.audio : undefined;
 
-      yield this.client.StreamConfig({name: objectId, customSettings});
+      yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
 
       if(liveRecordingConfig?.drm) {
         const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
