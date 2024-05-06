@@ -6,14 +6,12 @@ import {useParams} from "react-router-dom";
 import {Loader} from "Components/Loader";
 import {Box} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
-import ProbeConfirmation from "Pages/ProbeConfirmation";
 
-const AudioPanel = observer(({title, slug, url}) => {
+const AudioPanel = observer(({title, slug}) => {
   const params = useParams();
   const [objectLadderSpecs, setObjectLadderSpecs] = useState([]);
   const [formData, setFormData] = useState(null);
   const [applyingChanges, setApplyingChanges] = useState(false);
-  const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
 
   const LoadConfigData = async () => {
     const {ladderSpecs, audioData} = await dataStore.LoadStreamProbeData({
