@@ -87,7 +87,8 @@ const AdvancedSection = observer(({
   setAudioFormData,
   setShowProbeConfirmation,
   objectData,
-  useAdvancedSettings
+  useAdvancedSettings,
+  DisableProbeButton
 }) => {
   return (
     <>
@@ -145,7 +146,10 @@ const AdvancedSection = observer(({
                   <Button
                     variant="subtle"
                     onClick={() => setShowProbeConfirmation(true)}
-                    disabled={objectData !== null}
+                    disabled={
+                      objectData !== null ||
+                      DisableProbeButton()
+                    }
                   >
                     Probe
                   </Button>
@@ -485,6 +489,13 @@ const Create = observer(() => {
           setAudioFormData={setAudioFormData}
           setShowProbeConfirmation={setShowProbeConfirmation}
           objectData={objectData}
+          DisableProbeButton={() => {
+            return !(
+              basicFormData.url &&
+              basicFormData.name &&
+              basicFormData.libraryId
+            );
+          }}
         />
 
         <div style={{maxWidth: "200px"}}>
