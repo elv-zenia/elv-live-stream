@@ -55,5 +55,6 @@ export const RECORDING_BITRATE_OPTIONS = [
   {label: "384 Kbps", value: 384000},
   {label: "256 Kbps", value: 256000},
   {label: "192 Kbps", value: 192000},
+  {label: "128 Kbps", value: 128000},
   {label: "48 Kbps", value: 48000}
 ];
