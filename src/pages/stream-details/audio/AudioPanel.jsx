@@ -60,20 +60,21 @@ const AudioPanel = observer(({title, slug}) => {
   return (
     <>
       <Box mb="24px" maw="60%">
-        <AudioTracksTable
-          objectLadderSpecs={objectLadderSpecs}
-          audioFormData={formData}
-          setAudioFormData={setFormData}
-        />
+        <form onSubmit={HandleSubmit}>
+          <AudioTracksTable
+            objectLadderSpecs={objectLadderSpecs}
+            audioFormData={formData}
+            setAudioFormData={setFormData}
+          />
+          <button
+            type="submit"
+            className="button__primary"
+            disabled={applyingChanges}
+          >
+            {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+          </button>
+        </form>
       </Box>
-      <button
-        type="button"
-        className="button__primary"
-        disabled={applyingChanges}
-        onClick={HandleSubmit}
-      >
-        {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
-      </button>
     </>
   );
 });

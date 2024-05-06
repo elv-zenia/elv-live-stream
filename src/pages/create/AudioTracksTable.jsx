@@ -76,6 +76,9 @@ const AudioTracksTable = observer(({
                   <TextInput
                     value={audioFormData[item.stream_index].playout_label}
                     disabled={disabled}
+                    required={audioFormData[item.stream_index].record}
+                    onInvalid={e => e.target.setCustomValidity("Label cannot be empty when enabling Playout")}
+                    onInput={e => e.target.setCustomValidity("")}
                     onChange={(event) => {
                       HandleFormChange({
                         index: item.stream_index,
