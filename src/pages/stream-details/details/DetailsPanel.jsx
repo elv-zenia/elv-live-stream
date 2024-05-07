@@ -14,7 +14,7 @@ import {QUALITY_TEXT} from "Data/HumanReadableText";
 import {IconAlertCircle} from "@tabler/icons-react";
 import {VideoContainer} from "Pages/monitor/Monitor";
 
-export const Runtime = ({startTime, endTime, currentTimeMs, format="hh:mm"}) => {
+export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) => {
   let time;
 
   if(!endTime) {
@@ -133,12 +133,10 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
               </Text>
               <Text>
                 Current Period Runtime: {
-                  status?.state !== STATUS_MAP.RUNNING ?
-                    "--" :
-                    Runtime({
-                      startTime: status?.recording_period?.start_time_epoch_sec * 1000,
-                      currentTimeMs
-                    })
+                  [STATUS_MAP.RUNNING, STATUS_MAP.STARTING].includes(status?.state) ? Runtime({
+                    startTime: status?.recording_period?.start_time_epoch_sec * 1000,
+                    currentTimeMs
+                  }) : "--"
                 }
               </Text>
             </Box>

@@ -67,7 +67,7 @@ export const StatusIndicator = (status) => {
   }
 };
 
-export const FormatTime = ({milliseconds, iso, format="hh:mm"}) => {
+export const FormatTime = ({milliseconds, iso, format="hh,mm,ss"}) => {
   if(iso) {
     milliseconds = new Date(iso).getTime();
   }
@@ -100,8 +100,10 @@ export const FormatTime = ({milliseconds, iso, format="hh:mm"}) => {
 
     timeString = arrayValue.join(":");
     // timeString = `${hours}h ${minutes}min ${seconds}sec`
-  } else if(format === "hh:mm") {
+  } else if(format === "hh,mm") {
     timeString = `${hours}h ${minutes}min`;
+  } else if(format === "hh,mm,ss") {
+    timeString = `${hours}h ${minutes}min ${seconds}sec`;
   }
 
   return timeString;
