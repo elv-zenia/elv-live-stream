@@ -369,7 +369,7 @@ class DataStore {
       audioStreams.forEach(spec => {
         const audioConfigForIndex = audioConfig && audioConfig[spec.stream_index] ? audioConfig[spec.stream_index] : {};
 
-        const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(audioConfigForIndex.recording_bitrate) ? audioConfigForIndex.recording_bitrate : 192000;
+        const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(spec.bit_rate) ? spec.bit_rate : 192000;
 
         audioData[spec.stream_index] = {
           bitrate: spec.bit_rate,
