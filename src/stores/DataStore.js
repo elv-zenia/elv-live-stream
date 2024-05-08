@@ -351,6 +351,10 @@ class DataStore {
         });
       }
 
+      if(!probeMetadata) {
+        return {audioStreams: [], audioData: {}};
+      }
+
       const audioConfig = yield this.client.ContentObjectMetadata({
         libraryId,
         objectId,
