@@ -67,6 +67,21 @@ class StreamStore {
       });
       const customSettings = {};
 
+      const edgeWriteToken = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/fabric_config/edge_write_token"
+      });
+
+      // Config api will override meta containing edge write token
+      if(edgeWriteToken) {
+        customSettings["edge_write_token"] = edgeWriteToken;
+      }
+
+      if(liveRecordingConfig.part_ttl) {
+        customSettings["part_ttl"] = liveRecordingConfig.part_ttl;
+      }
+
       customSettings["audio"] = liveRecordingConfig.audio ? liveRecordingConfig.audio : undefined;
 
       yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
@@ -743,13 +758,6 @@ class StreamStore {
       objectId
     });
 
-    // Remove audio stream from meta if record=false
-    Object.keys(audioData || {}).forEach(index => {
-      if(!audioData[index].record) {
-        delete audioData[index];
-      }
-    });
-
     yield client.ReplaceMetadata({
       libraryId,
       objectId,
@@ -769,7 +777,7 @@ class StreamStore {
     const probeMetadata = yield client.ContentObjectMetadata({
       libraryId,
       objectId,
-      metadataSubtree: "live_recording/probe_info"
+      metadataSubtree: "live_recording_config/probe_info"
     });
 
     yield streamStore.ConfigureStream({

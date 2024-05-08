@@ -223,8 +223,8 @@ class DataStore {
         objectId,
         libraryId,
         select: [
-          "live_recording/probe_info/format/filename",
-          "live_recording/probe_info/streams",
+          "live_recording_config/probe_info/format/filename",
+          "live_recording_config/probe_info/streams",
           "live_recording/recording_config/recording_params/origin_url",
           "live_recording/recording_config/recording_params/simple_watermark",
           "live_recording/recording_config/recording_params/image_watermark",
@@ -233,14 +233,14 @@ class DataStore {
           "live_recording_config/drm_type"
         ]
       });
-      let probeMeta = streamMeta?.live_recording?.probe_info;
+      let probeMeta = streamMeta?.live_recording_config?.probe_info;
 
-      // Phase out as new streams will have live_recording/probe_info
+      // Phase out as new streams will have live_recording_config/probe_info
       if(!probeMeta) {
         probeMeta = yield this.client.ContentObjectMetadata({
           objectId,
           libraryId,
-          metadataSubtree: "/probe",
+          metadataSubtree: "/live_recording/probe_info",
           select: [
             "format/filename",
             "streams"
@@ -336,31 +336,51 @@ class DataStore {
         libraryId = yield this.client.ContentObjectLibraryId({objectId});
       }
 
-      const metadata = yield this.client.ContentObjectMetadata({
+      let probeMetadata = yield this.client.ContentObjectMetadata({
         libraryId,
         objectId,
-        metadataSubtree: "live_recording/recording_config/recording_params/ladder_specs",
+        metadataSubtree: "live_recording_config/probe_info",
       });
 
-      const audioStreams = (metadata || []).filter(stream => stream.representation.includes("audio"));
+      // Phase out as new streams will have live_recording_config/probe_info
+      if(!probeMetadata) {
+        probeMetadata = yield this.client.ContentObjectMetadata({
+          libraryId,
+          objectId,
+          metadataSubtree: "live_recording/probe_info",
+        });
+      }
+
+      const audioConfig = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording_config/audio"
+      });
+
+      const audioStreams = (probeMetadata.streams || [])
+        .filter(stream => stream.codec_type === "audio");
 
       // Map used for form data
       const audioData = {};
       audioStreams.forEach(spec => {
-        const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(spec.bit_rate) ? spec.bit_rate : 192000;
+        const audioConfigForIndex = audioConfig && audioConfig[spec.stream_index] ? audioConfig[spec.stream_index] : {};
+
+        const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(audioConfigForIndex.recording_bitrate) ? audioConfigForIndex.recording_bitrate : 192000;
 
         audioData[spec.stream_index] = {
-          ...spec,
-          playout: !!spec.stream_label,
-          record: !!spec.bit_rate,
+          bitrate: spec.bit_rate,
+          codec: spec.codec_name,
+          record: Object.hasOwn(audioConfigForIndex, "record") ? audioConfigForIndex.record : true,
           recording_bitrate: initBitrate,
-          playout_label: spec.stream_label || ""
+          recording_channels: spec.channels,
+          playout: Object.hasOwn(audioConfigForIndex, "playout") ? audioConfigForIndex.playout : true,
+          playout_label: audioConfigForIndex.playout_label || `Audio ${spec.stream_index}`
         };
       });
 
       return {
-        ladderSpecs: audioStreams,
-        audioData: audioData
+        audioStreams,
+        audioData
       };
     } catch(error) {
       console.error("Unable to load live_recording metadata", error);

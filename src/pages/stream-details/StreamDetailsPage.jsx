@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import PageHeader from "Components/header/PageHeader";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import {Tabs, Text} from "@mantine/core";
@@ -12,12 +12,11 @@ import ConfirmModal from "Components/ConfirmModal";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
-  const location = useLocation();
   const params = useParams();
   let streamSlug, stream;
   const [showModal, {open, close}] = useDisclosure(false);
   const [pageVersion, setPageVersion] = useState(0);
-  const [activeTab, setActiveTab] = useState(location.state?.tab ? location.state.tab : "details");
+  const [activeTab, setActiveTab] = useState("details");
 
   streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
     streamStore.streams[slug].objectId === params.id

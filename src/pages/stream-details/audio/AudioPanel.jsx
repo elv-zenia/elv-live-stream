@@ -9,16 +9,16 @@ import {notifications} from "@mantine/notifications";
 
 const AudioPanel = observer(({title, slug}) => {
   const params = useParams();
-  const [objectLadderSpecs, setObjectLadderSpecs] = useState([]);
+  const [audioTracks, setAudioTracks] = useState([]);
   const [formData, setFormData] = useState(null);
   const [applyingChanges, setApplyingChanges] = useState(false);
 
   const LoadConfigData = async () => {
-    const {ladderSpecs, audioData} = await dataStore.LoadStreamProbeData({
+    const {audioStreams, audioData} = await dataStore.LoadStreamProbeData({
       objectId: params.id
     });
 
-    setObjectLadderSpecs(ladderSpecs);
+    setAudioTracks(audioStreams);
     setFormData(audioData);
   };
 
@@ -28,7 +28,8 @@ const AudioPanel = observer(({title, slug}) => {
     }
   }, [params.id]);
 
-  const HandleSubmit = async() => {
+  const HandleSubmit = async(event) => {
+    event.preventDefault();
     try {
       setApplyingChanges(true);
 
@@ -62,17 +63,19 @@ const AudioPanel = observer(({title, slug}) => {
       <Box mb="24px" maw="60%">
         <form onSubmit={HandleSubmit}>
           <AudioTracksTable
-            objectLadderSpecs={objectLadderSpecs}
+            records={audioTracks}
             audioFormData={formData}
             setAudioFormData={setFormData}
           />
-          <button
-            type="submit"
-            className="button__primary"
-            disabled={applyingChanges}
-          >
-            {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
-          </button>
+          <Box mt="24px">
+            <button
+              type="submit"
+              className="button__primary"
+              disabled={applyingChanges}
+            >
+              {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+            </button>
+          </Box>
         </form>
       </Box>
     </>

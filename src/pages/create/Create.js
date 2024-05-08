@@ -82,7 +82,7 @@ const AdvancedSection = observer(({
   DrmUpdateCallback,
   AdvancedSettingsCallback,
   objectProbed=false,
-  objectLadderSpecs,
+  audioTracks,
   audioFormData,
   setAudioFormData,
   setShowProbeConfirmation,
@@ -158,7 +158,7 @@ const AdvancedSection = observer(({
             }
             <div className="form__section-header">Audio</div>
             <AudioTracksTable
-              objectLadderSpecs={objectLadderSpecs}
+              records={audioTracks}
               audioFormData={audioFormData}
               setAudioFormData={setAudioFormData}
               disabled={!objectProbed}
@@ -210,8 +210,7 @@ const Create = observer(() => {
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [objectData, setObjectData] = useState(null);
-  // const [objectData, setObjectData] = useState({objectId: "iq__2REnmEsQkcatAya3g3LzZBLe21YT"});
-  const [objectLadderSpecs, setObjectLadderSpecs] = useState([]);
+  const [audioTracks, setAudioTracks] = useState([]);
 
   const urls = basicFormData.protocol === "custom" ?
     [] :
@@ -220,11 +219,11 @@ const Create = observer(() => {
 
   useEffect(() => {
     const LoadConfigData = async () => {
-      const {ladderSpecs, audioData} = await dataStore.LoadStreamProbeData({
+      const {audioStreams, audioData} = await dataStore.LoadStreamProbeData({
         objectId: objectData.objectId
       });
 
-      setObjectLadderSpecs(ladderSpecs);
+      setAudioTracks(audioStreams);
       setAudioFormData(audioData);
     };
 
@@ -283,9 +282,7 @@ const Create = observer(() => {
         });
       }
 
-      navigate(`/streams/${objectId}`, {
-        state: {tab: objectData === null ? "details" : "audio"}
-      });
+      navigate(`/streams/${objectId}`);
     } finally {
       setIsCreating(false);
     }
@@ -484,7 +481,7 @@ const Create = observer(() => {
           })}
           AdvancedSettingsCallback={setUseAdvancedSettings}
           objectProbed={objectData !== null}
-          objectLadderSpecs={objectLadderSpecs}
+          audioTracks={audioTracks}
           audioFormData={audioFormData}
           setAudioFormData={setAudioFormData}
           setShowProbeConfirmation={setShowProbeConfirmation}

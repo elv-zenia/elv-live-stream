@@ -8,13 +8,11 @@ import {Select} from "Components/Inputs";
 import {RECORDING_BITRATE_OPTIONS} from "Data/StreamData";
 
 const AudioTracksTable = observer(({
-  objectLadderSpecs,
+  records,
   audioFormData,
   setAudioFormData,
   disabled
 }) => {
-  const items = objectLadderSpecs;
-
   const HandleFormChange = ({index, key, value}) => {
     const audioIndexSpecific = audioFormData[index];
     audioIndexSpecific[key] = value;
@@ -29,9 +27,9 @@ const AudioTracksTable = observer(({
     <DataTable
       idAccessor="stream_index"
       noRecordsText="No audio tracks found"
-      minHeight={items.length > 0 ? 350 : 200}
+      minHeight={records.length > 0 ? 350 : 200}
       fetching={!disabled && !audioFormData}
-      records={items}
+      records={records}
       withColumnBorders
       groups={[
         {
@@ -47,15 +45,15 @@ const AudioTracksTable = observer(({
               )
             },
             {
-              accessor: "codecs",
+              accessor: "codec_name",
               title: "Codec",
               render: item => (
                 <Text>
-                  { AudioCodec(item.codecs) }</Text>
+                  { AudioCodec(item.codec_name) }</Text>
               )
             },
             {
-              accessor: "input_bitrate",
+              accessor: "bit_rate",
               title: "Bitrate",
               render: item => (
                 <Text>{ AudioBitrateReadable(item.bit_rate) }</Text>
