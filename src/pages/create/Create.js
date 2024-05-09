@@ -1,16 +1,20 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
-import {dataStore, editStore} from "Stores";
-import {NumberInput, Radio, Select, TextInput} from "Components/Inputs";
+import {dataStore, editStore, streamStore} from "Stores";
+import {Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
 import {ENCRYPTION_OPTIONS} from "Data/StreamData";
+import {Alert, Button, Flex, Text} from "@mantine/core";
+import {IconAlertCircle} from "@tabler/icons-react";
+import AudioTracksTable from "Pages/create/AudioTracksTable";
+import {notifications} from "@mantine/notifications";
+import classes from "Assets/stylesheets/modules/CreatePage.module.css";
+import ProbeConfirmation from "Pages/ProbeConfirmation";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
-  OUTPUT: "OUTPUT",
-  INPUT: "INPUT",
   ADVANCED: "ADVANCED",
   DRM: "DRM"
 };
@@ -72,115 +76,97 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
 });
 
 const AdvancedSection = observer(({
-  outputFormData,
-  OutputUpdateCallback,
-  inputFormData,
-  InputUpdateCallback,
   advancedData,
   AdvancedUpdateCallback,
   drmFormData,
-  DrmUpdateCallback
+  DrmUpdateCallback,
+  AdvancedSettingsCallback,
+  objectProbed=false,
+  audioTracks,
+  audioFormData,
+  setAudioFormData,
+  setShowProbeConfirmation,
+  objectData,
+  useAdvancedSettings,
+  DisableProbeButton
 }) => {
   return (
-    <Accordion
-      title="Advanced Settings"
-      id="advanced-section"
-    >
-      <Radio
-        label="Audio/Video Properties"
-        options={[
-          {
-            optionLabel: "Default",
-            id: "default",
-            value: "DEFAULT",
-            checked: advancedData.avProperties === "DEFAULT",
-            onChange: (event) => AdvancedUpdateCallback({
-              key: "avProperties",
-              event
-            })
-          },
-          {
-            optionLabel: "Custom",
-            id: "custom",
-            value: "CUSTOM",
-            checked: advancedData.avProperties === "CUSTOM",
-            onChange: (event) => AdvancedUpdateCallback({
-              key: "avProperties",
-              event
-            })
-          }
-        ]}
-      />
+    <>
+      <Accordion
+        title="Advanced Settings"
+        id="advanced-section"
+        value={useAdvancedSettings}
+        onValueChange={AdvancedSettingsCallback}
+      >
+        {
+          useAdvancedSettings &&
+          <>
+            <Select
+              label="Retention"
+              labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+              formName="retention"
+              options={[
+                {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
+                {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
+                {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
+                {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
+                {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
+              ]}
+              value={advancedData.retention}
+              onChange={event => AdvancedUpdateCallback({
+                key: "retention",
+                event
+              })
+              }
+            />
+            <PlaybackEncryption
+              drmFormData={drmFormData}
+              UpdateCallback={({event, key}) => DrmUpdateCallback({
+                key,
+                event
+              })}
+            />
 
-      {
-        advancedData.avProperties === "CUSTOM" &&
-        <>
-          <Select
-            label="Retention"
-            labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-            formName="retention"
-            options={[
-              {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
-              {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
-              {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
-              {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
-              {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
-            ]}
-            value={advancedData.retention}
-            onChange={event => AdvancedUpdateCallback({
-              key: "retention",
-              event
-            })
+            {
+              !objectProbed &&
+              <Alert
+                variant="light"
+                color="blue"
+                mt={24}
+                mb={24}
+                icon={<IconAlertCircle/>}
+                classNames={{
+                  wrapper: classes.alertRoot
+                }}
+              >
+                <Flex justify="space-between" align="center">
+                  <Text>
+                    To apply audio stream settings, object must be probed first.
+                  </Text>
+                  <Button
+                    variant="subtle"
+                    onClick={() => setShowProbeConfirmation(true)}
+                    disabled={
+                      objectData !== null ||
+                      DisableProbeButton()
+                    }
+                  >
+                    Probe
+                  </Button>
+                </Flex>
+              </Alert>
             }
-          />
-          <PlaybackEncryption
-            drmFormData={drmFormData}
-            UpdateCallback={({event, key}) => DrmUpdateCallback({
-              key,
-              event
-            })}
-          />
-
-          <div className="form__section-header">Audio Output</div>
-          <Select
-            label="Channel Layout"
-            options={[
-              {label: "Stereo (2)", value: 2},
-              {label: "Surround (5.1)", value: 6}
-            ]}
-            onChange={(event) => OutputUpdateCallback({
-              key: "audioChannelLayout",
-              event
-            })}
-          />
-          <Select
-            label="Bitrate"
-            value={outputFormData.audioBitrate}
-            options={[
-              {label: "128000", value: "128000"},
-              {label: "192000", value: "192000"},
-              {label: "256000", value: "256000"},
-              {label: "384000", value: "384000"}
-            ]}
-            onChange={(event) => OutputUpdateCallback({
-              key: "audioBitrate",
-              event
-            })}
-          />
-
-          <div className="form__section-header">Audio Input</div>
-          <NumberInput
-            label="Stream Index"
-            min={0}
-            value={inputFormData.audioStreamIndex}
-            onChange={(event) => InputUpdateCallback({
-              key: "audioStreamIndex",
-              event
-            })}
-          />
-        </>
-      }
-    </Accordion>
+            <div className="form__section-header">Audio</div>
+            <AudioTracksTable
+              records={audioTracks}
+              audioFormData={audioFormData}
+              setAudioFormData={setAudioFormData}
+              disabled={!objectProbed}
+            />
+          </>
+        }
+      </Accordion>
+    </>
   );
 });
 
@@ -207,50 +193,50 @@ const Create = observer(() => {
     permission: "editable"
   });
 
-  const [outputFormData, setOutputFormData] = useState({
-    videoHeight: "",
-    videoWidth: "",
-    videoBitrate: "",
-    audioChannelLayout: 2,
-    audioBitrate: 128000
-  });
-
-  const [inputFormData, setInputFormData] = useState({
-    videoStreamId: "0",
-    videoStreamIndex: "0",
-    audioStreamId: "0",
-    audioStreamIndex: "0"
-  });
-
   const [advancedData, setAdvancedData] = useState({
-    retention: 3600,
-    avProperties: "DEFAULT"
+    retention: 21600
   });
+
+  const [useAdvancedSettings, setUseAdvancedSettings] = useState();
 
   const [drmFormData, setDrmFormData] = useState({
     encryption: ""
   });
 
+  const [audioFormData, setAudioFormData] = useState(null);
+
+  const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
+
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
+  const [objectData, setObjectData] = useState(null);
+  const [audioTracks, setAudioTracks] = useState([]);
+
   const urls = basicFormData.protocol === "custom" ?
     [] :
     Object.keys(dataStore.liveStreamUrls || {})
       .filter(url => dataStore.liveStreamUrls[url].protocol === basicFormData.protocol && !dataStore.liveStreamUrls[url].active);
+
+  useEffect(() => {
+    const LoadConfigData = async () => {
+      const {audioStreams, audioData} = await dataStore.LoadStreamProbeData({
+        objectId: objectData.objectId
+      });
+
+      setAudioTracks(audioStreams);
+      setAudioFormData(audioData);
+    };
+
+    if(objectData !== null) {
+      LoadConfigData();
+    }
+  }, [objectData, streamStore.streams]);
 
   const UpdateFormData = ({formKey, key, value}) => {
     const FORM_MAP = {
       "BASIC": {
         data: basicFormData,
         callback: setBasicFormData
-      },
-      "OUTPUT": {
-        data: outputFormData,
-        callback: setOutputFormData
-      },
-      "INPUT": {
-        data: inputFormData,
-        callback: setInputFormData
       },
       "ADVANCED": {
         data: advancedData,
@@ -273,15 +259,30 @@ const Create = observer(() => {
     setIsCreating(true);
 
     try {
-      await editStore.InitLiveStreamObject({
+      const formData = {
         basicFormData,
-        inputFormData,
-        outputFormData,
         advancedData,
         drmFormData
-      });
+      };
+      let objectId;
 
-      navigate("/streams");
+      if(objectData === null) {
+        const response = await editStore.InitLiveStreamObject({
+          ...formData
+        });
+
+        objectId = response.objectId;
+      } else {
+        objectId = objectData.objectId;
+        await editStore.UpdateLiveStreamObject({
+          objectId,
+          slug: objectData.slug,
+          audioFormData,
+          ...formData
+        });
+      }
+
+      navigate(`/streams/${objectId}`);
     } finally {
       setIsCreating(false);
     }
@@ -346,6 +347,7 @@ const Create = observer(() => {
             label="URL"
             required={basicFormData.protocol === "custom"}
             value={basicFormData.url}
+            disabled={objectData !== null}
             onChange={event => UpdateFormData({
               key: "url",
               value: event.target.value,
@@ -358,6 +360,7 @@ const Create = observer(() => {
           <Select
             label="URL"
             required={true}
+            disabled={objectData !== null}
             defaultValue={urls[0]}
             options={urls.map(url => (
               {
@@ -407,6 +410,7 @@ const Create = observer(() => {
 
         <Select
           label="Access Group"
+          disabled={objectData !== null}
           labelDescription="This is the Access Group that will manage your live stream object."
           options={
             Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
@@ -438,6 +442,7 @@ const Create = observer(() => {
 
         <Select
           label="Library"
+          disabled={objectData !== null}
           labelDescription="This is the library where your live stream object will be created."
           required={true}
           options={
@@ -461,30 +466,33 @@ const Create = observer(() => {
         />
 
         <AdvancedSection
-          inputFormData={inputFormData}
-          outputFormData={outputFormData}
           advancedData={advancedData}
           drmFormData={drmFormData}
+          useAdvancedSettings={useAdvancedSettings}
           DrmUpdateCallback={({event, key}) => UpdateFormData({
             key,
             value: event.target.value,
             formKey: FORM_KEYS.DRM
           })}
-          InputUpdateCallback={({event, key}) => UpdateFormData({
+          AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
             key,
-            value: event.target.value,
-            formKey: FORM_KEYS.INPUT
-          })}
-          OutputUpdateCallback={({event, key}) => UpdateFormData({
-            key,
-            value: event.target.value,
-            formKey: FORM_KEYS.OUTPUT
-          })}
-          AdvancedUpdateCallback={({event, key}) => UpdateFormData({
-            key,
-            value: event.target.value,
+            value: value ? value : event?.target?.value,
             formKey: FORM_KEYS.ADVANCED
           })}
+          AdvancedSettingsCallback={setUseAdvancedSettings}
+          objectProbed={objectData !== null}
+          audioTracks={audioTracks}
+          audioFormData={audioFormData}
+          setAudioFormData={setAudioFormData}
+          setShowProbeConfirmation={setShowProbeConfirmation}
+          objectData={objectData}
+          DisableProbeButton={() => {
+            return !(
+              basicFormData.url &&
+              basicFormData.name &&
+              basicFormData.libraryId
+            );
+          }}
         />
 
         <div style={{maxWidth: "200px"}}>
@@ -492,9 +500,30 @@ const Create = observer(() => {
         </div>
 
         <div className="form__actions">
-          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Create"} />
+          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Save"} />
         </div>
       </form>
+      <ProbeConfirmation
+        show={showProbeConfirmation}
+        url={basicFormData.url}
+        CloseCallback={() => setShowProbeConfirmation(false)}
+        ConfirmCallback={async () => {
+          const {objectId, slug} = await editStore.InitLiveStreamObject({
+            basicFormData,
+            advancedData,
+            drmFormData
+          });
+
+          await streamStore.ConfigureStream({objectId, slug});
+
+          setObjectData({objectId, slug});
+
+          notifications.show({
+            title: "Probed stream",
+            message: "Stream object was successfully created and probed"
+          });
+        }}
+      />
     </div>
   );
 });

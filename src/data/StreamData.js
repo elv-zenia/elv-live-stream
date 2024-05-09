@@ -1,10 +1,6 @@
 import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
 import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
-
-export const AV_STREAM = {
-  DEFAULT: "default",
-  CUSTOM: "specific"
-};
+import AudioPanel from "Pages/stream-details/audio/AudioPanel";
 
 export const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
@@ -20,7 +16,8 @@ export const STATUS_MAP = {
 
 export const DETAILS_TABS = [
   {label: "Details", value: "details", Component: DetailsPanel},
-  {label: "Playout", value: "playout", Component: PlayoutPanel}
+  {label: "Playout", value: "playout", Component: PlayoutPanel},
+  {label: "Audio", value: "audio", Component: AudioPanel}
 ];
 
 export const DEFAULT_WATERMARK_TEXT = {
@@ -52,3 +49,12 @@ export const QUALITY_MAP = {
   SEVERE: "severe",
   GOOD: "good"
 };
+
+export const RECORDING_BITRATE_OPTIONS = [
+  {label: "512 Kbps", value: 512000},
+  {label: "384 Kbps", value: 384000},
+  {label: "256 Kbps", value: 256000},
+  {label: "192 Kbps", value: 192000},
+  {label: "128 Kbps", value: 128000},
+  {label: "48 Kbps", value: 48000}
+];

@@ -1,34 +1,17 @@
-import {AV_STREAM, STATUS_MAP} from "Data/StreamData";
+import {STATUS_MAP} from "Data/StreamData";
 import Fraction from "fraction.js";
 
 export const ParseLiveConfigData = ({
-  inputFormData,
-  outputFormData,
   url,
   referenceUrl,
   encryption,
-  avProperties,
-  retention
+  retention,
+  audioFormData
 }) => {
-  const {audioStreamIndex} = inputFormData;
-  const {audioChannelLayout, audioBitrate} = outputFormData;
-
   const config = {
     drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
     drm_type: encryption,
-    input: {
-      audio: {
-        stream: AV_STREAM[avProperties],
-        stream_index: parseInt(audioStreamIndex)
-      }
-    },
-    output: {
-      audio: {
-        bitrate: parseInt(audioBitrate),
-        channel_layout: parseInt(audioChannelLayout),
-        quality: AV_STREAM[avProperties]
-      }
-    },
+    audio: audioFormData ? audioFormData : null,
     part_ttl: parseInt(retention),
     url,
     reference_url: referenceUrl
@@ -54,6 +37,14 @@ export const VideoBitrateReadable = (bitrate) => {
   return `${value}Mbps`;
 };
 
+export const AudioBitrateReadable = (bitrate) => {
+  if(!bitrate) { return ""; }
+  const denominator = 1000;
+  const value = (bitrate / denominator).toFixed(0);
+
+  return `${value} Kbps`;
+};
+
 export const StreamIsActive = (state) => {
   let active = false;
 
@@ -76,7 +67,7 @@ export const StatusIndicator = (status) => {
   }
 };
 
-export const FormatTime = ({milliseconds, iso, format="hh:mm"}) => {
+export const FormatTime = ({milliseconds, iso, format="hh,mm,ss"}) => {
   if(iso) {
     milliseconds = new Date(iso).getTime();
   }
@@ -109,8 +100,10 @@ export const FormatTime = ({milliseconds, iso, format="hh:mm"}) => {
 
     timeString = arrayValue.join(":");
     // timeString = `${hours}h ${minutes}min ${seconds}sec`
-  } else if(format === "hh:mm") {
+  } else if(format === "hh,mm") {
     timeString = `${hours}h ${minutes}min`;
+  } else if(format === "hh,mm,ss") {
+    timeString = `${hours}h ${minutes}min ${seconds}sec`;
   }
 
   return timeString;

@@ -28,13 +28,11 @@ class EditStore {
 
   InitLiveStreamObject = flow(function * ({
     basicFormData,
-    inputFormData,
-    outputFormData,
     advancedData,
     drmFormData
   }) {
     const {libraryId, url, name, description, displayName, accessGroup, permission, protocol} = basicFormData;
-    const {avProperties, retention} = advancedData;
+    const {retention} = advancedData;
     const {encryption} = drmFormData;
 
     const response = yield this.CreateContentObject({
@@ -52,11 +50,8 @@ class EditStore {
     }
 
     const config = ParseLiveConfigData({
-      inputFormData,
-      outputFormData,
       url,
       encryption,
-      avProperties,
       retention,
       referenceUrl: protocol === "custom" ? undefined : url
     });
@@ -107,7 +102,59 @@ class EditStore {
       value: streamValue
     });
 
-    return objectId;
+    return {
+      objectId,
+      slug: Slugify(name)
+    };
+  });
+
+  UpdateLiveStreamObject = flow(function * ({
+    basicFormData,
+    advancedData,
+    drmFormData,
+    audioFormData,
+    objectId,
+    slug
+  }) {
+    const {libraryId, url, name, description, displayName, accessGroup, protocol} = basicFormData;
+    const {retention} = advancedData;
+    const {encryption} = drmFormData;
+
+    if(accessGroup) {
+      this.AddAccessGroupPermission({
+        objectId,
+        accessGroup
+      });
+    }
+
+    // Remove audio stream from meta if record=false
+    Object.keys(audioFormData || {}).forEach(index => {
+      if(!audioFormData[index].record) {
+        delete audioFormData[index];
+      }
+    });
+
+    const config = ParseLiveConfigData({
+      url,
+      encryption,
+      retention,
+      referenceUrl: protocol === "custom" ? undefined : url,
+      audioFormData
+    });
+
+    yield this.AddMetadata({
+      libraryId,
+      objectId,
+      name,
+      description,
+      displayName,
+      config
+    });
+
+    yield streamStore.ConfigureStream({
+      objectId,
+      slug
+    });
   });
 
   CreateContentObject = flow(function * ({
@@ -150,6 +197,13 @@ class EditStore {
     description,
     displayName
   }) {
+    if(!writeToken) {
+      ({writeToken} = yield this.client.EditContentObject({
+        libraryId,
+        objectId
+      }));
+    }
+
     yield this.client.MergeMetadata({
       libraryId,
       objectId,

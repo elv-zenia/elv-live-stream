@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable} from "mobx";
-import {editStore} from "./index";
+import {editStore, streamStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
 import {FileInfo} from "Stores/helpers/Misc";
@@ -45,63 +45,81 @@ class StreamStore {
 
   ConfigureStream = flow(function * ({
     objectId,
-    slug
+    slug,
+    probeMetadata
   }) {
-    const liveRecordingConfig = yield this.client.ContentObjectMetadata({
-      libraryId: yield this.client.ContentObjectLibraryId({objectId}),
-      objectId,
-      metadataSubtree: "live_recording_config",
-      select: [
-        "input/audio/stream_index",
-        "input/audio/stream",
-        "output/audio/bitrate",
-        "output/audio/channel_layout",
-        "part_ttl",
-        "drm",
-        "drm_type"
-      ]
-    });
-    const customSettings = {};
-
-    if(liveRecordingConfig.input?.audio?.stream === "specific") {
-      customSettings["audioIndex"] = liveRecordingConfig.input?.audio?.stream_index;
-      customSettings["audioBitrate"] = liveRecordingConfig?.output?.audio?.bitrate;
-      customSettings["partTtl"] = liveRecordingConfig?.part_ttl;
-      customSettings["channelLayout"] = liveRecordingConfig?.output?.audio?.channel_layout;
-    }
-
-    yield this.client.StreamConfig({name: objectId, customSettings});
-
-    if(liveRecordingConfig?.drm) {
-      const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
-
-      yield client.StreamInitialize({
-        name: objectId,
-        drm: liveRecordingConfig?.drm === "clear" ? false : true,
-        format: drmOption?.format.join(",")
+    try {
+      const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      const liveRecordingConfig = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording_config",
+        select: [
+          "input/audio/stream_index",
+          "input/audio/stream",
+          "output/audio/bitrate",
+          "output/audio/channel_layout",
+          "part_ttl",
+          "drm",
+          "drm_type",
+          "audio"
+        ]
       });
-    }
+      const customSettings = {};
 
-    // Update stream link in site after stream configuration
-    yield editStore.UpdateStreamLink({objectId, slug});
+      const edgeWriteToken = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/fabric_config/edge_write_token"
+      });
 
-    const response = yield this.CheckStatus({
-      objectId
-    });
-
-    const streamDetails = yield dataStore.LoadStreamMetadata({
-      objectId
-    });
-
-    this.UpdateStream({
-      key: slug,
-      value: {
-        status: response.state,
-        warnings: response.warnings,
-        quality: response.quality,
-        ...streamDetails
+      // Config api will override meta containing edge write token
+      if(edgeWriteToken) {
+        customSettings["edge_write_token"] = edgeWriteToken;
       }
-    });
+
+      if(liveRecordingConfig.part_ttl) {
+        customSettings["part_ttl"] = liveRecordingConfig.part_ttl;
+      }
+
+      customSettings["audio"] = liveRecordingConfig.audio ? liveRecordingConfig.audio : undefined;
+
+      yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
+
+      if(liveRecordingConfig?.drm) {
+        const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
+
+        yield client.StreamInitialize({
+          name: objectId,
+          drm: liveRecordingConfig?.drm === "clear" ? false : true,
+          format: drmOption?.format.join(",")
+        });
+      }
+
+      // Update stream link in site after stream configuration
+      yield editStore.UpdateStreamLink({objectId, slug});
+
+      const response = yield this.CheckStatus({
+        objectId
+      });
+
+      const streamDetails = yield dataStore.LoadStreamMetadata({
+        objectId
+      });
+
+      this.UpdateStream({
+        key: slug,
+        value: {
+          status: response.state,
+          warnings: response.warnings,
+          quality: response.quality,
+          ...streamDetails
+        }
+      });
+    } catch(error) {
+      console.error("Unable to configure stream", error);
+      return {};
+    }
   });
 
   CheckStatus = flow(function * ({
@@ -731,6 +749,42 @@ class StreamStore {
 
       return response;
     }
+  });
+
+  UpdateStreamAudioSettings = flow(function * ({objectId, slug, audioData}) {
+    const libraryId = yield client.ContentObjectLibraryId({objectId});
+    const {writeToken} = yield client.EditContentObject({
+      libraryId,
+      objectId
+    });
+
+    yield client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording_config/audio",
+      metadata: audioData
+    });
+
+    yield client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update metadata",
+      awaitCommitConfirmation: true
+    });
+
+    const probeMetadata = yield client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: "live_recording_config/probe_info"
+    });
+
+    yield streamStore.ConfigureStream({
+      objectId,
+      slug,
+      probeMetadata
+    });
   });
 }
 

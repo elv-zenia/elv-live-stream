@@ -34,3 +34,17 @@ export const QUALITY_TEXT = {
   "severe": "Severe",
   "degraded": "Degraded"
 };
+
+export const AudioCodec = (value) => {
+  if(value === "aac") {
+    return "aac";
+  } else if(value === "mp3") {
+    return "mp3";
+  } else if(value === "mp2") {
+    return "mp2";
+  } else if(value?.includes("mp4a")) {
+    return "mp4a";
+  } else {
+    return "--";
+  }
+};
