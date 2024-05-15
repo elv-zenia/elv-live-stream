@@ -82,6 +82,15 @@ class StreamStore {
         customSettings["part_ttl"] = liveRecordingConfig.part_ttl;
       }
 
+      if(liveRecordingConfig.audio) {
+        // Remove audio tracks with a falsey record property
+        Object.keys(liveRecordingConfig.audio).forEach(audioIndex => {
+          if(!liveRecordingConfig.audio[audioIndex].record) {
+            delete liveRecordingConfig.audio[audioIndex];
+          }
+        });
+      }
+
       customSettings["audio"] = liveRecordingConfig.audio ? liveRecordingConfig.audio : undefined;
 
       yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
