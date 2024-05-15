@@ -4,7 +4,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore} from "Stores";
 import {observer} from "mobx-react";
 import {Tabs, Text} from "@mantine/core";
-import {useDisclosure} from "@mantine/hooks";
+import {useDebounceCallback, useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS, STATUS_MAP} from "Data/StreamData";
 import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
 import {Loader} from "Components/Loader";
@@ -26,6 +26,10 @@ const StreamDetailsPage = observer(() => {
   if(streamSlug) {
     stream = streamStore.streams[streamSlug];
   }
+
+  const DebouncedRefresh = useDebounceCallback(() => {
+    setPageVersion(prev => prev + 1);
+  }, 500);
 
   if(!stream) {
     return <Loader />;
@@ -56,7 +60,7 @@ const StreamDetailsPage = observer(() => {
     {
       label: "Refresh",
       variant: "outline",
-      onClick: () => setPageVersion(prev => prev + 1)
+      onClick: DebouncedRefresh
     }
   ];
 

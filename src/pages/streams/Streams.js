@@ -18,7 +18,7 @@ import {StreamIsActive} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import {CODEC_TEXT, FORMAT_TEXT} from "Data/HumanReadableText";
 
-import {useDebouncedValue} from "@mantine/hooks";
+import {useDebounceCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import PageHeader, {StatusText} from "Components/header/PageHeader";
@@ -74,6 +74,10 @@ const Streams = observer(() => {
     .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
     .sort(SortTable({sortStatus}));
 
+  const DebouncedRefresh = useDebounceCallback(async() => {
+    await dataStore.Initialize();
+  }, 500);
+
   return (
     <div>
       <div className="streams">
@@ -83,9 +87,7 @@ const Streams = observer(() => {
             {
               label: "Refresh",
               variant: "outline",
-              onClick: async () => {
-                await dataStore.Initialize();
-              }
+              onClick: DebouncedRefresh
             }
           ]}
         />
