@@ -118,6 +118,7 @@ class DataStore {
 
       streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
     } catch(error) {
+      streamStore.UpdateStreams({streams: {}});
       this.rootStore.SetErrorMessage("Error: Unable to load streams");
       console.error(error);
       throw Error(`Unable to load live streams for site ${this.siteId}.`);
