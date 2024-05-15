@@ -1,7 +1,7 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PageHeader from "Components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
-import {streamStore, editStore} from "Stores";
+import {streamStore, editStore, dataStore} from "Stores";
 import {observer} from "mobx-react";
 import {Tabs, Text} from "@mantine/core";
 import {useDebounceCallback, useDisclosure} from "@mantine/hooks";
@@ -18,17 +18,52 @@ const StreamDetailsPage = observer(() => {
   const [modalData, setModalData] = useState({});
   const [pageVersion, setPageVersion] = useState(0);
   const [activeTab, setActiveTab] = useState("details");
+  const [recordingInfo, setRecordingInfo] = useState(null);
 
-  streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
-    streamStore.streams[slug].objectId === params.id
-  ));
+  if(!streamSlug) {
+    streamSlug = Object.keys(streamStore.streams || {}).find(slug => (
+      streamStore.streams[slug].objectId === params.id
+    ));
+  }
 
   if(streamSlug) {
+    stream = undefined;
     stream = streamStore.streams[streamSlug];
   }
 
+  const GetStatus = async () => {
+    await streamStore.CheckStatus({
+      objectId: params.id,
+      update: true
+    });
+  };
+
+  const LoadEdgeWriteTokenMeta = async() => {
+    const metadata = await dataStore.LoadEdgeWriteTokenMeta({
+      objectId: params.id
+    });
+
+    if(metadata) {
+      metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
+        ...item,
+        id: i
+      }));
+
+      setRecordingInfo(metadata);
+    }
+  };
+
+  useEffect(() => {
+    if(params.id) {
+      GetStatus();
+      LoadEdgeWriteTokenMeta();
+    }
+  }, [params.id]);
+
   const DebouncedRefresh = useDebounceCallback(() => {
     setPageVersion(prev => prev + 1);
+    GetStatus();
+    LoadEdgeWriteTokenMeta();
   }, 500);
 
   if(!stream) {
@@ -74,6 +109,7 @@ const StreamDetailsPage = observer(() => {
           message: "Are you sure you want to start the stream?",
           ConfirmCallback: async () => {
             await streamStore.StartStream({slug: streamSlug});
+            await LoadEdgeWriteTokenMeta();
             close();
           }
         });
@@ -109,7 +145,7 @@ const StreamDetailsPage = observer(() => {
       <PageHeader
         title={`Edit ${stream.title || stream.objectId}`}
         subtitle={stream.objectId}
-        status={streamStore.streams?.[streamSlug]?.status}
+        status={stream.status}
         quality={streamStore.streams?.[streamSlug]?.quality}
         actions={actions}
       />
@@ -135,6 +171,7 @@ const StreamDetailsPage = observer(() => {
                 title={stream.title}
                 embedUrl={stream.embedUrl}
                 url={stream.originUrl}
+                recordingInfo={recordingInfo}
               />
             </Tabs.Panel>
           ))

@@ -124,15 +124,37 @@ class StreamStore {
 
   CheckStatus = flow(function * ({
     objectId,
+    slug,
     stopLro=false,
-    showParams=false
+    showParams=false,
+    update=false
   }) {
     try {
-      return yield this.client.StreamStatus({
+      const response = yield this.client.StreamStatus({
         name: objectId,
         stopLro,
         showParams
       });
+
+      if(update) {
+        if(!slug) {
+          slug = Object.keys(this.streams || {}).find(slug => (
+            this.streams[slug].objectId === objectId
+          ));
+        }
+
+        this.UpdateStream({
+          key: slug,
+          value: {
+            status: response.state,
+            warnings: response.warnings,
+            quality: response.quality,
+            embedUrl: response?.playout_urls?.embed_url
+          }
+        });
+      }
+
+      return response;
     } catch(error) {
       console.error(`Failed to load status for ${objectId || "object"}`, error);
       return {};
@@ -230,18 +252,10 @@ class StreamStore {
         async slug => {
           try {
             const streamMeta = this.streams?.[slug];
-            const response = await this.CheckStatus({
-              objectId: streamMeta.objectId
-            });
-
-            this.UpdateStream({
-              key: slug,
-              value: {
-                status: response.state,
-                warnings: response.warnings,
-                quality: response.quality,
-                embedUrl: response?.playout_urls?.embed_url
-              }
+            await this.CheckStatus({
+              objectId: streamMeta.objectId,
+              slug,
+              update: true
             });
           } catch(error) {
             console.error(`Skipping status for ${this.streams?.[slug].objectId || slug}.`, error);
