@@ -325,6 +325,7 @@ class DataStore {
       };
     } catch(error) {
       console.error("Unable to load metadata with edge write token", error);
+      return {};
     }
   });
 
