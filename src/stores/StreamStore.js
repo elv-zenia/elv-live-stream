@@ -127,11 +127,16 @@ class StreamStore {
     stopLro=false,
     showParams=false
   }) {
-    return yield this.client.StreamStatus({
-      name: objectId,
-      stopLro,
-      showParams
-    });
+    try {
+      return yield this.client.StreamStatus({
+        name: objectId,
+        stopLro,
+        showParams
+      });
+    } catch(error) {
+      console.error(`Failed to load status for ${objectId || "object"}`, error);
+      return {};
+    }
   });
 
   StartStream = flow(function * ({
@@ -239,7 +244,7 @@ class StreamStore {
               }
             });
           } catch(error) {
-            console.error(`Failed to load status for ${this.streams?.[slug].objectId}.`, error);
+            console.error(`Skipping status for ${this.streams?.[slug].objectId || slug}.`, error);
           }
         }
       );
