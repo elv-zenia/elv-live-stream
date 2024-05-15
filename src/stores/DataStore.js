@@ -321,7 +321,7 @@ class DataStore {
 
       return {
         _recordingStartTime: metadata?.recording_config?.recording_start_time,
-        ...metadata.recordings
+        ...metadata?.recordings
       };
     } catch(error) {
       console.error("Unable to load metadata with edge write token", error);
