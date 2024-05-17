@@ -320,6 +320,7 @@ class DataStore {
       });
 
       return {
+        // First stream recording start time
         _recordingStartTime: metadata?.recording_config?.recording_start_time,
         ...metadata?.recordings
       };

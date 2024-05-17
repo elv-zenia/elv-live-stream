@@ -51,11 +51,11 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
 
   const RecordingStatus = ({item, text=true, startTime, endTime}) => {
     let status;
-    const videoIsEmpty = (item?.sources?.video || []).length === 0;
+    const videoIsEmpty = (item?.sources?.video?.parts || []).length === 0;
 
     if(videoIsEmpty || !MeetsDurationMin({startTime, endTime})) {
       status = "NOT_AVAILABLE";
-    } else if(!videoIsEmpty && item?.sources?.video_trimmed > 0) {
+    } else if(!videoIsEmpty && (item?.sources?.trimmed || item?.sources?.video_trimmed) > 0) {
       status = "PARTIALLY_AVAILABLE";
     } else {
       status = "AVAILABLE";
@@ -68,6 +68,7 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
     startTime = new Date(startTime).getTime();
     endTime = new Date(endTime).getTime();
 
+    // If starting or currently running, part is copyable
     if(endTime === 0 || startTime === 0) { return true; }
 
     return (endTime - startTime) >= 61000;

@@ -32,6 +32,8 @@ class StreamStore {
   }
 
   UpdateStream = ({key, value={}}) => {
+    if(!key) { return; }
+
     this.streams[key] = {
       ...(this.streams[key] || {}),
       ...value,
