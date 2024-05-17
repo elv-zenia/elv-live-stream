@@ -9,6 +9,7 @@ import {DETAILS_TABS, STATUS_MAP} from "Data/StreamData";
 import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
 import {Loader} from "Components/Loader";
 import ConfirmModal from "Components/ConfirmModal";
+import {StreamIsActive} from "Stores/helpers/Misc";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const StreamDetailsPage = observer(() => {
       label: "Delete",
       variant: "outline",
       uppercase: true,
-      disabled: streamStore.streams?.[streamSlug]?.status !== STATUS_MAP.INACTIVE,
+      disabled: StreamIsActive(streamStore.streams?.[streamSlug]?.status),
       onClick: () => {
         setModalData({
           title: "Delete Stream",
