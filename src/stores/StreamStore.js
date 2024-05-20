@@ -32,6 +32,8 @@ class StreamStore {
   }
 
   UpdateStream = ({key, value={}}) => {
+    if(!key) { return; }
+
     this.streams[key] = {
       ...(this.streams[key] || {}),
       ...value,
@@ -82,6 +84,15 @@ class StreamStore {
         customSettings["part_ttl"] = liveRecordingConfig.part_ttl;
       }
 
+      if(liveRecordingConfig.audio) {
+        // Remove audio tracks with a falsey record property
+        Object.keys(liveRecordingConfig.audio).forEach(audioIndex => {
+          if(!liveRecordingConfig.audio[audioIndex].record) {
+            delete liveRecordingConfig.audio[audioIndex];
+          }
+        });
+      }
+
       customSettings["audio"] = liveRecordingConfig.audio ? liveRecordingConfig.audio : undefined;
 
       yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
@@ -124,14 +135,41 @@ class StreamStore {
 
   CheckStatus = flow(function * ({
     objectId,
+    slug,
     stopLro=false,
-    showParams=false
+    showParams=false,
+    update=false
   }) {
-    return yield this.client.StreamStatus({
-      name: objectId,
-      stopLro,
-      showParams
-    });
+    try {
+      const response = yield this.client.StreamStatus({
+        name: objectId,
+        stopLro,
+        showParams
+      });
+
+      if(update) {
+        if(!slug) {
+          slug = Object.keys(this.streams || {}).find(slug => (
+            this.streams[slug].objectId === objectId
+          ));
+        }
+
+        this.UpdateStream({
+          key: slug,
+          value: {
+            status: response.state,
+            warnings: response.warnings,
+            quality: response.quality,
+            embedUrl: response?.playout_urls?.embed_url
+          }
+        });
+      }
+
+      return response;
+    } catch(error) {
+      console.error(`Failed to load status for ${objectId || "object"}`, error);
+      return {};
+    }
   });
 
   StartStream = flow(function * ({
@@ -225,21 +263,13 @@ class StreamStore {
         async slug => {
           try {
             const streamMeta = this.streams?.[slug];
-            const response = await this.CheckStatus({
-              objectId: streamMeta.objectId
-            });
-
-            this.UpdateStream({
-              key: slug,
-              value: {
-                status: response.state,
-                warnings: response.warnings,
-                quality: response.quality,
-                embedUrl: response?.playout_urls?.embed_url
-              }
+            await this.CheckStatus({
+              objectId: streamMeta.objectId,
+              slug,
+              update: true
             });
           } catch(error) {
-            console.error(`Failed to load status for ${this.streams?.[slug].objectId}.`, error);
+            console.error(`Skipping status for ${this.streams?.[slug].objectId || slug}.`, error);
           }
         }
       );

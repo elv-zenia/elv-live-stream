@@ -160,3 +160,12 @@ export const DateFormat = ({time, format="sec"}) => {
 
   return new Date(time).toLocaleString();
 };
+
+export const SanitizeUrl = ({url}) => {
+  if(!url) { throw Error("No URL provided"); }
+
+  const urlObject = new URL(url);
+  urlObject.searchParams.delete("passphrase");
+
+  return urlObject.toString();
+};

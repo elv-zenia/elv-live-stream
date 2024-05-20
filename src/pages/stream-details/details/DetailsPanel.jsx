@@ -33,12 +33,11 @@ export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) 
   return time;
 };
 
-const DetailsPanel = observer(({slug, embedUrl, title}) => {
+const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState();
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState(false);
   const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
-  const [recordingInfo, setRecordingInfo] = useState(null);
 
   const params = useParams();
   const currentTimeMs = new Date().getTime();
@@ -58,22 +57,7 @@ const DetailsPanel = observer(({slug, embedUrl, title}) => {
       setFrameSegmentUrl(frameUrl || "");
     };
 
-    const LoadEdgeWriteTokenMeta = async() => {
-      const metadata = await dataStore.LoadEdgeWriteTokenMeta({
-        objectId: params.id
-      });
 
-      if(metadata) {
-        metadata.live_offering = (metadata.live_offering || []).map((item, i) => ({
-          ...item,
-          id: i
-        }));
-
-        setRecordingInfo(metadata);
-      }
-    };
-
-    LoadEdgeWriteTokenMeta();
     LoadLiveRecordingCopies();
     LoadStatus();
   }, [params.id]);

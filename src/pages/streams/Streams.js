@@ -13,12 +13,12 @@ import {
 
 import Modal from "Components/Modal";
 import {dataStore, editStore, streamStore} from "Stores";
-import {SortTable, VideoBitrateReadable} from "Stores/helpers/Misc";
+import {SanitizeUrl, SortTable, VideoBitrateReadable} from "Stores/helpers/Misc";
 import {StreamIsActive} from "Stores/helpers/Misc";
 import {STATUS_MAP} from "Data/StreamData";
 import {CODEC_TEXT, FORMAT_TEXT} from "Data/HumanReadableText";
 
-import {useDebouncedValue} from "@mantine/hooks";
+import {useDebounceCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import PageHeader, {StatusText} from "Components/header/PageHeader";
@@ -74,6 +74,10 @@ const Streams = observer(() => {
     .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
     .sort(SortTable({sortStatus}));
 
+  const DebouncedRefresh = useDebounceCallback(async() => {
+    await dataStore.Initialize();
+  }, 500);
+
   return (
     <div>
       <div className="streams">
@@ -83,9 +87,7 @@ const Streams = observer(() => {
             {
               label: "Refresh",
               variant: "outline",
-              onClick: async () => {
-                await dataStore.Initialize();
-              }
+              onClick: DebouncedRefresh
             }
           ]}
         />
@@ -130,7 +132,7 @@ const Streams = observer(() => {
                 <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
             )},
-            { accessor: "originUrl", title: "URL", render: record => <Text>{record.originUrl}</Text> },
+            { accessor: "originUrl", title: "URL", render: record => <Text>{SanitizeUrl({url: record.originUrl})}</Text> },
             { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
             { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
             { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
@@ -168,7 +170,7 @@ const Streams = observer(() => {
                               showModal: true,
                               title: "Check Stream",
                               description: record.status === STATUS_MAP.INACTIVE ? "Are you sure you want to check the stream? This will override your saved configuration." : "Are you sure you want to check the stream?",
-                              loadingText: `Please send your stream to ${url || "the URL you specified"}.`,
+                              loadingText: `Please send your stream to ${SanitizeUrl({url}) || "the URL you specified"}.`,
                               ConfirmCallback: async () => {
                                 await streamStore.ConfigureStream({
                                   objectId: record.objectId,

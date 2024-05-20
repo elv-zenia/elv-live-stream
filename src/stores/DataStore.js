@@ -118,6 +118,7 @@ class DataStore {
 
       streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
     } catch(error) {
+      streamStore.UpdateStreams({streams: {}});
       this.rootStore.SetErrorMessage("Error: Unable to load streams");
       console.error(error);
       throw Error(`Unable to load live streams for site ${this.siteId}.`);
@@ -319,11 +320,13 @@ class DataStore {
       });
 
       return {
+        // First stream recording start time
         _recordingStartTime: metadata?.recording_config?.recording_start_time,
-        ...metadata.recordings
+        ...metadata?.recordings
       };
     } catch(error) {
       console.error("Unable to load metadata with edge write token", error);
+      return {};
     }
   });
 

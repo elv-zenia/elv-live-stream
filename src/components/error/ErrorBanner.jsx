@@ -12,7 +12,7 @@ const ErrorBanner = observer(() => {
       <div className="error-banner__message">
         {rootStore.errorMessage}
       </div>
-      <ActionIcon className="error-banner__close" onClick={() => rootStore.SetErrorMessage(undefined)}>
+      <ActionIcon onClick={() => rootStore.SetErrorMessage(undefined)}>
         <IconX />
       </ActionIcon>
     </div>
