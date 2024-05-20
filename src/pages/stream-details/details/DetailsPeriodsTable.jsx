@@ -55,7 +55,7 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
 
     if(videoIsEmpty || !MeetsDurationMin({startTime, endTime})) {
       status = "NOT_AVAILABLE";
-    } else if(!videoIsEmpty && (item?.sources?.trimmed || item?.sources?.video_trimmed) > 0) {
+    } else if(!videoIsEmpty && item?.sources?.video?.trimmed > 0) {
       status = "PARTIALLY_AVAILABLE";
     } else {
       status = "AVAILABLE";
