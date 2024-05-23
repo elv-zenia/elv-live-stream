@@ -251,8 +251,8 @@ class StreamStore {
     }
   })
 
-  AllStreamsStatus = flow(function * () {
-    if(this.loadingStatus) { return; }
+  AllStreamsStatus = flow(function * (reload=false) {
+    if(this.loadingStatus && !reload) { return; }
 
     try {
       this.loadingStatus = true;
@@ -261,8 +261,8 @@ class StreamStore {
         15,
         Object.keys(this.streams || {}),
         async slug => {
+          const streamMeta = this.streams?.[slug];
           try {
-            const streamMeta = this.streams?.[slug];
             await this.CheckStatus({
               objectId: streamMeta.objectId,
               slug,

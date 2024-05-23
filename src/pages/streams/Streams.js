@@ -75,7 +75,7 @@ const Streams = observer(() => {
     .sort(SortTable({sortStatus}));
 
   const DebouncedRefresh = useDebounceCallback(async() => {
-    await dataStore.Initialize();
+    await dataStore.Initialize(true);
   }, 500);
 
   return (
