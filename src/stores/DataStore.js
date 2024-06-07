@@ -39,7 +39,7 @@ class DataStore {
     return this.siteLibraryId;
   }
 
-  Initialize = flow(function * () {
+  Initialize = flow(function * (reload=false) {
     const tenantContractId = yield this.LoadTenantInfo();
     if(!this.siteId) {
       this.siteId = yield this.LoadTenantData({tenantContractId});
@@ -50,7 +50,7 @@ class DataStore {
     }
 
     yield this.LoadStreams();
-    yield this.rootStore.streamStore.AllStreamsStatus();
+    yield streamStore.AllStreamsStatus(reload);
   });
 
   LoadTenantInfo = flow(function * () {
