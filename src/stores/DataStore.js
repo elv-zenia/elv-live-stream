@@ -169,18 +169,23 @@ class DataStore {
       const libraryIds = yield this.client.ContentLibraries() || [];
       yield Promise.all(
         libraryIds.map(async libraryId => {
-          const response = (await this.client.ContentObjectMetadata({
-            libraryId,
-            objectId: libraryId.replace(/^ilib/, "iq__"),
-            metadataSubtree: "public/name"
-          }));
+          let response;
+          try {
+            response = (await this.client.ContentObjectMetadata({
+              libraryId,
+              objectId: libraryId.replace(/^ilib/, "iq__"),
+              metadataSubtree: "public/name"
+            }));
 
-          if(!response) { return; }
+            if(!response) { return; }
 
-          loadedLibraries[libraryId] = {
-            libraryId,
-            name: response || libraryId
-          };
+            loadedLibraries[libraryId] = {
+              libraryId,
+              name: response || libraryId
+            };
+          } catch(error) {
+            console.log(`Unable to load info for library: ${libraryId}`);
+          }
         })
       );
 
