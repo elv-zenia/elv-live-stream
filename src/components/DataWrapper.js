@@ -9,7 +9,7 @@ const DataWrapper = observer(({children}) => {
       try {
         await streamStore.AllStreamsStatus();
       } catch(error) {
-        console.error("Unable to get stream status.", error);
+        console.error("Unable to get stream details.", error);
       }
     };
 

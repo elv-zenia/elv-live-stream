@@ -134,6 +134,8 @@ const StreamDetailsPage = observer(() => {
               operation: "STOP"
             });
             close();
+
+            DebouncedRefresh();
           }
         });
         open();
@@ -144,7 +146,7 @@ const StreamDetailsPage = observer(() => {
   return (
     <div key={`stream-details-${pageVersion}`}>
       <PageHeader
-        title={`Edit ${stream.title || stream.objectId}`}
+        title={`Edit ${streamStore.streams?.[streamSlug]?.display_title || streamStore.streams?.[streamSlug]?.title || stream.objectId}`}
         subtitle={stream.objectId}
         status={stream.status}
         quality={streamStore.streams?.[streamSlug]?.quality}
@@ -173,6 +175,7 @@ const StreamDetailsPage = observer(() => {
                 embedUrl={stream.embedUrl}
                 url={stream.originUrl}
                 recordingInfo={recordingInfo}
+                retention={stream.partTtl}
               />
             </Tabs.Panel>
           ))

@@ -214,7 +214,7 @@ class EditStore {
           description,
           asset_metadata: {
             display_title: displayTitle || name,
-            title: displayTitle || name,
+            title: name || displayTitle,
             title_type: "live_stream",
             video_type: "live",
             slug: Slugify(name)

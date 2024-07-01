@@ -8,8 +8,8 @@ import {Flex, Text} from "@mantine/core";
 import {DateFormat, Pluralize} from "Stores/helpers/Misc";
 import {Loader} from "Components/Loader";
 import {DataTable} from "mantine-datatable";
-import DetailsCopyModal from "Pages/stream-details/status/CopyToVodModal";
-import {Runtime} from "Pages/stream-details/status/StatusPanel";
+import DetailsCopyModal from "Pages/stream-details/details/CopyToVodModal";
+import {Runtime} from "Pages/stream-details/details/DetailsPanel";
 
 const RecordingPeriodsTable = observer(({records, objectId, title, CopyCallback, currentTimeMs}) => {
   const [selectedRecords, setSelectedRecords] = useState([]);

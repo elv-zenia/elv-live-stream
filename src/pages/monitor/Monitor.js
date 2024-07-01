@@ -146,7 +146,7 @@ const Monitor = observer(() => {
                               <div className="monitor__grid-item-details-bottom">
                                 {
                                   !stream.status ? <div /> :
-                                    <div className={`monitor__grid-item-status ${stream.status === "running" ? "monitor__grid-item-status--green" : ""}`}>
+                                    <div className={`monitor__grid-item-status ${stream.status === "running" ? "monitor__grid-item-details--green" : ""}`}>
                                       {STATUS_TEXT[stream.status]}
                                     </div>
                                 }

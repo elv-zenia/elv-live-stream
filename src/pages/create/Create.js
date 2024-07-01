@@ -194,7 +194,7 @@ const Create = observer(() => {
   });
 
   const [advancedData, setAdvancedData] = useState({
-    retention: 21600
+    retention: 86400
   });
 
   const [useAdvancedSettings, setUseAdvancedSettings] = useState();

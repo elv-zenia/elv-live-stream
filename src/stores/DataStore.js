@@ -237,7 +237,8 @@ class DataStore {
           "live_recording_config/reference_url",
           "live_recording_config/url",
           "live_recording_config/drm_type",
-          "public/description"
+          "public/description",
+          "live_recording_config/part_ttl"
         ]
       });
       let probeMeta = streamMeta?.live_recording_config?.probe_info;
@@ -273,7 +274,8 @@ class DataStore {
         drm: streamMeta?.live_recording_config?.drm_type,
         simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
         imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
-        description: streamMeta?.public?.description
+        description: streamMeta?.public?.description,
+        partTtl: streamMeta?.live_recording_config?.part_ttl
       };
     } catch(error) {
       console.error("Unable to load stream metadata", error);
