@@ -164,8 +164,13 @@ export const DateFormat = ({time, format="sec"}) => {
 export const SanitizeUrl = ({url}) => {
   if(!url) { throw Error("No URL provided"); }
 
-  const urlObject = new URL(url);
-  urlObject.searchParams.delete("passphrase");
+  try {
+    const urlObject = new URL(url);
+    urlObject.searchParams.delete("passphrase");
 
-  return urlObject.toString();
+    return urlObject.toString();
+  } catch(error) {
+    console.error(`Unable to sanitize ${url}`, error);
+    return false;
+  }
 };
