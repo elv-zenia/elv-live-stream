@@ -31,7 +31,7 @@ class EditStore {
     advancedData,
     drmFormData
   }) {
-    const {libraryId, url, name, description, displayName, accessGroup, permission, protocol} = basicFormData;
+    const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
     const {retention} = advancedData;
     const {encryption} = drmFormData;
 
@@ -61,7 +61,7 @@ class EditStore {
       objectId,
       name,
       description,
-      displayName,
+      displayTitle,
       writeToken: write_token,
       config
     });
@@ -116,7 +116,7 @@ class EditStore {
     objectId,
     slug
   }) {
-    const {libraryId, url, name, description, displayName, accessGroup, protocol} = basicFormData;
+    const {libraryId, url, name, description, displayTitle, accessGroup, protocol} = basicFormData;
     const {retention} = advancedData;
     const {encryption} = drmFormData;
 
@@ -147,7 +147,7 @@ class EditStore {
       objectId,
       name,
       description,
-      displayName,
+      displayTitle,
       config
     });
 
@@ -195,7 +195,7 @@ class EditStore {
     config,
     name,
     description,
-    displayName
+    displayTitle
   }) {
     if(!writeToken) {
       ({writeToken} = yield this.client.EditContentObject({
@@ -213,8 +213,8 @@ class EditStore {
           name,
           description,
           asset_metadata: {
-            display_title: displayName || name,
-            title: displayName || name,
+            display_title: displayTitle || name,
+            title: displayTitle || name,
             title_type: "live_stream",
             video_type: "live",
             slug: Slugify(name)
@@ -231,6 +231,64 @@ class EditStore {
       commitMessage: "Add metadata",
       awaitCommitConfirmation: true
     });
+  });
+
+  UpdateDetailMetadata = flow(function * ({
+    libraryId,
+    objectId,
+    writeToken,
+    name,
+    description,
+    displayTitle
+  }) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      if(!writeToken) {
+        ({writeToken} = yield this.client.EditContentObject({
+          libraryId,
+          objectId
+        }));
+      }
+
+      const metadata = {
+        public: {
+          asset_metadata: {}
+        }
+      };
+
+      if(name) {
+        metadata.public["name"] = name;
+        metadata.public.asset_metadata["title"] = name;
+      }
+
+      if(description) {
+        metadata.public["description"] = description;
+      }
+
+      if(displayTitle) {
+        metadata.public.asset_metadata["display_title"] = displayTitle;
+      }
+
+      yield this.client.MergeMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadata
+      });
+
+      return this.client.FinalizeContentObject({
+        libraryId,
+        objectId,
+        writeToken,
+        commitMessage: "Update metadata",
+        awaitCommitConfirmation: true
+      });
+    } catch(error) {
+      console.error("Unable to update metadata", error);
+    }
   });
 
   CreateSiteLinks = flow(function * ({objectId}) {

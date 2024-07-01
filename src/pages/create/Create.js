@@ -187,7 +187,7 @@ const Create = observer(() => {
     protocol: "mpegts",
     name: "",
     description: "",
-    displayName: "",
+    displayTitle: "",
     libraryId: "",
     accessGroup: "",
     permission: "editable"
@@ -399,10 +399,10 @@ const Create = observer(() => {
           })}
         />
         <TextInput
-          label="Display Name"
-          value={basicFormData.displayName}
+          label="Display Title"
+          value={basicFormData.displayTitle}
           onChange={event => UpdateFormData({
-            key: "displayName",
+            key: "displayTitle",
             value: event.target.value,
             formKey: FORM_KEYS.BASIC
           })}

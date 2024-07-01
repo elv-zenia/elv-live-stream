@@ -1,49 +1,32 @@
-import React, {useEffect, useState} from "react";
-import {Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
-import {dataStore, streamStore} from "Stores";
 import {observer} from "mobx-react";
-import {useParams} from "react-router-dom";
-import {DateFormat, FormatTime} from "Stores/helpers/Misc";
+import {Box, Grid, Flex, Stack, Skeleton, Text} from "@mantine/core";
+import React, {useEffect, useState} from "react";
 import {STATUS_MAP} from "Data/StreamData";
-import ClipboardIcon from "Assets/icons/ClipboardIcon";
+import {VideoContainer} from "Pages/monitor/Monitor";
 import {CopyToClipboard} from "Stores/helpers/Actions";
 import {IconCheck} from "@tabler/icons-react";
-import DetailsPeriodsTable from "Pages/stream-details/details/DetailsPeriodsTable";
-import DetailsRecordingCopiesTable from "Pages/stream-details/details/DetailsRecordingCopiesTable";
-import {QUALITY_TEXT} from "Data/HumanReadableText";
-import {IconAlertCircle} from "@tabler/icons-react";
-import {VideoContainer} from "Pages/monitor/Monitor";
+import ClipboardIcon from "Assets/icons/ClipboardIcon";
+import {dataStore, editStore, streamStore} from "Stores";
+import {useParams} from "react-router-dom";
+import {TextInput} from "Components/Inputs";
+import {notifications} from "@mantine/notifications";
+import {Loader} from "Components/Loader";
 
-export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) => {
-  let time;
-
-  if(!endTime) {
-    endTime = currentTimeMs;
-  }
-
-  if(!startTime) {
-    time = "--";
-  } else {
-    time = FormatTime({
-      milliseconds: endTime - startTime,
-      format
-    });
-  }
-
-  return time;
-};
-
-const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
-  const [frameSegmentUrl, setFrameSegmentUrl] = useState();
+const DetailsPanel = observer(({slug, embedUrl}) => {
+  const [frameSegmentUrl, setFrameSegmentUrl] = useState("");
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    displayTitle: ""
+  });
+  const [applyingChanges, setApplyingChanges] = useState(false);
 
   const params = useParams();
-  const currentTimeMs = new Date().getTime();
 
   useEffect(() => {
-    const LoadStatus = async () => {
+    const LoadStatus = async() => {
       const statusResponse = await streamStore.CheckStatus({
         objectId: params.id
       });
@@ -57,21 +40,60 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
       setFrameSegmentUrl(frameUrl || "");
     };
 
+    const LoadDetails = async() => {
+      await dataStore.LoadDetails({objectId: params.id, slug});
+      const stream = streamStore.streams[slug];
 
-    LoadLiveRecordingCopies();
-    LoadStatus();
-  }, [params.id]);
+      setFormData({
+        name: stream.title || "",
+        description: stream.description || "",
+        displayTitle: stream.display_title || ""
+      });
+    };
 
-  const LoadLiveRecordingCopies = async() => {
-    let liveRecordingCopies = await streamStore.FetchLiveRecordingCopies({
-      objectId: params.id
-    });
+    if(params.id) {
+      LoadStatus();
+      LoadDetails();
+    }
+  }, [params.id, streamStore.streams]);
 
-    Object.keys(liveRecordingCopies || {}).forEach(id => (
-      liveRecordingCopies[id]["_id"] = id
-    ));
+  const HandleFormChange = (event) => {
+    const {name, value} = event.target;
 
-    setLiveRecordingCopies(liveRecordingCopies || {});
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const HandleSubmit = async(event) => {
+    event.preventDefault();
+
+    try {
+      setApplyingChanges(true);
+
+      await editStore.UpdateDetailMetadata({
+        objectId: params.id,
+        name: formData.name,
+        description: formData.description,
+        displayTitle: formData.displayTitle
+      });
+
+      notifications.show({
+        title: `${formData.name || params.id} updated`,
+        message: "Changes have been applied successfully"
+      });
+    } catch(error) {
+      console.error("Unable to update metadata", error);
+
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: "Unable to save changes"
+      });
+    } finally {
+      setApplyingChanges(false);
+    }
   };
 
   return (
@@ -79,55 +101,33 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
       <Grid>
         <Grid.Col span={8}>
           <Flex direction="column" style={{flexGrow: "1"}}>
-            <Box mb="24px" maw="70%">
-              <div className="form__section-header">State</div>
-              <Text>Quality: {QUALITY_TEXT[status?.quality] || "--"}</Text>
-              {
-                status?.warnings &&
-                <>
-                  <Box mt={16}>
-                    <Code block icon={<IconAlertCircle />} color="rgba(250, 176, 5, 0.07)" style={{borderLeft: "4px solid var(--mantine-color-yellow-filled)", borderRadius: 0}}>
-                      {(status?.warnings || []).map(item => (
-                        <Text key={`warning-${item}`}>{item}</Text>
-                      ))}
-                    </Code>
-                  </Box>
-                </>
-              }
-            </Box>
-            <Box mb="24px" maw="70%">
-              <div className="form__section-header">Recording Info</div>
-              <Text>
-                Created: {
-                  recordingInfo?._recordingStartTime ?
-                    DateFormat({
-                      time: recordingInfo?._recordingStartTime,
-                      format: "sec"
-                    }) : "--"
-                }
-              </Text>
-              <Text>
-                Current Period Started: {
-                  status?.recording_period?.start_time_epoch_sec ?
-                    DateFormat({
-                      time: status?.recording_period?.start_time_epoch_sec,
-                      format: "sec"
-                    }) : "--"
-                }
-              </Text>
-              <Text>
-                Current Period Runtime: {
-                  [STATUS_MAP.RUNNING, STATUS_MAP.STARTING].includes(status?.state) ? Runtime({
-                    startTime: status?.recording_period?.start_time_epoch_sec * 1000,
-                    currentTimeMs
-                  }) : "--"
-                }
-              </Text>
-            </Box>
-            <DetailsRecordingCopiesTable
-              liveRecordingCopies={liveRecordingCopies}
-              DeleteCallback={LoadLiveRecordingCopies}
-            />
+            <form className="form" onSubmit={HandleSubmit}>
+              <Box mb="24px" maw="70%">
+                <div className="form__section-header">General</div>
+                <TextInput
+                  label="Name"
+                  formName="name"
+                  required={true}
+                  value={formData.name}
+                  onChange={HandleFormChange}
+                />
+                <TextInput
+                  label="Display Title"
+                  formName="displayTitle"
+                  value={formData.displayTitle}
+                  onChange={HandleFormChange}
+                />
+                <TextInput
+                  label="Description"
+                  formName="description"
+                  value={formData.description}
+                  onChange={HandleFormChange}
+                />
+              </Box>
+              <button type="submit" className="button__primary" disabled={applyingChanges}>
+                {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Save"}
+              </button>
+            </form>
           </Flex>
         </Grid.Col>
         <Grid.Col span={4}>
@@ -168,14 +168,6 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
           </Flex>
         </Grid.Col>
       </Grid>
-      <div className="form__section-header">Recording Periods</div>
-      <DetailsPeriodsTable
-        objectId={params.id}
-        records={recordingInfo?.live_offering}
-        title={title}
-        CopyCallback={LoadLiveRecordingCopies}
-        currentTimeMs={currentTimeMs}
-      />
     </>
   );
 });

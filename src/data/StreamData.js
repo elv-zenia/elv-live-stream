@@ -1,6 +1,7 @@
 import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
 import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
 import AudioPanel from "Pages/stream-details/audio/AudioPanel";
+import StatusPanel from "Pages/stream-details/status/StatusPanel";
 
 export const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",
@@ -16,6 +17,7 @@ export const STATUS_MAP = {
 
 export const DETAILS_TABS = [
   {label: "Details", value: "details", Component: DetailsPanel},
+  {label: "Status", value: "status", Component: StatusPanel},
   {label: "Playout", value: "playout", Component: PlayoutPanel},
   {label: "Audio", value: "audio", Component: AudioPanel}
 ];

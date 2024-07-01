@@ -18,7 +18,7 @@ const StreamDetailsPage = observer(() => {
   const [showModal, {open, close}] = useDisclosure(false);
   const [modalData, setModalData] = useState({});
   const [pageVersion, setPageVersion] = useState(0);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState(DETAILS_TABS[0].value);
   const [recordingInfo, setRecordingInfo] = useState(null);
 
   if(!streamSlug) {

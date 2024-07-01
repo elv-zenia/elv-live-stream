@@ -10,7 +10,7 @@ import ConfirmModal from "Components/ConfirmModal";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
 
-const DetailsRecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallback}) => {
+const RecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallback}) => {
   const [showDeleteModal, {open, close}] = useDisclosure(false);
   const [sortStatus, setSortStatus] = useState({
     columnAccessor: "title",
@@ -141,4 +141,4 @@ const DetailsRecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallba
   );
 });
 
-export default DetailsRecordingCopiesTable;
+export default RecordingCopiesTable;

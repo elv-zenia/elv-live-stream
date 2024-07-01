@@ -99,10 +99,11 @@ export const TextInput = ({
         type="text"
         name={formName}
         required={required}
-        value={value || ""}
-        onChange={onChange}
+        value={value ? value : "undefined"}
+        onChange={onChange ? onChange : undefined}
         placeholder={placeholder}
         disabled={disabled}
+        width="100%"
         {...rest}
       />
     </>

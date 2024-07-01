@@ -140,7 +140,7 @@ class DataStore {
           streamMetadata[slug].objectId = objectId;
           streamMetadata[slug].versionHash = versionHash;
           streamMetadata[slug].libraryId = libraryId;
-          streamMetadata[slug].title = stream.display_title || stream.title;
+          streamMetadata[slug].title = stream.title || stream.display_title;
           streamMetadata[slug].embedUrl = await this.EmbedUrl({objectId});
 
           const streamDetails = await this.LoadStreamMetadata({
@@ -184,7 +184,7 @@ class DataStore {
               name: response || libraryId
             };
           } catch(error) {
-            console.log(`Unable to load info for library: ${libraryId}`);
+            console.error(`Unable to load info for library: ${libraryId}`);
           }
         })
       );
@@ -236,7 +236,8 @@ class DataStore {
           "live_recording/recording_config/recording_params/image_watermark",
           "live_recording_config/reference_url",
           "live_recording_config/url",
-          "live_recording_config/drm_type"
+          "live_recording_config/drm_type",
+          "public/description"
         ]
       });
       let probeMeta = streamMeta?.live_recording_config?.probe_info;
@@ -271,8 +272,40 @@ class DataStore {
         referenceUrl: streamMeta?.live_recording_config?.reference_url,
         drm: streamMeta?.live_recording_config?.drm_type,
         simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
-        imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark
+        imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
+        description: streamMeta?.public?.description
       };
+    } catch(error) {
+      console.error("Unable to load stream metadata", error);
+    }
+  });
+
+  LoadDetails = flow(function * ({libraryId, objectId, slug}) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      const streamMeta = yield this.client.ContentObjectMetadata({
+        objectId,
+        libraryId,
+        metadataSubtree: "public",
+        select: [
+          "name",
+          "description",
+          "asset_metadata/display_title",
+          "asset_metadata/title"
+        ]
+      });
+
+      streamStore.UpdateStream({
+        key: slug,
+        value: {
+          title: streamMeta.asset_metadata?.title || streamMeta.asset_metadata?.display_title,
+          description: streamMeta.description,
+          display_title: streamMeta.asset_metadata?.display_title
+        }
+      });
     } catch(error) {
       console.error("Unable to load stream metadata", error);
     }
