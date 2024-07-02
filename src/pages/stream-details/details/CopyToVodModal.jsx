@@ -26,7 +26,7 @@ const CopyToVodModal = observer(({show, close, title, setTitle, Callback}) => {
           onChange={event => setTitle(event.target.value)}
           style={{width: "100%"}}
         />
-        <Text mt={16}>This process takes around 20 seconds per hour of content.</Text>
+        <Text mt={16}>This process takes around 30 seconds per hour of content.</Text>
       </Box>
       {
         !error ? null :

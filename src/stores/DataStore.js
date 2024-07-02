@@ -1,7 +1,7 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {streamStore} from "./index";
-import {RECORDING_BITRATE_OPTIONS} from "Data/StreamData";
+import {RECORDING_BITRATE_OPTIONS} from "Utils/constants";
 
 configure({
   enforceActions: "always"

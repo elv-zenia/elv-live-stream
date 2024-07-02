@@ -7,7 +7,7 @@ import {Loader} from "Components/Loader";
 import {Box} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {Select} from "Components/Inputs";
-import {RETENTION_OPTIONS} from "Data/StreamData";
+import {RETENTION_OPTIONS} from "Utils/constants";
 
 const RecordingPanel = observer(({title, slug, currentRetention}) => {
   const params = useParams();

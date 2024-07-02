@@ -5,7 +5,7 @@ import {Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
-import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "Data/StreamData";
+import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "Utils/constants";
 import {Alert, Button, Flex, Text} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "Pages/create/AudioTracksTable";

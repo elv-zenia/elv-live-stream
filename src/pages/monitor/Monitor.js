@@ -9,9 +9,9 @@ import AspectRatio from "Components/AspectRatio";
 import Video from "Components/Video";
 import ImageIcon from "Components/ImageIcon";
 import {Loader} from "Components/Loader";
-import {SortTable} from "Stores/helpers/Misc";
+import {SortTable} from "Utils/helpers";
 import PlayIcon from "Assets/icons/play circle.svg";
-import {STATUS_TEXT} from "Data/HumanReadableText";
+import {STATUS_TEXT} from "Utils/constants";
 
 export const VideoContainer = observer(({slug, index, showPreview}) => {
   const [play, setPlay] = useState(false);

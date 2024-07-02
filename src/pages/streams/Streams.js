@@ -13,10 +13,9 @@ import {
 
 import Modal from "Components/Modal";
 import {dataStore, editStore, streamStore} from "Stores";
-import {SanitizeUrl, SortTable, VideoBitrateReadable} from "Stores/helpers/Misc";
-import {StreamIsActive} from "Stores/helpers/Misc";
-import {STATUS_MAP} from "Data/StreamData";
-import {CODEC_TEXT, FORMAT_TEXT} from "Data/HumanReadableText";
+import {SanitizeUrl, SortTable, VideoBitrateReadable, StreamIsActive} from "Utils/helpers";
+import {STATUS_MAP} from "Utils/constants";
+import {CODEC_TEXT, FORMAT_TEXT} from "Utils/constants";
 
 import {useDebounceCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";

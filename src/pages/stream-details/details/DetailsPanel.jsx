@@ -3,14 +3,13 @@ import {Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
 import {streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
-import {DateFormat, FormatTime} from "Stores/helpers/Misc";
-import {STATUS_MAP} from "Data/StreamData";
+import {DateFormat, FormatTime} from "Utils/helpers";
+import {STATUS_MAP, QUALITY_TEXT} from "Utils/constants";
 import RecordingPeriodsTable from "Pages/stream-details/details/RecordingPeriodsTable";
 import RecordingCopiesTable from "Pages/stream-details/details/RecordingCopiesTable";
-import {QUALITY_TEXT} from "Data/HumanReadableText";
 import {IconAlertCircle, IconCheck} from "@tabler/icons-react";
 import {VideoContainer} from "Pages/monitor/Monitor";
-import {CopyToClipboard} from "Stores/helpers/Actions";
+import {CopyToClipboard} from "Utils/helpers";
 import ClipboardIcon from "Assets/icons/ClipboardIcon";
 
 export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) => {

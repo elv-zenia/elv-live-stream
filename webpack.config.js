@@ -55,12 +55,12 @@ module.exports = {
   },
   resolve: {
     alias: {
-      Assets: Path.resolve(__dirname, "src/static"),
+      Assets: Path.resolve(__dirname, "src/assets"),
       Components: Path.resolve(__dirname, "src/components"),
       Pages: Path.resolve(__dirname, "src/pages"),
       Routes: Path.resolve(__dirname, "src/routes"),
       Stores: Path.resolve(__dirname, "src/stores"),
-      Data: Path.resolve(__dirname, "src/data"),
+      Utils: Path.resolve(__dirname, "src/utils"),
       // Force webpack to use *one* copy of bn.js instead of 8
       "bn.js": Path.resolve(Path.join(__dirname, "node_modules", "bn.js"))
     },
