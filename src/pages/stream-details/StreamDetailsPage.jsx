@@ -175,7 +175,7 @@ const StreamDetailsPage = observer(() => {
                 embedUrl={stream.embedUrl}
                 url={stream.originUrl}
                 recordingInfo={recordingInfo}
-                retention={stream.partTtl}
+                currentRetention={stream.partTtl}
               />
             </Tabs.Panel>
           ))

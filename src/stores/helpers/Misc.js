@@ -151,14 +151,14 @@ export const SortTable = ({sortStatus, AdditionalCondition}) => {
   };
 };
 
-export const DateFormat = ({time, format="sec"}) => {
+export const DateFormat = ({time, format="sec", options={}}) => {
   if(!["sec", "iso", "ms"].includes(format)) { throw Error("Invalid format type provided."); }
 
   if(format === "sec") {
     time = time * 1000;
   }
 
-  return new Date(time).toLocaleString();
+  return new Date(time).toLocaleString(navigator.language, options);
 };
 
 export const SanitizeUrl = ({url}) => {

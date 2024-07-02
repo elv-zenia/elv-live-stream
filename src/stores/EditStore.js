@@ -425,6 +425,55 @@ class EditStore {
     }
   });
 
+  UpdateRetention = flow(function * ({
+    objectId,
+    libraryId,
+    slug,
+    retention,
+    writeToken
+  }) {
+    if(!libraryId) {
+      libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+    if(!writeToken) {
+      ({writeToken} = yield this.client.EditContentObject({
+        libraryId,
+        objectId
+      }));
+    }
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording_config/part_ttl",
+      metadata: retention
+    });
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/part_ttl",
+      metadata: retention
+    });
+
+    yield this.client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update retention",
+      awaitCommitConfirmation: true
+    });
+
+    streamStore.UpdateStream({
+      key: slug,
+      value: {
+        partTtl: retention
+      }
+    });
+  });
+
   DeleteStream = flow(function * ({objectId}) {
     const streams = Object.assign({}, streamStore.streams);
     const slug = Object.keys(streams).find(streamSlug => {

@@ -32,7 +32,33 @@ export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) 
   return time;
 };
 
-const DetailsPanel = observer(({title, recordingInfo, retention, slug, embedUrl}) => {
+const ExpirationTime = ({startTime, retention}) => {
+  if(!startTime) { return null; }
+
+  const expirationTimeMs = (startTime * 1000) + (retention * 1000);
+
+  const formattedExpiration = expirationTimeMs ?
+    DateFormat({
+      time: expirationTimeMs,
+      format: "ms",
+      options: {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      }
+    }) : "--";
+
+  return (
+    <Text>
+      Recordings older than {formattedExpiration} are deleted
+    </Text>
+  );
+};
+
+const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, embedUrl}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState("");
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -105,6 +131,9 @@ const DetailsPanel = observer(({title, recordingInfo, retention, slug, embedUrl}
                 }
               </Text>
               <Text>
+                Retention: { currentRetention ? FormatTime({milliseconds: currentRetention * 1000}) : "--" }
+              </Text>
+              <Text>
                 Current Period Started: {
                   status?.recording_period?.start_time_epoch_sec ?
                     DateFormat({
@@ -121,9 +150,7 @@ const DetailsPanel = observer(({title, recordingInfo, retention, slug, embedUrl}
                   }) : "--"
                 }
               </Text>
-              <Text>
-                Retention: { retention ? FormatTime({milliseconds: retention * 1000}) : "--" }
-              </Text>
+              <ExpirationTime startTime={recordingInfo?._recordingStartTime} retention={currentRetention} />
             </Box>
             <RecordingCopiesTable
               liveRecordingCopies={liveRecordingCopies}

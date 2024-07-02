@@ -1,6 +1,6 @@
 import GeneralPanel from "Pages/stream-details/general/GeneralPanel";
 import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
-import AudioPanel from "Pages/stream-details/audio/AudioPanel";
+import RecordingPanel from "Pages/stream-details/recording/RecordingPanel";
 import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
 
 export const STATUS_MAP = {
@@ -18,7 +18,7 @@ export const STATUS_MAP = {
 export const DETAILS_TABS = [
   {label: "Details", value: "status", Component: DetailsPanel},
   {label: "General Config", value: "general", Component: GeneralPanel},
-  {label: "Recording Config", value: "audio", Component: AudioPanel},
+  {label: "Recording Config", value: "recording", Component: RecordingPanel},
   {label: "Playout Config", value: "playout", Component: PlayoutPanel}
 ];
 
@@ -59,4 +59,12 @@ export const RECORDING_BITRATE_OPTIONS = [
   {label: "192 Kbps", value: 192000},
   {label: "128 Kbps", value: 128000},
   {label: "48 Kbps", value: 48000}
+];
+
+export const RETENTION_OPTIONS = [
+  {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
+  {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
+  {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
+  {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
+  {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
 ];

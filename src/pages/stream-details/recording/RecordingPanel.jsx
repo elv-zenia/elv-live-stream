@@ -1,16 +1,19 @@
 import React, {useEffect, useState} from "react";
 import {observer} from "mobx-react";
 import AudioTracksTable from "Pages/create/AudioTracksTable";
-import {dataStore, streamStore} from "Stores";
+import {dataStore, editStore, streamStore} from "Stores";
 import {useParams} from "react-router-dom";
 import {Loader} from "Components/Loader";
 import {Box} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
+import {Select} from "Components/Inputs";
+import {RETENTION_OPTIONS} from "Data/StreamData";
 
-const AudioPanel = observer(({title, slug}) => {
+const RecordingPanel = observer(({title, slug, currentRetention}) => {
   const params = useParams();
   const [audioTracks, setAudioTracks] = useState([]);
-  const [formData, setFormData] = useState(null);
+  const [audioFormData, setAudioFormData] = useState(null);
+  const [retention, setRetention] = useState(currentRetention);
   const [applyingChanges, setApplyingChanges] = useState(false);
 
   const LoadConfigData = async () => {
@@ -19,7 +22,7 @@ const AudioPanel = observer(({title, slug}) => {
     });
 
     setAudioTracks(audioStreams);
-    setFormData(audioData);
+    setAudioFormData(audioData);
   };
 
   useEffect(() => {
@@ -36,7 +39,13 @@ const AudioPanel = observer(({title, slug}) => {
       await streamStore.UpdateStreamAudioSettings({
         objectId: params.id,
         slug,
-        audioData: formData
+        audioData: audioFormData
+      });
+
+      await editStore.UpdateRetention({
+        objectId: params.id,
+        slug,
+        retention
       });
 
       await LoadConfigData();
@@ -61,11 +70,20 @@ const AudioPanel = observer(({title, slug}) => {
   return (
     <>
       <Box mb="24px" maw="60%">
-        <form onSubmit={HandleSubmit}>
+        <form onSubmit={HandleSubmit} className="form">
+          <div className="form__section-header">Retention Period</div>
+          <Select
+            labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+            formName="retention"
+            options={RETENTION_OPTIONS}
+            value={retention}
+            onChange={event => setRetention(event.target.value)}
+          />
+          <div className="form__section-header">Audio Tracks</div>
           <AudioTracksTable
             records={audioTracks}
-            audioFormData={formData}
-            setAudioFormData={setFormData}
+            audioFormData={audioFormData}
+            setAudioFormData={setAudioFormData}
           />
           <Box mt="24px">
             <button
@@ -82,4 +100,4 @@ const AudioPanel = observer(({title, slug}) => {
   );
 });
 
-export default AudioPanel;
+export default RecordingPanel;

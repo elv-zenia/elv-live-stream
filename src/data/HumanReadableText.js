@@ -24,7 +24,7 @@ export const CODEC_TEXT = {
 };
 
 export const RECORDING_STATUS_TEXT = {
-  NOT_AVAILABLE: "Not Available",
+  EXPIRED: "Expired",
   PARTIALLY_AVAILABLE: "Partially Available",
   AVAILABLE: "Available"
 };
