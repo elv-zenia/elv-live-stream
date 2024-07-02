@@ -202,6 +202,7 @@ const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, em
         title={title}
         CopyCallback={LoadLiveRecordingCopies}
         currentTimeMs={currentTimeMs}
+        retention={currentRetention}
       />
     </>
   );

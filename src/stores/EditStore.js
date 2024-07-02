@@ -494,7 +494,7 @@ class EditStore {
       objectId,
       writeToken,
       metadataSubtree: "live_recording_config/part_ttl",
-      metadata: retention
+      metadata: parseInt(retention)
     });
 
     yield this.client.ReplaceMetadata({
@@ -502,7 +502,7 @@ class EditStore {
       objectId,
       writeToken,
       metadataSubtree: "live_recording/recording_config/recording_params/part_ttl",
-      metadata: retention
+      metadata: parseInt(retention)
     });
 
     yield this.client.FinalizeContentObject({

@@ -11,7 +11,14 @@ import {DataTable} from "mantine-datatable";
 import DetailsCopyModal from "Pages/stream-details/details/CopyToVodModal";
 import {Runtime} from "Pages/stream-details/details/DetailsPanel";
 
-const RecordingPeriodsTable = observer(({records, objectId, title, CopyCallback, currentTimeMs}) => {
+const RecordingPeriodsTable = observer(({
+  records,
+  objectId,
+  title,
+  CopyCallback,
+  currentTimeMs,
+  retention
+}) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [copyingToVod, setCopyingToVod] = useState(false);
   const [showCopyModal, {open, close}] = useDisclosure(false);
@@ -53,7 +60,11 @@ const RecordingPeriodsTable = observer(({records, objectId, title, CopyCallback,
     let status;
     const videoIsEmpty = (item?.sources?.video?.parts || []).length === 0;
 
-    if(videoIsEmpty || !MeetsDurationMin({startTime, endTime})) {
+    if(
+      videoIsEmpty ||
+      !MeetsDurationMin({startTime, endTime}) ||
+      !IsWithinRetentionPeriod({startTime})
+    ) {
       status = "EXPIRED";
     } else if(!videoIsEmpty && item?.sources?.video?.trimmed > 0) {
       status = "PARTIALLY_AVAILABLE";
@@ -72,6 +83,16 @@ const RecordingPeriodsTable = observer(({records, objectId, title, CopyCallback,
     if(endTime === 0 || startTime === 0) { return true; }
 
     return (endTime - startTime) >= 61000;
+  };
+
+  const IsWithinRetentionPeriod = ({startTime}) => {
+    const currentTime = new Date().getTime();
+    const startTimeMs = new Date(startTime).getTime();
+    const retentionMs = retention * 1000;
+
+    if(typeof startTimeMs !== "number") { return false; }
+
+    return (currentTime - startTimeMs) < retentionMs;
   };
 
   return (
