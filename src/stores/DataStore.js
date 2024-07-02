@@ -313,6 +313,40 @@ class DataStore {
     }
   });
 
+  LoadPermission = flow(function * ({libraryId, objectId}) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      return client.Permission({
+        libraryId,
+        objectId
+      });
+    } catch(error) {
+      console.error(`Unable to load permission for ${objectId}`, error);
+    }
+  });
+
+  LoadAccessGroupPermissions = flow(function * ({objectId}) {
+    try {
+      let groupAddress = "";
+
+      const permissions = yield client.ContentObjectGroupPermissions({objectId});
+
+      for(let address of Object.keys(permissions || {})) {
+        if(permissions[address].includes("manage")) {
+          groupAddress = address;
+          break;
+        }
+      }
+
+      return groupAddress;
+    } catch(error) {
+      console.error(`Unable to load access group permissions for ${objectId}`, error);
+    }
+  })
+
   LoadStreamUrls = flow(function * () {
     this.UpdateStreamUrls({});
     try {

@@ -45,7 +45,7 @@ class EditStore {
     if(accessGroup) {
       this.AddAccessGroupPermission({
         objectId,
-        accessGroup
+        groupName: accessGroup
       });
     }
 
@@ -123,7 +123,7 @@ class EditStore {
     if(accessGroup) {
       this.AddAccessGroupPermission({
         objectId,
-        accessGroup
+        groupName: accessGroup
       });
     }
 
@@ -175,18 +175,65 @@ class EditStore {
 
   AddAccessGroupPermission = flow(function * ({
     objectId,
-    accessGroup
+    groupName,
+    groupAddress
   }) {
     try {
+      if(!groupAddress) {
+        groupAddress = dataStore.accessGroups[groupName]?.address;
+      }
+
       yield this.client.AddContentObjectGroupPermission({
         objectId,
-        groupAddress: dataStore.accessGroups[accessGroup]?.address,
+        groupAddress,
         permission: "manage"
       });
     } catch(error) {
-      console.error(`Unable to add group permission for group: ${accessGroup}`, error);
+      console.error(`Unable to add group permission for group: ${groupName || groupAddress}`, error);
     }
   });
+
+  RemoveAccessGroupPermission = ({
+    objectId,
+    groupAddress
+  }) => {
+    try {
+      return this.client.RemoveContentObjectGroupPermission({
+        objectId,
+        groupAddress,
+        permission: "manage"
+      });
+    } catch(error) {
+      console.error(`Unable to remove group permission for group: ${groupAddress}`, error);
+    }
+  }
+
+  UpdateAccessGroupPermission = flow(function * ({objectId, addGroup, removeGroup}) {
+    if(removeGroup) {
+      yield this.RemoveAccessGroupPermission({
+        objectId,
+        groupAddress: removeGroup
+      });
+    }
+
+    if(addGroup) {
+      yield this.AddAccessGroupPermission({
+        objectId,
+        groupAddress: addGroup
+      });
+    }
+  });
+
+  SetPermission = ({objectId, permission}) => {
+    try {
+      return this.client.SetPermission({
+        objectId,
+        permission
+      });
+    } catch(error) {
+      console.error("Unable to set permission.", error);
+    }
+  };
 
   AddMetadata = flow(function * ({
     libraryId,

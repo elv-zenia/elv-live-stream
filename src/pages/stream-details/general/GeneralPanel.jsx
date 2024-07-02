@@ -1,9 +1,9 @@
 import {observer} from "mobx-react";
 import {Box, Flex} from "@mantine/core";
 import React, {useEffect, useState} from "react";
-import {dataStore, editStore, streamStore} from "Stores";
+import {dataStore, editStore, rootStore, streamStore} from "Stores";
 import {useParams} from "react-router-dom";
-import {TextInput} from "Components/Inputs";
+import {Select, TextInput} from "Components/Inputs";
 import {notifications} from "@mantine/notifications";
 import {Loader} from "Components/Loader";
 
@@ -11,9 +11,15 @@ const GeneralPanel = observer(({slug}) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    displayTitle: ""
+    displayTitle: "",
+    accessGroup: "",
+    permission: ""
   });
   const [applyingChanges, setApplyingChanges] = useState(false);
+  const [currentSettings, setCurrentSettings] = useState({
+    accessGroup: "",
+    permission: ""
+  });
 
   const params = useParams();
 
@@ -21,15 +27,29 @@ const GeneralPanel = observer(({slug}) => {
     const LoadDetails = async() => {
       await dataStore.LoadDetails({objectId: params.id, slug});
       const stream = streamStore.streams[slug];
+      const currentPermission = await dataStore.LoadPermission({objectId: params.id});
+      const accessGroupPermission = await dataStore.LoadAccessGroupPermissions({objectId: params.id});
 
       setFormData({
         name: stream.title || "",
         description: stream.description || "",
-        displayTitle: stream.display_title || ""
+        displayTitle: stream.display_title || "",
+        permission: currentPermission || "",
+        accessGroup: accessGroupPermission || ""
+      });
+
+      setCurrentSettings({
+        permission: currentPermission || "",
+        accessGroup: accessGroupPermission || ""
       });
     };
 
+    const LoadAccessGroups = async() => {
+      await dataStore.LoadAccessGroups();
+    };
+
     if(params.id) {
+      LoadAccessGroups();
       LoadDetails();
     }
   }, [params.id, streamStore.streams]);
@@ -56,6 +76,21 @@ const GeneralPanel = observer(({slug}) => {
         displayTitle: formData.displayTitle
       });
 
+      if(currentSettings.permission !== formData.permission) {
+        await editStore.SetPermission({
+          objectId: params.id,
+          permission: formData.permission
+        });
+      }
+
+      if(currentSettings.accessGroup !== formData.accessGroup) {
+        await editStore.UpdateAccessGroupPermission({
+          objectId: params.id,
+          addGroup: formData.accessGroup,
+          removeGroup: currentSettings.accessGroup
+        });
+      }
+
       notifications.show({
         title: `${formData.name || params.id} updated`,
         message: "Changes have been applied successfully"
@@ -78,7 +113,6 @@ const GeneralPanel = observer(({slug}) => {
       <Flex direction="column" style={{flexGrow: "1"}}>
         <form className="form" onSubmit={HandleSubmit}>
           <Box mb="24px" maw="70%">
-            <div className="form__section-header">General</div>
             <TextInput
               label="Name"
               formName="name"
@@ -97,6 +131,48 @@ const GeneralPanel = observer(({slug}) => {
               formName="description"
               value={formData.description}
               onChange={HandleFormChange}
+            />
+            <Select
+              label="Access Group"
+              labelDescription="This is the Access Group that will manage your live stream object."
+              formName="accessGroup"
+              options={
+                Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
+                  {
+                    label: accessGroupName,
+                    value: dataStore.accessGroups[accessGroupName]?.address
+                  }
+                ))
+              }
+              value={formData.accessGroup}
+              defaultOption={{
+                value: "",
+                label: "Select Access Group"
+              }}
+              onChange={HandleFormChange}
+            />
+            <Select
+              label="Permission"
+              labelDescription="Set a permission level."
+              formName="permission"
+              tooltip={
+                Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
+                  <div key={`permission-info-${short}`} className="form__tooltip-item">
+                    <div className="form__tooltip-item__permission-title">{ short }:</div>
+                    <div>{ description }</div>
+                  </div>
+                )
+              }
+              value={formData.permission}
+              onChange={HandleFormChange}
+              options={
+                Object.keys(rootStore.client.permissionLevels || {}).map(permissionName => (
+                  {
+                    label: rootStore.client.permissionLevels[permissionName].short,
+                    value: permissionName
+                  }
+                ))
+              }
             />
           </Box>
           <button type="submit" className="button__primary" disabled={applyingChanges}>
