@@ -39,7 +39,7 @@ const ExpirationTime = ({startTime, retention}) => {
   const formattedExpiration = expirationTimeMs ?
     DateFormat({
       time: expirationTimeMs,
-      format: "sec"
+      format: "ms"
     }) : "--";
 
   return (
