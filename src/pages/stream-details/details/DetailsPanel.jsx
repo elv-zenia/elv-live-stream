@@ -4,7 +4,7 @@ import {streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
 import {DateFormat, FormatTime} from "Utils/helpers";
-import {STATUS_MAP, QUALITY_TEXT} from "Utils/constants";
+import {STATUS_MAP, QUALITY_TEXT, RETENTION_TEXT} from "Utils/constants";
 import RecordingPeriodsTable from "Pages/stream-details/details/RecordingPeriodsTable";
 import RecordingCopiesTable from "Pages/stream-details/details/RecordingCopiesTable";
 import {IconAlertCircle, IconCheck} from "@tabler/icons-react";
@@ -39,20 +39,12 @@ const ExpirationTime = ({startTime, retention}) => {
   const formattedExpiration = expirationTimeMs ?
     DateFormat({
       time: expirationTimeMs,
-      format: "ms",
-      options: {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      }
+      format: "sec"
     }) : "--";
 
   return (
-    <Text>
-      Recordings older than {formattedExpiration} are deleted
+    <Text c="dimmed">
+      {`(Expiration: ${formattedExpiration})`}
     </Text>
   );
 };
@@ -130,7 +122,10 @@ const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, em
                 }
               </Text>
               <Text>
-                Retention: { currentRetention ? FormatTime({milliseconds: currentRetention * 1000}) : "--" }
+                <Flex direction="row" gap={6}>
+                  Retention: { currentRetention ? RETENTION_TEXT[currentRetention] : "--" }
+                  <ExpirationTime startTime={recordingInfo?._recordingStartTime} retention={currentRetention} />
+                </Flex>
               </Text>
               <Text>
                 Current Period Started: {
@@ -149,7 +144,6 @@ const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, em
                   }) : "--"
                 }
               </Text>
-              <ExpirationTime startTime={recordingInfo?._recordingStartTime} retention={currentRetention} />
             </Box>
             <RecordingCopiesTable
               liveRecordingCopies={liveRecordingCopies}
