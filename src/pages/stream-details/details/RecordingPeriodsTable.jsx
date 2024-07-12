@@ -132,7 +132,6 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "start_time",
             title: "Start Time",
-            width: 300,
             render: record => (
               <Text>
                 {
@@ -145,7 +144,6 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "end_time",
             title: "End Time",
-            width: 300,
             render: record => (
               <Text>
                 {
@@ -158,7 +156,6 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "runtime",
             title: "Runtime",
-            width: 300,
             render: record => (
               <Text>
                 {
@@ -176,7 +173,6 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "expiration_time",
             title: "Expiration Time",
-            width: 300,
             render: record => (
               <Text>
                 <ExpirationTime startTime={record?.start_time_epoch_sec} retention={retention} />
@@ -186,7 +182,6 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "status",
             title: "Status",
-            width: 300,
             render: record => (
               <Text>
                 {RecordingStatus({
