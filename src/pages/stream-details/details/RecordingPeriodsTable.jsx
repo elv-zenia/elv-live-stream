@@ -3,15 +3,23 @@ import {observer} from "mobx-react";
 import {useDisclosure} from "@mantine/hooks";
 import {streamStore} from "Stores";
 import {notifications} from "@mantine/notifications";
-import {RECORDING_STATUS_TEXT} from "Data/HumanReadableText";
+import {RECORDING_STATUS_TEXT, STATUS_MAP} from "Utils/constants";
 import {Flex, Text} from "@mantine/core";
-import {DateFormat, Pluralize} from "Stores/helpers/Misc";
+import {DateFormat, Pluralize} from "Utils/helpers";
 import {Loader} from "Components/Loader";
 import {DataTable} from "mantine-datatable";
-import DetailsCopyModal from "Pages/stream-details/details/DetailsCopyModal";
+import DetailsCopyModal from "Pages/stream-details/details/CopyToVodModal";
 import {Runtime} from "Pages/stream-details/details/DetailsPanel";
 
-const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, currentTimeMs}) => {
+const RecordingPeriodsTable = observer(({
+  records,
+  objectId,
+  title,
+  CopyCallback,
+  currentTimeMs,
+  retention,
+  status
+}) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [copyingToVod, setCopyingToVod] = useState(false);
   const [showCopyModal, {open, close}] = useDisclosure(false);
@@ -53,8 +61,12 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
     let status;
     const videoIsEmpty = (item?.sources?.video?.parts || []).length === 0;
 
-    if(videoIsEmpty || !MeetsDurationMin({startTime, endTime})) {
-      status = "NOT_AVAILABLE";
+    if(
+      videoIsEmpty ||
+      !MeetsDurationMin({startTime, endTime}) ||
+      !IsWithinRetentionPeriod({startTime})
+    ) {
+      status = "EXPIRED";
     } else if(!videoIsEmpty && item?.sources?.video?.trimmed > 0) {
       status = "PARTIALLY_AVAILABLE";
     } else {
@@ -72,6 +84,30 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
     if(endTime === 0 || startTime === 0) { return true; }
 
     return (endTime - startTime) >= 61000;
+  };
+
+  const IsWithinRetentionPeriod = ({startTime}) => {
+    if(status?.state !== STATUS_MAP.STOPPED) { return true; }
+
+    const currentTime = new Date().getTime();
+    const startTimeMs = new Date(startTime).getTime();
+    const retentionMs = retention * 1000;
+
+    if(typeof startTimeMs !== "number") { return false; }
+
+    return (currentTime - startTimeMs) < retentionMs;
+  };
+
+  const ExpirationTime = ({startTime, retention}) => {
+    if(!startTime) { return "--"; }
+
+    const expirationTimeMs = (startTime * 1000) + (retention * 1000);
+
+    return expirationTimeMs ?
+      DateFormat({
+        time: expirationTimeMs,
+        format: "ms"
+      }) : "--";
   };
 
   return (
@@ -135,6 +171,15 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
             )
           },
           {
+            accessor: "expiration_time",
+            title: "Expiration Time",
+            render: record => (
+              <Text>
+                <ExpirationTime startTime={record?.start_time_epoch_sec} retention={retention} />
+              </Text>
+            )
+          },
+          {
             accessor: "status",
             title: "Status",
             render: record => (
@@ -176,5 +221,5 @@ const DetailsPeriodsTable = observer(({records, objectId, title, CopyCallback, c
   );
 });
 
-export default DetailsPeriodsTable;
+export default RecordingPeriodsTable;
 

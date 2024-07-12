@@ -1,4 +1,4 @@
-import {STATUS_MAP} from "Data/StreamData";
+import {STATUS_MAP} from "Utils/constants";
 import Fraction from "fraction.js";
 
 export const ParseLiveConfigData = ({
@@ -151,14 +151,14 @@ export const SortTable = ({sortStatus, AdditionalCondition}) => {
   };
 };
 
-export const DateFormat = ({time, format="sec"}) => {
+export const DateFormat = ({time, format="sec", options={}}) => {
   if(!["sec", "iso", "ms"].includes(format)) { throw Error("Invalid format type provided."); }
 
   if(format === "sec") {
     time = time * 1000;
   }
 
-  return new Date(time).toLocaleString();
+  return new Date(time).toLocaleString(navigator.language, options);
 };
 
 export const SanitizeUrl = ({url}) => {
@@ -173,4 +173,46 @@ export const SanitizeUrl = ({url}) => {
     console.error(`Unable to sanitize ${url}`, error);
     return false;
   }
+};
+
+const FallbackCopyToClipboard = ({text}) => {
+  const element = document.createElement("textarea");
+  element.value = text;
+  element.style.all = "unset";
+  // Avoid screen readers from reading text out loud
+  element.ariaHidden = "true";
+  // used to preserve spaces and line breaks
+  element.style.whiteSpace = "pre";
+  // do not inherit user-select (it may be `none`)
+  element.style.webkitUserSelect = "text";
+  element.style.MozUserSelect = "text";
+  element.style.msUserSelect = "text";
+  element.style.userSelect = "text";
+
+  document.body.appendChild(element);
+  element.focus();
+  element.select();
+
+  try {
+    document.execCommand("copy");
+    document.body.removeChild(element);
+  } catch(error) {
+    console.error("Unable to copy to clipboard", error);
+  }
+};
+
+export const CopyToClipboard = ({text}) => {
+  if(!navigator.clipboard) {
+    FallbackCopyToClipboard({text});
+    return;
+  }
+
+  navigator.clipboard.writeText(text)
+    .catch(error => {
+      if(error instanceof DOMException && error.name === "NotAllowedError") {
+        FallbackCopyToClipboard({text});
+      } else {
+        console.error("Unable to copy to clipboard", error);
+      }
+    });
 };

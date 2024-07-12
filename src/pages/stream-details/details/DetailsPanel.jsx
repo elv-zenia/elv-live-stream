@@ -1,18 +1,16 @@
 import React, {useEffect, useState} from "react";
 import {Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
-import {dataStore, streamStore} from "Stores";
+import {streamStore} from "Stores";
 import {observer} from "mobx-react";
 import {useParams} from "react-router-dom";
-import {DateFormat, FormatTime} from "Stores/helpers/Misc";
-import {STATUS_MAP} from "Data/StreamData";
-import ClipboardIcon from "Assets/icons/ClipboardIcon";
-import {CopyToClipboard} from "Stores/helpers/Actions";
-import {IconCheck} from "@tabler/icons-react";
-import DetailsPeriodsTable from "Pages/stream-details/details/DetailsPeriodsTable";
-import DetailsRecordingCopiesTable from "Pages/stream-details/details/DetailsRecordingCopiesTable";
-import {QUALITY_TEXT} from "Data/HumanReadableText";
-import {IconAlertCircle} from "@tabler/icons-react";
+import {DateFormat, FormatTime} from "Utils/helpers";
+import {STATUS_MAP, QUALITY_TEXT, RETENTION_TEXT} from "Utils/constants";
+import RecordingPeriodsTable from "Pages/stream-details/details/RecordingPeriodsTable";
+import RecordingCopiesTable from "Pages/stream-details/details/RecordingCopiesTable";
+import {IconAlertCircle, IconCheck} from "@tabler/icons-react";
 import {VideoContainer} from "Pages/monitor/Monitor";
+import {CopyToClipboard} from "Utils/helpers";
+import ClipboardIcon from "Assets/icons/ClipboardIcon";
 
 export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) => {
   let time;
@@ -33,8 +31,8 @@ export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) 
   return time;
 };
 
-const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
-  const [frameSegmentUrl, setFrameSegmentUrl] = useState();
+const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, embedUrl}) => {
+  const [frameSegmentUrl, setFrameSegmentUrl] = useState("");
   const [status, setStatus] = useState(null);
   const [copied, setCopied] = useState(false);
   const [liveRecordingCopies, setLiveRecordingCopies] = useState({});
@@ -56,7 +54,6 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
       setStatus(statusResponse);
       setFrameSegmentUrl(frameUrl || "");
     };
-
 
     LoadLiveRecordingCopies();
     LoadStatus();
@@ -107,6 +104,9 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
                 }
               </Text>
               <Text>
+                Retention: { currentRetention ? RETENTION_TEXT[currentRetention] : "--" }
+              </Text>
+              <Text>
                 Current Period Started: {
                   status?.recording_period?.start_time_epoch_sec ?
                     DateFormat({
@@ -124,7 +124,7 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
                 }
               </Text>
             </Box>
-            <DetailsRecordingCopiesTable
+            <RecordingCopiesTable
               liveRecordingCopies={liveRecordingCopies}
               DeleteCallback={LoadLiveRecordingCopies}
             />
@@ -169,12 +169,14 @@ const DetailsPanel = observer(({slug, embedUrl, title, recordingInfo}) => {
         </Grid.Col>
       </Grid>
       <div className="form__section-header">Recording Periods</div>
-      <DetailsPeriodsTable
+      <RecordingPeriodsTable
         objectId={params.id}
         records={recordingInfo?.live_offering}
         title={title}
         CopyCallback={LoadLiveRecordingCopies}
         currentTimeMs={currentTimeMs}
+        retention={currentRetention}
+        status={status}
       />
     </>
   );

@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction, toJS} from "mobx";
-import {ParseLiveConfigData, Slugify} from "Stores/helpers/Misc";
+import {ParseLiveConfigData, Slugify} from "Utils/helpers";
 import {dataStore, streamStore} from "./index";
 
 configure({
@@ -31,7 +31,7 @@ class EditStore {
     advancedData,
     drmFormData
   }) {
-    const {libraryId, url, name, description, displayName, accessGroup, permission, protocol} = basicFormData;
+    const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
     const {retention} = advancedData;
     const {encryption} = drmFormData;
 
@@ -45,7 +45,7 @@ class EditStore {
     if(accessGroup) {
       this.AddAccessGroupPermission({
         objectId,
-        accessGroup
+        groupName: accessGroup
       });
     }
 
@@ -61,7 +61,7 @@ class EditStore {
       objectId,
       name,
       description,
-      displayName,
+      displayTitle,
       writeToken: write_token,
       config
     });
@@ -116,14 +116,14 @@ class EditStore {
     objectId,
     slug
   }) {
-    const {libraryId, url, name, description, displayName, accessGroup, protocol} = basicFormData;
+    const {libraryId, url, name, description, displayTitle, accessGroup, protocol} = basicFormData;
     const {retention} = advancedData;
     const {encryption} = drmFormData;
 
     if(accessGroup) {
       this.AddAccessGroupPermission({
         objectId,
-        accessGroup
+        groupName: accessGroup
       });
     }
 
@@ -147,7 +147,7 @@ class EditStore {
       objectId,
       name,
       description,
-      displayName,
+      displayTitle,
       config
     });
 
@@ -175,18 +175,65 @@ class EditStore {
 
   AddAccessGroupPermission = flow(function * ({
     objectId,
-    accessGroup
+    groupName,
+    groupAddress
   }) {
     try {
+      if(!groupAddress) {
+        groupAddress = dataStore.accessGroups[groupName]?.address;
+      }
+
       yield this.client.AddContentObjectGroupPermission({
         objectId,
-        groupAddress: dataStore.accessGroups[accessGroup]?.address,
+        groupAddress,
         permission: "manage"
       });
     } catch(error) {
-      console.error(`Unable to add group permission for group: ${accessGroup}`, error);
+      console.error(`Unable to add group permission for group: ${groupName || groupAddress}`, error);
     }
   });
+
+  RemoveAccessGroupPermission = ({
+    objectId,
+    groupAddress
+  }) => {
+    try {
+      return this.client.RemoveContentObjectGroupPermission({
+        objectId,
+        groupAddress,
+        permission: "manage"
+      });
+    } catch(error) {
+      console.error(`Unable to remove group permission for group: ${groupAddress}`, error);
+    }
+  }
+
+  UpdateAccessGroupPermission = flow(function * ({objectId, addGroup, removeGroup}) {
+    if(removeGroup) {
+      yield this.RemoveAccessGroupPermission({
+        objectId,
+        groupAddress: removeGroup
+      });
+    }
+
+    if(addGroup) {
+      yield this.AddAccessGroupPermission({
+        objectId,
+        groupAddress: addGroup
+      });
+    }
+  });
+
+  SetPermission = ({objectId, permission}) => {
+    try {
+      return this.client.SetPermission({
+        objectId,
+        permission
+      });
+    } catch(error) {
+      console.error("Unable to set permission.", error);
+    }
+  };
 
   AddMetadata = flow(function * ({
     libraryId,
@@ -195,7 +242,7 @@ class EditStore {
     config,
     name,
     description,
-    displayName
+    displayTitle
   }) {
     if(!writeToken) {
       ({writeToken} = yield this.client.EditContentObject({
@@ -213,8 +260,8 @@ class EditStore {
           name,
           description,
           asset_metadata: {
-            display_title: displayName || name,
-            title: displayName || name,
+            display_title: displayTitle || name,
+            title: name || displayTitle,
             title_type: "live_stream",
             video_type: "live",
             slug: Slugify(name)
@@ -231,6 +278,64 @@ class EditStore {
       commitMessage: "Add metadata",
       awaitCommitConfirmation: true
     });
+  });
+
+  UpdateDetailMetadata = flow(function * ({
+    libraryId,
+    objectId,
+    writeToken,
+    name,
+    description,
+    displayTitle
+  }) {
+    try {
+      if(!libraryId) {
+        libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      }
+
+      if(!writeToken) {
+        ({writeToken} = yield this.client.EditContentObject({
+          libraryId,
+          objectId
+        }));
+      }
+
+      const metadata = {
+        public: {
+          asset_metadata: {}
+        }
+      };
+
+      if(name) {
+        metadata.public["name"] = name;
+        metadata.public.asset_metadata["title"] = name;
+      }
+
+      if(description) {
+        metadata.public["description"] = description;
+      }
+
+      if(displayTitle) {
+        metadata.public.asset_metadata["display_title"] = displayTitle;
+      }
+
+      yield this.client.MergeMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadata
+      });
+
+      return this.client.FinalizeContentObject({
+        libraryId,
+        objectId,
+        writeToken,
+        commitMessage: "Update metadata",
+        awaitCommitConfirmation: true
+      });
+    } catch(error) {
+      console.error("Unable to update metadata", error);
+    }
   });
 
   CreateSiteLinks = flow(function * ({objectId}) {
@@ -365,6 +470,55 @@ class EditStore {
     } catch(error) {
       console.error("Unable to update stream link", error);
     }
+  });
+
+  UpdateRetention = flow(function * ({
+    objectId,
+    libraryId,
+    slug,
+    retention,
+    writeToken
+  }) {
+    if(!libraryId) {
+      libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+    if(!writeToken) {
+      ({writeToken} = yield this.client.EditContentObject({
+        libraryId,
+        objectId
+      }));
+    }
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording_config/part_ttl",
+      metadata: parseInt(retention)
+    });
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/part_ttl",
+      metadata: parseInt(retention)
+    });
+
+    yield this.client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update retention",
+      awaitCommitConfirmation: true
+    });
+
+    streamStore.UpdateStream({
+      key: slug,
+      value: {
+        partTtl: retention
+      }
+    });
   });
 
   DeleteStream = flow(function * ({objectId}) {

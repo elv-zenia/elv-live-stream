@@ -4,7 +4,7 @@ import {Box, Flex, Modal, Text} from "@mantine/core";
 import {TextInput} from "Components/Inputs";
 import {Loader} from "Components/Loader";
 
-const DetailsCopyModal = observer(({show, close, title, setTitle, Callback}) => {
+const CopyToVodModal = observer(({show, close, title, setTitle, Callback}) => {
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +26,7 @@ const DetailsCopyModal = observer(({show, close, title, setTitle, Callback}) => 
           onChange={event => setTitle(event.target.value)}
           style={{width: "100%"}}
         />
-        <Text mt={16}>This process takes around 20 seconds per hour of content.</Text>
+        <Text mt={16}>This process takes around 30 seconds per hour of content.</Text>
       </Box>
       {
         !error ? null :
@@ -62,4 +62,4 @@ const DetailsCopyModal = observer(({show, close, title, setTitle, Callback}) => 
   );
 });
 
-export default DetailsCopyModal;
+export default CopyToVodModal;

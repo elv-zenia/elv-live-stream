@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import {observer} from "mobx-react";
 import {DataTable} from "mantine-datatable";
 import {ActionIcon, Box, Group, Text} from "@mantine/core";
-import {DateFormat, SortTable} from "Stores/helpers/Misc";
+import {DateFormat, SortTable} from "Utils/helpers";
 import {editStore, streamStore} from "Stores";
 import {IconExternalLink, IconTrash} from "@tabler/icons-react";
 import {useDisclosure} from "@mantine/hooks";
@@ -10,7 +10,7 @@ import ConfirmModal from "Components/ConfirmModal";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
 
-const DetailsRecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallback}) => {
+const RecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallback}) => {
   const [showDeleteModal, {open, close}] = useDisclosure(false);
   const [sortStatus, setSortStatus] = useState({
     columnAccessor: "title",
@@ -141,4 +141,4 @@ const DetailsRecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallba
   );
 });
 
-export default DetailsRecordingCopiesTable;
+export default RecordingCopiesTable;

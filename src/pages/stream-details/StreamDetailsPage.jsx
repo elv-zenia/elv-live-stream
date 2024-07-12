@@ -5,11 +5,11 @@ import {streamStore, editStore, dataStore} from "Stores";
 import {observer} from "mobx-react";
 import {Tabs, Text} from "@mantine/core";
 import {useDebounceCallback, useDisclosure} from "@mantine/hooks";
-import {DETAILS_TABS, STATUS_MAP} from "Data/StreamData";
+import {DETAILS_TABS, STATUS_MAP} from "Utils/constants";
 import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
 import {Loader} from "Components/Loader";
 import ConfirmModal from "Components/ConfirmModal";
-import {StreamIsActive} from "Stores/helpers/Misc";
+import {StreamIsActive} from "Utils/helpers";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const StreamDetailsPage = observer(() => {
   const [showModal, {open, close}] = useDisclosure(false);
   const [modalData, setModalData] = useState({});
   const [pageVersion, setPageVersion] = useState(0);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState(DETAILS_TABS[0].value);
   const [recordingInfo, setRecordingInfo] = useState(null);
 
   if(!streamSlug) {
@@ -134,6 +134,8 @@ const StreamDetailsPage = observer(() => {
               operation: "STOP"
             });
             close();
+
+            DebouncedRefresh();
           }
         });
         open();
@@ -144,7 +146,7 @@ const StreamDetailsPage = observer(() => {
   return (
     <div key={`stream-details-${pageVersion}`}>
       <PageHeader
-        title={`Edit ${stream.title || stream.objectId}`}
+        title={`Edit ${streamStore.streams?.[streamSlug]?.display_title || streamStore.streams?.[streamSlug]?.title || stream.objectId}`}
         subtitle={stream.objectId}
         status={stream.status}
         quality={streamStore.streams?.[streamSlug]?.quality}
@@ -173,6 +175,7 @@ const StreamDetailsPage = observer(() => {
                 embedUrl={stream.embedUrl}
                 url={stream.originUrl}
                 recordingInfo={recordingInfo}
+                currentRetention={stream.partTtl}
               />
             </Tabs.Panel>
           ))

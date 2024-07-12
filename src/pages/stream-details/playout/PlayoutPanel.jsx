@@ -1,10 +1,10 @@
 import React, {useRef, useState} from "react";
 const path = require("path");
 import {ActionIcon, Box, FileButton, Flex, Group, Menu, Paper, Text, Textarea} from "@mantine/core";
-import {DEFAULT_WATERMARK_TEXT, STATUS_MAP} from "Data/StreamData";
+import {DEFAULT_WATERMARK_TEXT, STATUS_MAP} from "Utils/constants";
 import {observer} from "mobx-react";
 import {Select} from "Components/Inputs";
-import {ENCRYPTION_OPTIONS} from "Data/StreamData";
+import {ENCRYPTION_OPTIONS} from "Utils/constants";
 import classes from "Assets/stylesheets/modules/PlayoutPanel.module.css";
 import {streamStore} from "Stores";
 import {useParams} from "react-router-dom";

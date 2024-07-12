@@ -5,7 +5,7 @@ import {Radio, Select, TextInput} from "Components/Inputs";
 import Accordion from "Components/Accordion";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "Components/Loader";
-import {ENCRYPTION_OPTIONS} from "Data/StreamData";
+import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "Utils/constants";
 import {Alert, Button, Flex, Text} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "Pages/create/AudioTracksTable";
@@ -105,13 +105,7 @@ const AdvancedSection = observer(({
               label="Retention"
               labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
               formName="retention"
-              options={[
-                {label: "1 Hour", value: 3600}, // 60 * 60 = 3600 seconds
-                {label: "6 Hours", value: 21600}, // 60 * 60 * 6 = 21600
-                {label: "1 Day", value: 86400}, // 60 * 60 * 24 = 86400 seconds
-                {label: "1 Week", value: 604800}, // 60 * 60 * 24 * 7 = 604800 seconds
-                {label: "1 Month", value: 2635200} // 60 * 60 * 24 * 30.5 = 2635200 seconds
-              ]}
+              options={RETENTION_OPTIONS}
               value={advancedData.retention}
               onChange={event => AdvancedUpdateCallback({
                 key: "retention",
@@ -187,14 +181,14 @@ const Create = observer(() => {
     protocol: "mpegts",
     name: "",
     description: "",
-    displayName: "",
+    displayTitle: "",
     libraryId: "",
     accessGroup: "",
     permission: "editable"
   });
 
   const [advancedData, setAdvancedData] = useState({
-    retention: 21600
+    retention: 86400
   });
 
   const [useAdvancedSettings, setUseAdvancedSettings] = useState();
@@ -399,10 +393,10 @@ const Create = observer(() => {
           })}
         />
         <TextInput
-          label="Display Name"
-          value={basicFormData.displayName}
+          label="Display Title"
+          value={basicFormData.displayTitle}
           onChange={event => UpdateFormData({
-            key: "displayName",
+            key: "displayTitle",
             value: event.target.value,
             formKey: FORM_KEYS.BASIC
           })}

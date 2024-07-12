@@ -3,8 +3,8 @@ import {configure, flow, makeAutoObservable} from "mobx";
 import {editStore, streamStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
-import {FileInfo} from "Stores/helpers/Misc";
-import {ENCRYPTION_OPTIONS} from "Data/StreamData";
+import {FileInfo} from "Utils/helpers";
+import {ENCRYPTION_OPTIONS} from "Utils/constants";
 
 configure({
   enforceActions: "always"

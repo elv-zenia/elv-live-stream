@@ -2,10 +2,9 @@ import React from "react";
 import {observer} from "mobx-react";
 import {Checkbox, Text, TextInput} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
-import {AudioCodec} from "Data/HumanReadableText";
-import {AudioBitrateReadable} from "Stores/helpers/Misc";
+import {AudioBitrateReadable} from "Utils/helpers";
 import {Select} from "Components/Inputs";
-import {RECORDING_BITRATE_OPTIONS} from "Data/StreamData";
+import {RECORDING_BITRATE_OPTIONS, AudioCodec} from "Utils/constants";
 
 const AudioTracksTable = observer(({
   records,
