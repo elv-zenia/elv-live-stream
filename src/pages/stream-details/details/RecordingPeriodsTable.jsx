@@ -87,7 +87,7 @@ const RecordingPeriodsTable = observer(({
   };
 
   const IsWithinRetentionPeriod = ({startTime}) => {
-    if(status !== STATUS_MAP.STOPPED) { return true; }
+    if(status?.state !== STATUS_MAP.STOPPED) { return true; }
 
     const currentTime = new Date().getTime();
     const startTimeMs = new Date(startTime).getTime();
