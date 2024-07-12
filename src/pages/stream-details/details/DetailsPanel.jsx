@@ -31,24 +31,6 @@ export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) 
   return time;
 };
 
-const ExpirationTime = ({startTime, retention}) => {
-  if(!startTime) { return null; }
-
-  const expirationTimeMs = (startTime * 1000) + (retention * 1000);
-
-  const formattedExpiration = expirationTimeMs ?
-    DateFormat({
-      time: expirationTimeMs,
-      format: "ms"
-    }) : "--";
-
-  return (
-    <Text c="dimmed">
-      {`(Expiration: ${formattedExpiration})`}
-    </Text>
-  );
-};
-
 const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, embedUrl}) => {
   const [frameSegmentUrl, setFrameSegmentUrl] = useState("");
   const [status, setStatus] = useState(null);
@@ -122,10 +104,7 @@ const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, em
                 }
               </Text>
               <Text>
-                <Flex direction="row" gap={6}>
-                  Retention: { currentRetention ? RETENTION_TEXT[currentRetention] : "--" }
-                  <ExpirationTime startTime={recordingInfo?._recordingStartTime} retention={currentRetention} />
-                </Flex>
+                Retention: { currentRetention ? RETENTION_TEXT[currentRetention] : "--" }
               </Text>
               <Text>
                 Current Period Started: {

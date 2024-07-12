@@ -98,6 +98,18 @@ const RecordingPeriodsTable = observer(({
     return (currentTime - startTimeMs) < retentionMs;
   };
 
+  const ExpirationTime = ({startTime, retention}) => {
+    if(!startTime) { return "--"; }
+
+    const expirationTimeMs = (startTime * 1000) + (retention * 1000);
+
+    return expirationTimeMs ?
+      DateFormat({
+        time: expirationTimeMs,
+        format: "ms"
+      }) : "--";
+  };
+
   return (
     <>
       <Flex direction="row" justify="space-between">
@@ -120,6 +132,7 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "start_time",
             title: "Start Time",
+            width: 300,
             render: record => (
               <Text>
                 {
@@ -132,6 +145,7 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "end_time",
             title: "End Time",
+            width: 300,
             render: record => (
               <Text>
                 {
@@ -144,6 +158,7 @@ const RecordingPeriodsTable = observer(({
           {
             accessor: "runtime",
             title: "Runtime",
+            width: 300,
             render: record => (
               <Text>
                 {
@@ -159,8 +174,19 @@ const RecordingPeriodsTable = observer(({
             )
           },
           {
+            accessor: "expiration_time",
+            title: "Expiration Time",
+            width: 300,
+            render: record => (
+              <Text>
+                <ExpirationTime startTime={record?.start_time_epoch_sec} retention={retention} />
+              </Text>
+            )
+          },
+          {
             accessor: "status",
             title: "Status",
+            width: 300,
             render: record => (
               <Text>
                 {RecordingStatus({
