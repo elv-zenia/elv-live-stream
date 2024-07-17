@@ -1,11 +1,11 @@
-import {observer} from "mobx-react";
+import {observer} from "mobx-react-lite";
 import {Box, Flex} from "@mantine/core";
-import React, {useEffect, useState} from "react";
-import {dataStore, editStore, rootStore, streamStore} from "Stores";
+import {useEffect, useState} from "react";
+import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Select, TextInput} from "Components/Inputs";
+import {Select, TextInput} from "@/components/Inputs.jsx";
 import {notifications} from "@mantine/notifications";
-import {Loader} from "Components/Loader";
+import {Loader} from "@/components/Loader.jsx";
 
 const GeneralPanel = observer(({slug}) => {
   const [formData, setFormData] = useState({
@@ -96,6 +96,7 @@ const GeneralPanel = observer(({slug}) => {
         message: "Changes have been applied successfully"
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to update metadata", error);
 
       notifications.show({

@@ -1,7 +1,7 @@
-import React, {useState} from "react";
-import {observer} from "mobx-react";
+import {useState} from "react";
+import {observer} from "mobx-react-lite";
 import {Flex, Modal, Text} from "@mantine/core";
-import {Loader} from "Components/Loader";
+import {Loader} from "@/components/Loader.jsx";
 
 const ConfirmModal = observer(({
   message,
@@ -51,6 +51,7 @@ const ConfirmModal = observer(({
               setLoading(true);
               await ConfirmCallback();
             } catch(error) {
+              // eslint-disable-next-line no-console
               console.error(error);
               setError(error?.message || error.kind || error.toString());
             } finally {

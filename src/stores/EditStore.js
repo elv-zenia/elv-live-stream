@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction, toJS} from "mobx";
-import {ParseLiveConfigData, Slugify} from "Utils/helpers";
+import {ParseLiveConfigData, Slugify} from "@/utils/helpers";
 import {dataStore, streamStore} from "./index";
 
 configure({
@@ -75,6 +75,7 @@ class EditStore {
         permission
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to set permission.", error);
     }
 
@@ -167,6 +168,7 @@ class EditStore {
         options: { type: dataStore.contentType }
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to create content object.", error);
     }
 
@@ -189,6 +191,7 @@ class EditStore {
         permission: "manage"
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(`Unable to add group permission for group: ${groupName || groupAddress}`, error);
     }
   });
@@ -204,9 +207,10 @@ class EditStore {
         permission: "manage"
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(`Unable to remove group permission for group: ${groupAddress}`, error);
     }
-  }
+  };
 
   UpdateAccessGroupPermission = flow(function * ({objectId, addGroup, removeGroup}) {
     if(removeGroup) {
@@ -231,6 +235,7 @@ class EditStore {
         permission
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to set permission.", error);
     }
   };
@@ -334,6 +339,7 @@ class EditStore {
         awaitCommitConfirmation: true
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to update metadata", error);
     }
   });
@@ -378,7 +384,7 @@ class EditStore {
       },
       "/": `/qfab/${targetHash}/${linkTarget}`
     };
-  }
+  };
 
   AddStreamToSite = flow(function * ({objectId}) {
     try {
@@ -430,6 +436,7 @@ class EditStore {
         awaitCommitConfirmation: true
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to replace meta", error);
     }
   });
@@ -468,6 +475,7 @@ class EditStore {
         awaitCommitConfirmation: true
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to update stream link", error);
     }
   });

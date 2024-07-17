@@ -1,17 +1,16 @@
-import React, {useRef, useState} from "react";
-const path = require("path");
+import {cloneElement, useRef, useState} from "react";
+import path from "path";
 import {ActionIcon, Box, FileButton, Flex, Group, Menu, Paper, Text, Textarea} from "@mantine/core";
-import {DEFAULT_WATERMARK_TEXT, STATUS_MAP} from "Utils/constants";
-import {observer} from "mobx-react";
-import {Select} from "Components/Inputs";
-import {ENCRYPTION_OPTIONS} from "Utils/constants";
-import classes from "Assets/stylesheets/modules/PlayoutPanel.module.css";
-import {streamStore} from "Stores";
+import {DEFAULT_WATERMARK_TEXT, STATUS_MAP} from "@/utils/constants";
+import {observer} from "mobx-react-lite";
+import {Select} from "@/components/Inputs.jsx";
+import {ENCRYPTION_OPTIONS} from "@/utils/constants";
+import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
+import {streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Loader} from "Components/Loader";
+import {Loader} from "@/components/Loader.jsx";
 import {notifications} from "@mantine/notifications";
-import EditIcon from "Assets/icons/EditIcon";
-import TrashIcon from "Assets/icons/TrashIcon";
+import {EditIcon, TrashIcon} from "@/assets/icons";
 
 const WatermarkBox = ({type, value, actions=[]}) => {
   if(value === undefined) { return null; }
@@ -34,7 +33,7 @@ const WatermarkBox = ({type, value, actions=[]}) => {
         <Group ml="auto">
           {
             actions.map(({id, Component}) => (
-              React.cloneElement(Component, {key: id})
+              cloneElement(Component, {key: id})
             ))
           }
         </Group>
@@ -52,7 +51,7 @@ const PlayoutPanel = observer(({
   title
 }) => {
   const [drm, setDrm] = useState(currentDrm);
-  const [formDrm, setFormDrm] = useState(currentDrm ? currentDrm : undefined);
+  // const [formDrm, setFormDrm] = useState(currentDrm ? currentDrm : undefined);
   const [formWatermarks, setFormWatermarks] = useState(
     {
       image: imageWatermark ? imageWatermark : undefined,
@@ -117,6 +116,7 @@ const PlayoutPanel = observer(({
         message: "Unable to apply settings"
       });
 
+      // eslint-disable-next-line no-console
       console.error("Unable to configure watermark", error);
     } finally {
       setApplyingChanges(false);

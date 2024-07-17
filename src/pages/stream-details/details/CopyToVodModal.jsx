@@ -1,8 +1,8 @@
-import React, {useState} from "react";
-import {observer} from "mobx-react";
+import {useState} from "react";
+import {observer} from "mobx-react-lite";
 import {Box, Flex, Modal, Text} from "@mantine/core";
-import {TextInput} from "Components/Inputs";
-import {Loader} from "Components/Loader";
+import {TextInput} from "@/components/Inputs.jsx";
+import {Loader} from "@/components/Loader.jsx";
 
 const CopyToVodModal = observer(({show, close, title, setTitle, Callback}) => {
   const [error, setError] = useState();
@@ -48,6 +48,7 @@ const CopyToVodModal = observer(({show, close, title, setTitle, Callback}) => {
               setLoading(true);
               await Callback(title);
             } catch(error) {
+              // eslint-disable-next-line no-console
               console.error(error);
               setError(error?.message || error.kind || error.toString());
             } finally {

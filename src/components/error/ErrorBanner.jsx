@@ -1,6 +1,5 @@
-import React from "react";
-import {observer} from "mobx-react";
-import {rootStore} from "Stores";
+import {observer} from "mobx-react-lite";
+import {rootStore} from "@/stores";
 import {ActionIcon} from "@mantine/core";
 import {IconX} from "@tabler/icons-react";
 

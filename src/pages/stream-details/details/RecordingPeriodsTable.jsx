@@ -1,15 +1,15 @@
-import React, {useState} from "react";
-import {observer} from "mobx-react";
+import {useState} from "react";
+import {observer} from "mobx-react-lite";
 import {useDisclosure} from "@mantine/hooks";
-import {streamStore} from "Stores";
+import {streamStore} from "@/stores";
 import {notifications} from "@mantine/notifications";
-import {RECORDING_STATUS_TEXT, STATUS_MAP} from "Utils/constants";
+import {RECORDING_STATUS_TEXT, STATUS_MAP} from "@/utils/constants";
 import {Flex, Text} from "@mantine/core";
-import {DateFormat, Pluralize} from "Utils/helpers";
-import {Loader} from "Components/Loader";
+import {DateFormat, Pluralize} from "@/utils/helpers";
+import {Loader} from "@/components/Loader.jsx";
 import {DataTable} from "mantine-datatable";
-import DetailsCopyModal from "Pages/stream-details/details/CopyToVodModal";
-import {Runtime} from "Pages/stream-details/details/DetailsPanel";
+import DetailsCopyModal from "@/pages/stream-details/details/CopyToVodModal";
+import {Runtime} from "@/pages/stream-details/details/DetailsPanel";
 
 const RecordingPeriodsTable = observer(({
   records,
@@ -49,6 +49,7 @@ const RecordingPeriodsTable = observer(({
         message: "Unable to copy to VoD"
       });
 
+      // eslint-disable-next-line no-console
       console.error("Unable to copy to VoD", error);
       setCopyingToVod(false);
       close();

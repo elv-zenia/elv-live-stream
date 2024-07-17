@@ -1,12 +1,12 @@
-import React, {useState} from "react";
-import {observer} from "mobx-react";
+import {useState} from "react";
+import {observer} from "mobx-react-lite";
 import {DataTable} from "mantine-datatable";
 import {ActionIcon, Box, Group, Text} from "@mantine/core";
-import {DateFormat, SortTable} from "Utils/helpers";
-import {editStore, streamStore} from "Stores";
+import {DateFormat, SortTable} from "@/utils/helpers";
+import {editStore, streamStore} from "@/stores";
 import {IconExternalLink, IconTrash} from "@tabler/icons-react";
 import {useDisclosure} from "@mantine/hooks";
-import ConfirmModal from "Components/ConfirmModal";
+import ConfirmModal from "@/components/ConfirmModal";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
 

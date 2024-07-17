@@ -1,5 +1,3 @@
-import React from "react";
-
 const MagnifyingGlassIcon = ({className}) => {
   return (
     <svg className={className} width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -1,13 +1,13 @@
-import React, {useEffect, useState} from "react";
-import {observer} from "mobx-react";
-import AudioTracksTable from "Pages/create/AudioTracksTable";
-import {dataStore, editStore, streamStore} from "Stores";
+import {useEffect, useState} from "react";
+import {observer} from "mobx-react-lite";
+import AudioTracksTable from "@/pages/create/AudioTracksTable";
+import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Loader} from "Components/Loader";
+import {Loader} from "@/components/Loader.jsx";
 import {Box} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
-import {Select} from "Components/Inputs";
-import {RETENTION_OPTIONS} from "Utils/constants";
+import {Select} from "@/components/Inputs.jsx";
+import {RETENTION_OPTIONS} from "@/utils/constants";
 
 const RecordingPanel = observer(({title, slug, currentRetention}) => {
   const params = useParams();
@@ -55,6 +55,7 @@ const RecordingPanel = observer(({title, slug, currentRetention}) => {
         message: "Settings have been applied successfully"
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to configure audio settings", error);
 
       notifications.show({
