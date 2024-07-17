@@ -13,20 +13,7 @@ export default defineConfig({
         }
       ]
     }),
-    react({
-      swcOptions: {
-        jsc: {
-          transform: {
-            react: {
-              runtime: "automatic",
-              // Enable decorators support
-              decorators: true,
-            },
-            legacyDecorator: true,
-          },
-        },
-      },
-    })
+    react()
   ],
   build: {
     outDir: "dist",
