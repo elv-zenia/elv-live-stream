@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from "react";
-import PageHeader from "Components/header/PageHeader";
+import {useEffect, useState} from "react";
+import PageHeader from "@/components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
-import {streamStore, editStore, dataStore} from "Stores";
-import {observer} from "mobx-react";
+import {streamStore, editStore, dataStore} from "@/stores";
+import {observer} from "mobx-react-lite";
 import {Tabs, Text} from "@mantine/core";
 import {useDebounceCallback, useDisclosure} from "@mantine/hooks";
-import {DETAILS_TABS, STATUS_MAP} from "Utils/constants";
-import classes from "Assets/stylesheets/modules/StreamDetails.module.css";
-import {Loader} from "Components/Loader";
-import ConfirmModal from "Components/ConfirmModal";
-import {StreamIsActive} from "Utils/helpers";
+import {DETAILS_TABS, STATUS_MAP} from "@/utils/constants";
+import classes from "@/assets/stylesheets/modules/StreamDetails.module.css";
+import {Loader} from "@/components/Loader.jsx";
+import ConfirmModal from "@/components/ConfirmModal";
+import {StreamIsActive} from "@/utils/helpers";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();

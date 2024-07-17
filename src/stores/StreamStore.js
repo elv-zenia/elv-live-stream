@@ -3,8 +3,8 @@ import {configure, flow, makeAutoObservable} from "mobx";
 import {editStore, streamStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
-import {FileInfo} from "Utils/helpers";
-import {ENCRYPTION_OPTIONS} from "Utils/constants";
+import {FileInfo} from "@/utils/helpers";
+import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 
 configure({
   enforceActions: "always"
@@ -100,7 +100,7 @@ class StreamStore {
       if(liveRecordingConfig?.drm) {
         const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
 
-        yield client.StreamInitialize({
+        yield this.client.StreamInitialize({
           name: objectId,
           drm: liveRecordingConfig?.drm === "clear" ? false : true,
           format: drmOption?.format.join(",")
@@ -128,6 +128,7 @@ class StreamStore {
         }
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to configure stream", error);
       return {};
     }
@@ -167,6 +168,7 @@ class StreamStore {
 
       return response;
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(`Failed to load status for ${objectId || "object"}`, error);
       return {};
     }
@@ -235,6 +237,7 @@ class StreamStore {
 
       this.UpdateStream({key: slug, value: { status: response.state }});
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(`Unable to ${OP_MAP[operation]} LRO.`, error);
     }
   });
@@ -247,9 +250,10 @@ class StreamStore {
 
       this.UpdateStream({key: slug, value: { status: response.state }});
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to deactivate stream", error);
     }
-  })
+  });
 
   AllStreamsStatus = flow(function * (reload=false) {
     if(this.loadingStatus && !reload) { return; }
@@ -269,11 +273,13 @@ class StreamStore {
               update: true
             });
           } catch(error) {
+            // eslint-disable-next-line no-console
             console.error(`Skipping status for ${this.streams?.[slug].objectId || slug}.`, error);
           }
         }
       );
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     } finally {
       this.loadingStatus = false;
@@ -392,8 +398,10 @@ class StreamStore {
 
       return url;
     } catch(error) {
+      /* eslint-disable no-console */
       console.error("Error fetching frame for " + slug);
       console.error(error);
+      /* eslint-disable no-console */
       return;
     } finally {
       console.timeEnd(`Load Frame: ${slug}`);
@@ -429,7 +437,7 @@ class StreamStore {
     slug,
     types
   }) {
-    yield client.StreamRemoveWatermark({
+    yield this.client.StreamRemoveWatermark({
       objectId,
       types,
       finalize: true
@@ -462,17 +470,17 @@ class StreamStore {
     if(imageWatermarkFile) {
       const fileInfo = yield FileInfo({path: "", fileList: [imageWatermarkFile]});
 
-      const libraryId = yield client.ContentObjectLibraryId({objectId});
-      const {writeToken} = yield client.EditContentObject({objectId, libraryId});
+      const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      const {writeToken} = yield this.client.EditContentObject({objectId, libraryId});
 
-      yield client.UploadFiles({
+      yield this.client.UploadFiles({
         libraryId,
         objectId,
         writeToken,
         fileInfo
       });
 
-      yield client.FinalizeContentObject({
+      yield this.client.FinalizeContentObject({
         libraryId,
         objectId,
         writeToken,
@@ -497,7 +505,7 @@ class StreamStore {
       payload["simpleWatermark"] = textWatermark;
     }
 
-    const response = yield client.StreamAddWatermark(payload);
+    const response = yield this.client.StreamAddWatermark(payload);
 
     this.UpdateStream({
       key: slug,
@@ -568,13 +576,13 @@ class StreamStore {
 
     const drmOption = ENCRYPTION_OPTIONS.find(option => option.value === drmType);
 
-    const libraryId = yield client.ContentObjectLibraryId({objectId});
-    const {writeToken} = yield client.EditContentObject({
+    const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    const {writeToken} = yield this.client.EditContentObject({
       objectId,
       libraryId
     });
 
-    yield client.ReplaceMetadata({
+    yield this.client.ReplaceMetadata({
       objectId,
       libraryId,
       writeToken,
@@ -582,14 +590,14 @@ class StreamStore {
       metadata: drmType
     });
 
-    yield client.FinalizeContentObject({
+    yield this.client.FinalizeContentObject({
       objectId,
       libraryId,
       writeToken,
       commitMessage: "Update drm type metadata"
     });
 
-    const response = yield client.StreamInitialize({
+    const response = yield this.client.StreamInitialize({
       name: objectId,
       drm: drmType === "clear" ? false : true,
       format: drmOption.format.join(",")
@@ -612,10 +620,10 @@ class StreamStore {
 
   FetchLiveRecordingCopies = flow(function * ({objectId, libraryId}) {
     if(!libraryId) {
-      libraryId = yield client.ContentObjectLibraryId({objectId});
+      libraryId = yield this.client.ContentObjectLibraryId({objectId});
     }
 
-    return client.ContentObjectMetadata({
+    return this.client.ContentObjectMetadata({
       objectId,
       libraryId,
       metadataSubtree: "live_recording_copies"
@@ -627,13 +635,13 @@ class StreamStore {
 
     delete liveRecordingCopies[recordingCopyId];
 
-    const libraryId = yield client.ContentObjectLibraryId({objectId: streamId});
-    const {writeToken} = yield client.EditContentObject({
+    const libraryId = yield this.client.ContentObjectLibraryId({objectId: streamId});
+    const {writeToken} = yield this.client.EditContentObject({
       objectId: streamId,
       libraryId
     });
 
-    yield client.ReplaceMetadata({
+    yield this.client.ReplaceMetadata({
       objectId: streamId,
       libraryId,
       writeToken,
@@ -641,7 +649,7 @@ class StreamStore {
       metadata: liveRecordingCopies
     });
 
-    const response = yield client.FinalizeContentObject({
+    const response = yield this.client.FinalizeContentObject({
       objectId: streamId,
       libraryId,
       writeToken,
@@ -685,13 +693,13 @@ class StreamStore {
     // Create content object
     const titleType = dataStore.titleContentType;
 
-    const targetLibraryId = yield client.ContentObjectLibraryId({objectId});
+    const targetLibraryId = yield this.client.ContentObjectLibraryId({objectId});
     const streamSlug = Object.keys(this.streams || {}).find(slug => (
       this.streams[slug].objectId === objectId
     ));
     const targetTitle = title || `${this.streams[streamSlug]?.title || objectId} VoD`;
 
-    const createResponse = yield client.CreateContentObject({
+    const createResponse = yield this.client.CreateContentObject({
       libraryId: targetLibraryId,
       options: titleType ?
         {
@@ -707,13 +715,13 @@ class StreamStore {
     const targetObjectId = createResponse.id;
 
     // Set editable permission
-    yield client.SetPermission({
+    yield this.client.SetPermission({
       objectId: targetObjectId,
       permission: "editable",
       writeToken: createResponse.writeToken
     });
 
-    yield client.FinalizeContentObject({
+    yield this.client.FinalizeContentObject({
       libraryId: targetLibraryId,
       objectId: targetObjectId,
       writeToken: createResponse.writeToken,
@@ -723,7 +731,7 @@ class StreamStore {
 
     let response;
     try {
-      response = yield client.StreamCopyToVod({
+      response = yield this.client.StreamCopyToVod({
         name: objectId,
         targetObjectId,
         recordingPeriod,
@@ -731,6 +739,7 @@ class StreamStore {
         endTime
       });
     } catch(error) {
+       
       console.error("Unable to copy to VoD.", error);
       throw error(error);
     }
@@ -738,13 +747,13 @@ class StreamStore {
     if(!response) {
       throw Error("Unable to copy to VoD. Is part available?");
     } else if(response) {
-      const libraryId = yield client.ContentObjectLibraryId({objectId});
-      const {writeToken} = yield client.EditContentObject({
+      const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+      const {writeToken} = yield this.client.EditContentObject({
         objectId,
         libraryId
       });
 
-      let copiesMetadata = yield client.ContentObjectMetadata({
+      let copiesMetadata = yield this.client.ContentObjectMetadata({
         objectId,
         libraryId,
         metadataSubtree: "live_recording_copies"
@@ -761,7 +770,7 @@ class StreamStore {
         title: targetTitle
       };
 
-      yield client.ReplaceMetadata({
+      yield this.client.ReplaceMetadata({
         objectId,
         libraryId,
         writeToken,
@@ -769,7 +778,7 @@ class StreamStore {
         metadata: copiesMetadata
       });
 
-      yield client.FinalizeContentObject({
+      yield this.client.FinalizeContentObject({
         libraryId,
         objectId,
         writeToken,
@@ -782,13 +791,13 @@ class StreamStore {
   });
 
   UpdateStreamAudioSettings = flow(function * ({objectId, slug, audioData}) {
-    const libraryId = yield client.ContentObjectLibraryId({objectId});
-    const {writeToken} = yield client.EditContentObject({
+    const libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    const {writeToken} = yield this.client.EditContentObject({
       libraryId,
       objectId
     });
 
-    yield client.ReplaceMetadata({
+    yield this.client.ReplaceMetadata({
       libraryId,
       objectId,
       writeToken,
@@ -796,7 +805,7 @@ class StreamStore {
       metadata: audioData
     });
 
-    yield client.FinalizeContentObject({
+    yield this.client.FinalizeContentObject({
       libraryId,
       objectId,
       writeToken,
@@ -804,7 +813,7 @@ class StreamStore {
       awaitCommitConfirmation: true
     });
 
-    const probeMetadata = yield client.ContentObjectMetadata({
+    const probeMetadata = yield this.client.ContentObjectMetadata({
       libraryId,
       objectId,
       metadataSubtree: "live_recording_config/probe_info"

@@ -1,4 +1,4 @@
-import {STATUS_MAP} from "Utils/constants";
+import {STATUS_MAP} from "@/utils/constants";
 import Fraction from "fraction.js";
 
 export const ParseLiveConfigData = ({
@@ -25,7 +25,7 @@ export const Slugify = (string) => {
     .toLowerCase()
     .trim()
     .replace(/ /g, "-")
-    .replace(/[^a-z0-9\-]/g,"")
+    .replace(/[^a-z0-9-]/g,"")
     .replace(/-+/g, "-");
 };
 
@@ -170,6 +170,7 @@ export const SanitizeUrl = ({url}) => {
 
     return urlObject.toString();
   } catch(error) {
+    // eslint-disable-next-line no-console
     console.error(`Unable to sanitize ${url}`, error);
     return false;
   }
@@ -197,6 +198,7 @@ const FallbackCopyToClipboard = ({text}) => {
     document.execCommand("copy");
     document.body.removeChild(element);
   } catch(error) {
+    // eslint-disable-next-line no-console
     console.error("Unable to copy to clipboard", error);
   }
 };
@@ -212,6 +214,7 @@ export const CopyToClipboard = ({text}) => {
       if(error instanceof DOMException && error.name === "NotAllowedError") {
         FallbackCopyToClipboard({text});
       } else {
+        // eslint-disable-next-line no-console
         console.error("Unable to copy to clipboard", error);
       }
     });

@@ -1,8 +1,8 @@
 import {configure, flow, makeAutoObservable} from "mobx";
 import {FrameClient} from "@eluvio/elv-client-js/src/FrameClient";
-import DataStore from "Stores/DataStore";
-import EditStore from "Stores/EditStore";
-import StreamStore from "Stores/StreamStore";
+import DataStore from "@/stores/DataStore";
+import EditStore from "@/stores/EditStore";
+import StreamStore from "@/stores/StreamStore";
 
 // Force strict mode so mutations are only allowed within actions.
 configure({
@@ -35,12 +35,14 @@ class RootStore {
 
       window.client = this.client;
       this.networkInfo = yield this.client.NetworkInfo();
-      this.contentSpaceId = yield client.ContentSpaceId();
+      this.contentSpaceId = yield this.client.ContentSpaceId();
 
       this.dataStore.Initialize();
     } catch(error) {
+      /* eslint-disable no-console */
       console.error("Failed to initialize application");
       console.error(error);
+       
     } finally {
       this.loaded = true;
     }

@@ -1,7 +1,7 @@
-import GeneralPanel from "Pages/stream-details/general/GeneralPanel";
-import PlayoutPanel from "Pages/stream-details/playout/PlayoutPanel";
-import RecordingPanel from "Pages/stream-details/recording/RecordingPanel";
-import DetailsPanel from "Pages/stream-details/details/DetailsPanel";
+import GeneralPanel from "@/pages/stream-details/general/GeneralPanel";
+import PlayoutPanel from "@/pages/stream-details/playout/PlayoutPanel";
+import RecordingPanel from "@/pages/stream-details/recording/RecordingPanel";
+import DetailsPanel from "@/pages/stream-details/details/DetailsPanel";
 
 export const STATUS_MAP = {
   UNCONFIGURED: "unconfigured",

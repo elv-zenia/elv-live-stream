@@ -27,7 +27,7 @@ const theme = createTheme({
     ],
     "elv-gray": [
       "#f5f5f5",
-      "#e7e7e7",
+      "#eee",
       "#cdcdcd",
       "#b2b2b2",
       "#9a9a9a",

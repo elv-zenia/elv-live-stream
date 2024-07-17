@@ -1,6 +1,5 @@
-import React from "react";
-import {observer} from "mobx-react";
-import ConfirmModal from "Components/ConfirmModal";
+import {observer} from "mobx-react-lite";
+import ConfirmModal from "@/components/ConfirmModal";
 
 const ProbeConfirmation = observer(({
   show,
@@ -20,6 +19,7 @@ const ProbeConfirmation = observer(({
           await ConfirmCallback();
           CloseCallback();
         } catch(error) {
+          // eslint-disable-next-line no-console
           console.error("Unable to probe stream", error);
           throw Error(error);
         }

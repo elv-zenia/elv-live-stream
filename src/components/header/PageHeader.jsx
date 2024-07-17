@@ -1,11 +1,10 @@
-import React from "react";
-import {observer} from "mobx-react";
+import {observer} from "mobx-react-lite";
 import {Box, Flex, Group, Indicator, Text} from "@mantine/core";
-import HeaderSearchBar from "Components/header/HeaderSearchBar.jsx";
-import HeaderTopActions from "Components/header/HeaderTopActions";
-import {StatusIndicator} from "Utils/helpers";
-import classes from "Assets/stylesheets/modules/PageHeader.module.css";
-import {QUALITY_MAP, STATUS_TEXT} from "Utils/constants";
+import HeaderSearchBar from "@/components/header/HeaderSearchBar.jsx";
+import HeaderTopActions from "@/components/header/HeaderTopActions";
+import {StatusIndicator} from "@/utils/helpers";
+import classes from "@/assets/stylesheets/modules/PageHeader.module.css";
+import {QUALITY_MAP, STATUS_TEXT} from "@/utils/constants";
 import {IconAlertCircle} from "@tabler/icons-react";
 
 export const StatusText = ({status, quality, withBorder=false}) => {

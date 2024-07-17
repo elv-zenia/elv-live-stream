@@ -1,7 +1,7 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable, runInAction} from "mobx";
 import {streamStore} from "./index";
-import {RECORDING_BITRATE_OPTIONS} from "Utils/constants";
+import {RECORDING_BITRATE_OPTIONS} from "@/utils/constants";
 
 configure({
   enforceActions: "always"
@@ -31,14 +31,6 @@ class DataStore {
     return this.rootStore.client;
   }
 
-  get siteId() {
-    return this.siteId;
-  }
-
-  get siteLibraryId() {
-    return this.siteLibraryId;
-  }
-
   Initialize = flow(function * (reload=false) {
     const tenantContractId = yield this.LoadTenantInfo();
     if(!this.siteId) {
@@ -66,6 +58,7 @@ class DataStore {
       return this.tenantId;
     } catch(error) {
       this.rootStore.SetErrorMessage("Error: Unable to determine tenant info");
+      // eslint-disable-next-line no-console
       console.error(error);
       throw Error("No tenant contract ID found.");
     }
@@ -96,6 +89,7 @@ class DataStore {
       return sites?.live_streams;
     } catch(error) {
       this.rootStore.SetErrorMessage("Error: Unable to load tenant sites");
+      // eslint-disable-next-line no-console
       console.error(error);
       throw Error(`Unable to load sites for tenant ${tenantContractId}.`);
     }
@@ -120,6 +114,7 @@ class DataStore {
     } catch(error) {
       streamStore.UpdateStreams({streams: {}});
       this.rootStore.SetErrorMessage("Error: Unable to load streams");
+      // eslint-disable-next-line no-console
       console.error(error);
       throw Error(`Unable to load live streams for site ${this.siteId}.`);
     }
@@ -152,6 +147,7 @@ class DataStore {
             streamMetadata[slug][detail] = streamDetails[detail];
           });
         } else {
+          // eslint-disable-next-line no-console
           console.error(`No version hash for ${slug}`);
         }
       }
@@ -184,6 +180,7 @@ class DataStore {
               name: response || libraryId
             };
           } catch(error) {
+            // eslint-disable-next-line no-console
             console.error(`Unable to load info for library: ${libraryId}`);
           }
         })
@@ -193,6 +190,7 @@ class DataStore {
       const sortedArray = Object.entries(loadedLibraries).sort(([id1, obj1], [id2, obj2]) => obj1.name.localeCompare(obj2.name));
       this.libraries = Object.fromEntries(sortedArray);
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to load libraries", error);
     }
   });
@@ -215,6 +213,7 @@ class DataStore {
           });
       }
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to load access groups", error);
     }
   });
@@ -282,6 +281,7 @@ class DataStore {
         display_title: streamMeta?.public?.asset_metadata?.display_title
       };
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to load stream metadata", error);
     }
   });
@@ -313,6 +313,7 @@ class DataStore {
         }
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to load stream metadata", error);
     }
   });
@@ -323,11 +324,12 @@ class DataStore {
         libraryId = yield this.client.ContentObjectLibraryId({objectId});
       }
 
-      return client.Permission({
+      return this.client.Permission({
         libraryId,
         objectId
       });
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(`Unable to load permission for ${objectId}`, error);
     }
   });
@@ -336,7 +338,7 @@ class DataStore {
     try {
       let groupAddress = "";
 
-      const permissions = yield client.ContentObjectGroupPermissions({objectId});
+      const permissions = yield this.client.ContentObjectGroupPermissions({objectId});
 
       for(let address of Object.keys(permissions || {})) {
         if(permissions[address].includes("manage")) {
@@ -347,9 +349,10 @@ class DataStore {
 
       return groupAddress;
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(`Unable to load access group permissions for ${objectId}`, error);
     }
-  })
+  });
 
   LoadStreamUrls = flow(function * () {
     this.UpdateStreamUrls({});
@@ -368,6 +371,7 @@ class DataStore {
 
       this.UpdateStreamUrls({urls});
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to load stream URLs", error);
     }
   });
@@ -403,6 +407,7 @@ class DataStore {
         ...metadata?.recordings
       };
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to load metadata with edge write token", error);
       return {};
     }
@@ -468,6 +473,7 @@ class DataStore {
         audioData
       };
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error("Unable to load live_recording metadata", error);
     }
   });
@@ -478,6 +484,7 @@ class DataStore {
     try {
       return yield this.client.EmbedUrl({objectId, mediaType: "live_video"});
     } catch(error) {
+      // eslint-disable-next-line no-console
       console.error(error);
       return "";
     }

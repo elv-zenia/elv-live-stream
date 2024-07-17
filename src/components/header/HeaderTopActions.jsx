@@ -1,5 +1,4 @@
 import {Flex} from "@mantine/core";
-import React from "react";
 
 // TODO: Update all buttons to Mantine button
 const HeaderTopActions = ({actions=[]}) => {

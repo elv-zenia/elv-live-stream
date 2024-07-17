@@ -1,16 +1,16 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
-import {streamStore} from "Stores";
-import {observer} from "mobx-react";
+import {streamStore} from "@/stores";
+import {observer} from "mobx-react-lite";
 import {useParams} from "react-router-dom";
-import {DateFormat, FormatTime} from "Utils/helpers";
-import {STATUS_MAP, QUALITY_TEXT, RETENTION_TEXT} from "Utils/constants";
-import RecordingPeriodsTable from "Pages/stream-details/details/RecordingPeriodsTable";
-import RecordingCopiesTable from "Pages/stream-details/details/RecordingCopiesTable";
+import {DateFormat, FormatTime} from "@/utils/helpers";
+import {STATUS_MAP, QUALITY_TEXT, RETENTION_TEXT} from "@/utils/constants";
+import RecordingPeriodsTable from "@/pages/stream-details/details/RecordingPeriodsTable";
+import RecordingCopiesTable from "@/pages/stream-details/details/RecordingCopiesTable";
 import {IconAlertCircle, IconCheck} from "@tabler/icons-react";
-import {VideoContainer} from "Pages/monitor/Monitor";
-import {CopyToClipboard} from "Utils/helpers";
-import ClipboardIcon from "Assets/icons/ClipboardIcon";
+import {VideoContainer} from "@/pages/monitor/Monitor.jsx";
+import {CopyToClipboard} from "@/utils/helpers";
+import {ClipboardIcon} from "@/assets/icons";
 
 export const Runtime = ({startTime, endTime, currentTimeMs, format="hh,mm,ss"}) => {
   let time;
