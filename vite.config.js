@@ -15,6 +15,9 @@ export default defineConfig({
     }),
     react()
   ],
+  optimizeDeps: {
+    include: ["hash.js", "@eluvio/elv-client-js", "mux-embed"],
+  },
   build: {
     outDir: "dist",
     manifest: true

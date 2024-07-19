@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
-import EluvioPlayer, {EluvioPlayerParameters} from "@eluvio/elv-player-js";
-import {rootStore} from "@/stores";
 import {observer} from "mobx-react-lite";
+import {InitializeEluvioPlayer, EluvioPlayerParameters} from "@eluvio/elv-player-js/lib/index";
+import {rootStore} from "@/stores/index.js";
 
 const Video = observer(({
   objectId,
@@ -30,34 +30,33 @@ const Video = observer(({
         ref={element => {
           if(!element || player) { return; }
 
-          setPlayer(
-            new EluvioPlayer(
-              element,
-              {
-                clientOptions: {
-                  network: EluvioPlayerParameters.networks[rootStore.networkInfo.name === "main" ? "MAIN" : "DEMO"],
-                  ...clientOptions
-                },
-                sourceOptions: {
-                  protocols: [EluvioPlayerParameters.protocols.HLS],
-                  ...sourceOptions,
-                  playoutParameters: {
-                    objectId,
-                    ...playoutParameters
-                  }
-                },
-                playerOptions: {
-                  watermark: EluvioPlayerParameters.watermark.OFF,
-                  muted: EluvioPlayerParameters.muted.ON,
-                  autoplay: EluvioPlayerParameters.autoplay.OFF,
-                  controls: EluvioPlayerParameters.controls.AUTO_HIDE,
-                  loop: EluvioPlayerParameters.loop.OFF,
-                  playerProfile: EluvioPlayerParameters.playerProfile.LOW_LATENCY,
-                  ...playerOptions
+          InitializeEluvioPlayer(
+            element,
+            {
+              clientOptions: {
+                client: rootStore.client,
+                network: EluvioPlayerParameters.networks[rootStore.networkInfo.name === "main" ? "MAIN" : "DEMO"],
+                ...clientOptions
+              },
+              sourceOptions: {
+                protocols: [EluvioPlayerParameters.protocols.HLS],
+                ...sourceOptions,
+                playoutParameters: {
+                  objectId,
+                  ...playoutParameters
                 }
+              },
+              playerOptions: {
+                watermark: EluvioPlayerParameters.watermark.OFF,
+                muted: EluvioPlayerParameters.muted.ON,
+                autoplay: EluvioPlayerParameters.autoplay.OFF,
+                controls: EluvioPlayerParameters.controls.AUTO_HIDE,
+                loop: EluvioPlayerParameters.loop.OFF,
+                playerProfile: EluvioPlayerParameters.playerProfile.LOW_LATENCY,
+                ...playerOptions
               }
-            )
-          );
+            }
+          ).then(newPlayer => setPlayer(newPlayer));
         }}
       />
     </div>
