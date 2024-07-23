@@ -1,6 +1,6 @@
 // Force strict mode so mutations are only allowed within actions.
 import {configure, flow, makeAutoObservable} from "mobx";
-import {editStore, streamStore} from "./index";
+import {editStore} from "./index";
 import UrlJoin from "url-join";
 import {dataStore} from "./index";
 import {FileInfo} from "@/utils/helpers";
@@ -739,7 +739,7 @@ class StreamStore {
         endTime
       });
     } catch(error) {
-       
+
       console.error("Unable to copy to VoD.", error);
       throw error(error);
     }
@@ -790,7 +790,7 @@ class StreamStore {
     }
   });
 
-  UpdateStreamAudioSettings = flow(function * ({objectId, slug, audioData}) {
+  UpdateStreamAudioSettings = flow(function * ({objectId, audioData}) {
     const libraryId = yield this.client.ContentObjectLibraryId({objectId});
     const {writeToken} = yield this.client.EditContentObject({
       libraryId,
@@ -811,18 +811,6 @@ class StreamStore {
       writeToken,
       commitMessage: "Update metadata",
       awaitCommitConfirmation: true
-    });
-
-    const probeMetadata = yield this.client.ContentObjectMetadata({
-      libraryId,
-      objectId,
-      metadataSubtree: "live_recording_config/probe_info"
-    });
-
-    yield streamStore.ConfigureStream({
-      objectId,
-      slug,
-      probeMetadata
     });
   });
 }

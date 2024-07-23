@@ -25,7 +25,7 @@ const AudioTracksTable = observer(({
     <DataTable
       idAccessor="stream_index"
       noRecordsText="No audio tracks found"
-      minHeight={records.length > 0 ? 350 : 200}
+      minHeight={records.length > 0 ? 150 : 200}
       fetching={!disabled && !audioFormData}
       records={records}
       withColumnBorders
