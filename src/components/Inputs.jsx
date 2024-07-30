@@ -97,7 +97,6 @@ export const TextInput = ({
         type="text"
         name={formName}
         required={required}
-        defaultValue=""
         value={value ? value : ""}
         onChange={onChange ? onChange : undefined}
         placeholder={placeholder}
