@@ -33,16 +33,20 @@ export const DEFAULT_WATERMARK_TEXT = {
 };
 
 export const DRM_MAP = {
-  ALL: ["hls-sample-aes", "hls-aes128", "hls-fairplay"],
+  ALL: ["hls-sample-aes", "hls-aes128", "hls-fairplay", "hls-widevine-cenc", "hls-playready-cenc"],
   PUBLIC: ["hls-sample-aes", "hls-aes128"],
   FAIRPLAY: ["hls-fairplay"],
-  CLEAR: ["hls-clear"]
+  CLEAR: ["hls-clear"],
+  HLS_WIDEVINE: ["hls-widevine-cenc"],
+  PLAYREADY: ["hls-playready-cenc"]
 };
 
 export const ENCRYPTION_OPTIONS = [
   {value: "drm-public", label: "DRM - Public Access", title: "Playout Formats - HLS Sample AES, HLS AES-128", format: DRM_MAP.PUBLIC, id: "drm-public"},
   {value: "drm-all", label: "DRM - All Formats", title: "Playout Formats - HLS Sample AES, HLS AES-128, HLS Fairplay", format: DRM_MAP.ALL, id: "drm-all"},
   {value: "drm-fairplay", label: "DRM - Fairplay", title: "Playout Formats - HLS Fairplay", format: DRM_MAP.FAIRPLAY, id: "drm-fairplay"},
+  {value: "drm-widevine", label: "DRM - HLS Widevine", title: "Playout Formats - HLS Widevine", format: DRM_MAP.HLS_WIDEVINE, id: "drm-widevine"},
+  {value: "drm-playready", label: "DRM - HLS PlayReady", title: "Playout Formats - HLS PlayReady", format: DRM_MAP.PLAYREADY, id: "drm-playready"},
   {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear", format: DRM_MAP.CLEAR, id: "clear"}
 ];
 
