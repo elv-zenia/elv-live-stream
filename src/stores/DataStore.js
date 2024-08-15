@@ -110,7 +110,7 @@ class DataStore {
         resolveIncludeSource: true
       });
 
-      streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams;
+      streamMetadata = siteMetadata?.public?.asset_metadata?.live_streams || {};
     } catch(error) {
       streamStore.UpdateStreams({streams: {}});
       this.rootStore.SetErrorMessage("Error: Unable to load streams");
