@@ -162,7 +162,9 @@ export const DateFormat = ({time, format="sec", options={}}) => {
 };
 
 export const SanitizeUrl = ({url}) => {
-  if(!url) { throw Error("No URL provided"); }
+  if(!url) {
+    return "";
+  }
 
   try {
     const urlObject = new URL(url);
