@@ -125,8 +125,8 @@ const Streams = observer(() => {
           columns={[
             { accessor: "title", title: "Name", sortable: true, render: record => (
               <div className="table__multi-line">
-                <Link to={`/streams/${record.objectId}`}>
-                  <Text fw={600}>{record.display_title}</Text>
+                <Link to={`/streams/${record.objectId || record.slug}`}>
+                  <Text fw={600}>{record.display_title || record.slug}</Text>
                 </Link>
                 <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
