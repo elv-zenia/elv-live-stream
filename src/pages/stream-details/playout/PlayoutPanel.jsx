@@ -64,7 +64,7 @@ const PlayoutPanel = observer(({
   );
   const [showTextWatermarkInput, setShowTextWatermarkInput] = useState(false);
   const [dvrEnabled, setDvrEnabled] = useState(currentDvrEnabled || false);
-  const [dvrStartTime, setDvrStartTime] = useState(new Date(currentDvrStartTime) || null);
+  const [dvrStartTime, setDvrStartTime] = useState(currentDvrStartTime !== undefined ? new Date(currentDvrStartTime) : null);
   const [dvrMaxDuration, setDvrMaxDuration] = useState(currentDvrMaxDuration !== undefined ? currentDvrMaxDuration : 0);
 
   const [applyingChanges, setApplyingChanges] = useState(false);

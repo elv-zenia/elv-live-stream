@@ -67,6 +67,16 @@ class StreamStore {
           "audio"
         ]
       });
+
+      const recordingConfig = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/recording_config",
+        select: [
+          "recording_params/xc_params/connection_timeout"
+        ]
+      });
+
       const customSettings = {};
 
       const edgeWriteToken = yield this.client.ContentObjectMetadata({
@@ -82,6 +92,10 @@ class StreamStore {
 
       if(liveRecordingConfig.part_ttl) {
         customSettings["part_ttl"] = liveRecordingConfig.part_ttl;
+      }
+
+      if(recordingConfig?.recording_params?.xc_params?.connection_timeout) {
+        customSettings["connection_timeout"] = recordingConfig.recording_params.xc_params.connection_timeout;
       }
 
       if(liveRecordingConfig.audio) {
