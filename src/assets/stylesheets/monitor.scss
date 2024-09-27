@@ -19,31 +19,6 @@
     width: 300px;
   }
 
-  &__video-x {
-    background: $darker-opacity;
-    opacity: 0;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    transition: opacity 0.25s ease;
-    z-index: 1;
-
-    &.mantine-ActionIcon-root {
-      position: absolute;
-    }
-  }
-
-  &__video-wrapper {
-    background-color: $black;
-    position: relative;
-
-    &:hover {
-      .monitor__video-x {
-        opacity: 1;
-      }
-    }
-  }
-
   &__video-placeholder {
     align-items: center;
     display: flex;

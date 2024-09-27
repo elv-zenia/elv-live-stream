@@ -8,7 +8,7 @@ import {STATUS_MAP, QUALITY_TEXT, RETENTION_TEXT} from "@/utils/constants";
 import RecordingPeriodsTable from "@/pages/stream-details/details/RecordingPeriodsTable";
 import RecordingCopiesTable from "@/pages/stream-details/details/RecordingCopiesTable";
 import {IconAlertCircle, IconCheck} from "@tabler/icons-react";
-import {VideoContainer} from "@/pages/monitor/Monitor.jsx";
+import VideoContainer from "@/components/VideoContainer.jsx";
 import {CopyToClipboard} from "@/utils/helpers";
 import {ClipboardIcon} from "@/assets/icons";
 
@@ -137,7 +137,11 @@ const DetailsPanel = observer(({title, recordingInfo, currentRetention, slug, em
               <Skeleton visible={frameSegmentUrl === undefined || !status} height={200} width={350}>
                 {
                   (status?.state === STATUS_MAP.RUNNING && frameSegmentUrl) ?
-                    <VideoContainer index={0} slug={slug} showPreview /> :
+                    <VideoContainer
+                      index={0}
+                      slug={slug}
+                      showPreview
+                    /> :
                     <Box bg="gray.3" h="100%" margin="auto" ta="center" style={{borderRadius: "4px"}}>
                       <Text lh="200px">Preview is not available</Text>
                     </Box>

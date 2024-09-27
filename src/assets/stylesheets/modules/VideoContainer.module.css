@@ -1,0 +1,20 @@
+.closeButton {
+  background: rgb(0 0 0 / 50%);
+  opacity: 0;
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  transition: opacity 0.25s ease;
+  z-index: 10;
+}
+
+.videoWrapper {
+  background-color: #000;
+  position: relative;
+
+  &:hover {
+    .closeButton {
+      opacity: 1;
+    }
+  }
+}

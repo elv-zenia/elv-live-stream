@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {InitializeEluvioPlayer, EluvioPlayerParameters} from "@eluvio/elv-player-js/lib/index";
+import {InitializeEluvioPlayer, EluvioPlayerParameters} from "@eluvio/elv-player-js/lib/index.js";
+
 import {rootStore} from "@/stores/index.js";
 
 const Video = observer(({
@@ -24,9 +25,8 @@ const Video = observer(({
   }
 
   return (
-    <div className={`player-container ${player ? "player-container--loaded" : "player-container--loading"} ${className}`}>
+    <div className={`player-container ${player ? "player-container--loaded" : "player-container--loading"} ${className || ""}`}>
       <div
-        className="player-container__player"
         ref={element => {
           if(!element || player) { return; }
 
