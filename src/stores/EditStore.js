@@ -529,6 +529,129 @@ class EditStore {
     });
   });
 
+  UpdateConfigMetadata = flow(function * ({
+    libraryId,
+    objectId,
+    writeToken,
+    slug,
+    retention,
+    connectionTimeout,
+    reconnectionTimeout,
+    dvrEnabled,
+    dvrStartTime,
+    dvrMaxDuration
+  }){
+    if(!libraryId) {
+      libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+    if(!writeToken) {
+      ({writeToken} = yield this.client.EditContentObject({
+        libraryId,
+        objectId
+      }));
+    }
+
+    const updateValue = {};
+
+    if(retention !== undefined) {
+      yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadataSubtree: "live_recording_config/part_ttl",
+        metadata: parseInt(retention)
+      });
+
+      yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadataSubtree: "live_recording/recording_config/recording_params/part_ttl",
+        metadata: parseInt(retention)
+      });
+
+      updateValue.partTtl = parseInt(retention);
+    }
+
+    if(connectionTimeout !== undefined) {
+      yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadataSubtree: "live_recording/recording_config/recording_params/xc_params/connection_timeout",
+        metadata: parseInt(connectionTimeout)
+      });
+
+      updateValue.connectionTimeout = parseInt(connectionTimeout);
+    }
+
+    if(reconnectionTimeout !== undefined) {
+      yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadataSubtree: "live_recording/recording_config/reconnect_timeout",
+        metadata: parseInt(reconnectionTimeout)
+      });
+
+      updateValue.reconnectionTimeout = parseInt(reconnectionTimeout);
+    }
+
+    if(dvrEnabled !== undefined) {
+      const playoutMeta = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/playout_config"
+      });
+
+      if(dvrEnabled === true) {
+
+        playoutMeta.dvr_enabled = dvrEnabled;
+        if(dvrStartTime !== undefined) {
+          playoutMeta.dvr_start_time = dvrStartTime.toISOString();
+        } else {
+          delete playoutMeta.dvr_start_time;
+        }
+
+        if(dvrMaxDuration !== undefined) {
+          playoutMeta.dvr_max_duration = parseInt(dvrMaxDuration);
+        } else {
+          delete playoutMeta.dvr_max_duration;
+        }
+
+      } else if(dvrEnabled === false) {
+        playoutMeta.dvr_enabled = dvrEnabled;
+        delete playoutMeta.dvr_max_duration;
+        delete playoutMeta.dvr_start_time;
+      }
+
+      yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadataSubtree: "live_recording/playout_config",
+        metadata: playoutMeta
+      });
+
+      updateValue.dvrEnabled = dvrEnabled;
+      updateValue.dvrMaxDuration = parseInt(dvrMaxDuration);
+      updateValue.dvrStartTime = dvrStartTime.toISOString();
+    }
+
+    yield this.client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update recording config",
+      awaitCommitConfirmation: true
+    });
+
+    streamStore.UpdateStream({
+      key: slug,
+      value: updateValue
+    });
+  });
+
   DeleteStream = flow(function * ({objectId}) {
     const streams = Object.assign({}, streamStore.streams);
     const slug = Object.keys(streams).find(streamSlug => {
