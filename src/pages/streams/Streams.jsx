@@ -17,7 +17,7 @@ import {SanitizeUrl, SortTable, VideoBitrateReadable, StreamIsActive} from "@/ut
 import {STATUS_MAP} from "@/utils/constants";
 import {CODEC_TEXT, FORMAT_TEXT} from "@/utils/constants";
 
-import {useDebounceCallback, useDebouncedValue} from "@mantine/hooks";
+import {useDebouncedCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import PageHeader, {StatusText} from "@/components/header/PageHeader";
@@ -70,10 +70,16 @@ const Streams = observer(() => {
   });
 
   const records = Object.values(streamStore.streams || {})
-    .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
+    .filter(record => {
+      return (
+        !debouncedFilter ||
+        record.title.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        record.objectId.toLowerCase().includes(debouncedFilter.toLowerCase())
+      );
+    })
     .sort(SortTable({sortStatus}));
 
-  const DebouncedRefresh = useDebounceCallback(async() => {
+  const DebouncedRefresh = useDebouncedCallback(async() => {
     await dataStore.Initialize(true);
   }, 500);
 
@@ -92,7 +98,7 @@ const Streams = observer(() => {
         />
         <TextInput
           maw={400}
-          placeholder="Filter"
+          placeholder="Search by object name or ID"
           mb="md"
           value={filter}
           onChange={event => setFilter(event.target.value)}
