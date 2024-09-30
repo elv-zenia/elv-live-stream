@@ -15,7 +15,13 @@ const Monitor = observer(() => {
 
   const streams = !streamStore.streams ? undefined :
     Object.values(streamStore.streams || {})
-      .filter(record => !debouncedFilter || record.title.toLowerCase().includes(debouncedFilter.toLowerCase()))
+      .filter(record => {
+        return (
+          !debouncedFilter ||
+          record.title.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+          record.objectId.toLowerCase().includes(debouncedFilter.toLowerCase())
+        );
+      })
       .sort(SortTable({sortStatus: {columnAccessor: "title", direction: "asc"}}));
 
   return (
@@ -30,7 +36,7 @@ const Monitor = observer(() => {
       </div>
       <TextInput
         maw={400}
-        placeholder="Filter"
+        placeholder="Search by name or object ID"
         mb="md"
         value={filter}
         onChange={event => setFilter(event.target.value)}

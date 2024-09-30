@@ -4,7 +4,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore, dataStore} from "@/stores";
 import {observer} from "mobx-react-lite";
 import {Tabs, Text} from "@mantine/core";
-import {useDebounceCallback, useDisclosure} from "@mantine/hooks";
+import {useDebouncedCallback, useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS, STATUS_MAP} from "@/utils/constants";
 import classes from "@/assets/stylesheets/modules/StreamDetails.module.css";
 import {Loader} from "@/components/Loader.jsx";
@@ -61,7 +61,7 @@ const StreamDetailsPage = observer(() => {
     }
   }, [params.id]);
 
-  const DebouncedRefresh = useDebounceCallback(() => {
+  const DebouncedRefresh = useDebouncedCallback(() => {
     setPageVersion(prev => prev + 1);
     GetStatus();
     LoadEdgeWriteTokenMeta();
