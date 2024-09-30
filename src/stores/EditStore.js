@@ -605,7 +605,6 @@ class EditStore {
       });
 
       if(dvrEnabled === true) {
-
         playoutMeta.dvr_enabled = dvrEnabled;
         if(dvrStartTime !== undefined) {
           playoutMeta.dvr_start_time = dvrStartTime.toISOString();
@@ -618,7 +617,6 @@ class EditStore {
         } else {
           delete playoutMeta.dvr_max_duration;
         }
-
       } else if(dvrEnabled === false) {
         playoutMeta.dvr_enabled = dvrEnabled;
         delete playoutMeta.dvr_max_duration;
@@ -634,8 +632,8 @@ class EditStore {
       });
 
       updateValue.dvrEnabled = dvrEnabled;
-      updateValue.dvrMaxDuration = parseInt(dvrMaxDuration);
-      updateValue.dvrStartTime = dvrStartTime.toISOString();
+      updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : parseInt(dvrMaxDuration);
+      updateValue.dvrStartTime = dvrStartTime ? dvrStartTime.toISOString() : undefined;
     }
 
     yield this.client.FinalizeContentObject({
