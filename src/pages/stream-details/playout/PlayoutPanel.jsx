@@ -223,7 +223,7 @@ const PlayoutPanel = observer(({
 
       <Box mb="24px" maw="50%">
         <Group mb={16}>
-          <div style={{fontSize: "1.25rem", fontWeight: 400}}>Visible Watermark</div>
+          <div className="form__section-header">Visible Watermark</div>
         </Group>
 
         {/* Add WM button */}
