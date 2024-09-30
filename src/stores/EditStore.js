@@ -606,13 +606,13 @@ class EditStore {
 
       if(dvrEnabled === true) {
         playoutMeta.dvr_enabled = dvrEnabled;
-        if(dvrStartTime !== undefined) {
+        if(![undefined, null].includes(dvrStartTime)) {
           playoutMeta.dvr_start_time = dvrStartTime.toISOString();
         } else {
           delete playoutMeta.dvr_start_time;
         }
 
-        if(dvrMaxDuration !== undefined) {
+        if(![undefined, null].includes(dvrMaxDuration)) {
           playoutMeta.dvr_max_duration = parseInt(dvrMaxDuration);
         } else {
           delete playoutMeta.dvr_max_duration;

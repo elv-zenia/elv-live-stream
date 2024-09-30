@@ -133,7 +133,7 @@ const PlayoutPanel = observer(({
       });
 
       // eslint-disable-next-line no-console
-      console.error("Unable to configure watermark", error);
+      console.error("Unable to apply settings", error);
     } finally {
       setApplyingChanges(false);
     }
