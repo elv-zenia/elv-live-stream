@@ -25,7 +25,7 @@ const RecordingPanel = observer(({
   const [audioFormData, setAudioFormData] = useState(null);
   const [retention, setRetention] = useState(currentRetention);
   const [connectionTimeout, setConnectionTimeout] = useState(currentConnectionTimeout === undefined ? 600 : CONNECTION_TIMEOUT_OPTIONS.map(item => item.value).includes(currentConnectionTimeout) ? currentConnectionTimeout : undefined);
-  const [reconnectionTimeout, setReconnectionTimeout] = useState(currentReconnectionTimeout || 3600);
+  const [reconnectionTimeout, setReconnectionTimeout] = useState(RECONNECTION_TIMEOUT_OPTIONS.map(item => item.value).includes(currentReconnectionTimeout) ? currentReconnectionTimeout : undefined);
   const [applyingChanges, setApplyingChanges] = useState(false);
 
   const LoadConfigData = async () => {

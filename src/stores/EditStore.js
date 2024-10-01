@@ -590,7 +590,7 @@ class EditStore {
         libraryId,
         objectId,
         writeToken,
-        metadataSubtree: "live_recording/recording_config/reconnect_timeout",
+        metadataSubtree: "live_recording/recording_config/recording_params/reconnect_timeout",
         metadata: parseInt(reconnectionTimeout)
       });
 
