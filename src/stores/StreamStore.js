@@ -73,7 +73,8 @@ class StreamStore {
         objectId,
         metadataSubtree: "live_recording/recording_config",
         select: [
-          "recording_params/xc_params/connection_timeout"
+          "recording_params/xc_params/connection_timeout",
+          "recording_params/reconnect_timeout"
         ]
       });
 
@@ -96,6 +97,10 @@ class StreamStore {
 
       if(recordingConfig?.recording_params?.xc_params?.connection_timeout) {
         customSettings["connection_timeout"] = recordingConfig.recording_params.xc_params.connection_timeout;
+      }
+
+      if(recordingConfig?.recording_params?.reconnect_timeout) {
+        customSettings["reconnect_timeout"] = recordingConfig.recording_params.reconnect_timeout;
       }
 
       if(liveRecordingConfig.audio) {
