@@ -680,6 +680,7 @@ class StreamStore {
 
   CopyToVod = flow(function * ({
     objectId,
+    targetLibraryId,
     selectedPeriods=[],
     title
   }) {
@@ -712,7 +713,10 @@ class StreamStore {
     // Create content object
     const titleType = dataStore.titleContentType;
 
-    const targetLibraryId = yield this.client.ContentObjectLibraryId({objectId});
+    if(!targetLibraryId) {
+      targetLibraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+
     const streamSlug = Object.keys(this.streams || {}).find(slug => (
       this.streams[slug].objectId === objectId
     ));
