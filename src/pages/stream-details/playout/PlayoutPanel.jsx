@@ -125,7 +125,7 @@ const PlayoutPanel = observer(({
 
   return (
     <>
-      <Box data-disabled={status !== STATUS_MAP.INACTIVE} mb="24px" maw="50%" className={classes.box}>
+      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={classes.box}>
         <div className="form__section-header">Playout</div>
         <Select
           label="DRM"
