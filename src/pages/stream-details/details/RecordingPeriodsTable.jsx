@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import {useDisclosure} from "@mantine/hooks";
 import {streamStore} from "@/stores";
 import {notifications} from "@mantine/notifications";
-import {RECORDING_STATUS_TEXT, STATUS_MAP} from "@/utils/constants";
+import {RECORDING_STATUS_TEXT} from "@/utils/constants";
 import {Flex, Text} from "@mantine/core";
 import {DateFormat, Pluralize} from "@/utils/helpers";
 import {Loader} from "@/components/Loader.jsx";
@@ -17,8 +17,7 @@ const RecordingPeriodsTable = observer(({
   title,
   CopyCallback,
   currentTimeMs,
-  retention,
-  status
+  retention
 }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [copyingToVod, setCopyingToVod] = useState(false);
@@ -88,15 +87,13 @@ const RecordingPeriodsTable = observer(({
   };
 
   const IsWithinRetentionPeriod = ({startTime}) => {
-    if(status?.state !== STATUS_MAP.STOPPED) { return true; }
-
-    const currentTime = new Date().getTime();
+    const currentTimeMs = new Date().getTime();
     const startTimeMs = new Date(startTime).getTime();
     const retentionMs = retention * 1000;
 
     if(typeof startTimeMs !== "number") { return false; }
 
-    return (currentTime - startTimeMs) < retentionMs;
+    return (currentTimeMs - startTimeMs) < retentionMs;
   };
 
   const ExpirationTime = ({startTime, retention}) => {
