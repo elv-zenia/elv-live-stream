@@ -25,6 +25,7 @@ const RecordingPeriodsTable = observer(({
   const [showCopyModal, {open, close}] = useDisclosure(false);
   const [vodTitle, setVodTitle] = useState(`${title} VoD`);
   const [vodLibraryId, setVodLibraryId] = useState(libraryId);
+  const [vodAccessGroup, setVodAccessGroup] = useState(null);
 
   const HandleCopy = async ({title}) => {
     try {
@@ -32,6 +33,7 @@ const RecordingPeriodsTable = observer(({
       const response = await streamStore.CopyToVod({
         objectId,
         targetLibraryId: vodLibraryId,
+        accessGroup: vodAccessGroup,
         selectedPeriods: selectedRecords,
         title
       });
@@ -215,6 +217,7 @@ const RecordingPeriodsTable = observer(({
         show={showCopyModal}
         close={() => {
           setVodLibraryId(libraryId);
+          setVodAccessGroup(null);
           close();
         }}
         Callback={(title) => HandleCopy({title})}
@@ -222,6 +225,8 @@ const RecordingPeriodsTable = observer(({
         setTitle={setVodTitle}
         libraryId={vodLibraryId}
         setLibraryId={setVodLibraryId}
+        accessGroup={vodAccessGroup}
+        setAccessGroup={setVodAccessGroup}
       />
     </>
   );

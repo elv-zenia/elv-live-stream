@@ -12,18 +12,28 @@ const CopyToVodModal = observer(({
   setTitle,
   libraryId,
   setLibraryId,
+  accessGroup,
+  setAccessGroup,
   Callback
 }) => {
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const LoadData = async() => {
+    const LoadLibraries = async() => {
       await dataStore.LoadLibraries();
     };
 
+    const LoadGroups = async() => {
+      await dataStore.LoadAccessGroups();
+    };
+
     if(!dataStore.libraries) {
-      LoadData();
+      LoadLibraries();
+    }
+
+    if(!dataStore.accessGroups) {
+      LoadGroups();
     }
   }, []);
 
@@ -63,6 +73,33 @@ const CopyToVodModal = observer(({
               />
             )
         }
+
+        {
+          !dataStore.accessGroups ?
+            <Loader /> :
+            (
+              <Select
+                label="Access Group"
+                labelDescription="This is the Access Group that will manage your live stream object."
+                options={
+                  Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
+                    {
+                      label: accessGroupName,
+                      value: accessGroupName
+                    }
+                  ))
+                }
+                defaultOption={{
+                  value: "",
+                  label: "Select Access Group"
+                }}
+                value={accessGroup}
+                onChange={event => setAccessGroup(event.target.value)}
+                style={{width: "100%", marginBottom: "1rem"}}
+              />
+            )
+        }
+
         <TextInput
           label="Enter a title for the VoD"
           required={true}
@@ -84,7 +121,7 @@ const CopyToVodModal = observer(({
         </button>
         <button
           type="button"
-          disabled={loading}
+          disabled={loading || !libraryId || !title}
           className="button__primary"
           onClick={async () => {
             try {

@@ -681,6 +681,7 @@ class StreamStore {
   CopyToVod = flow(function * ({
     objectId,
     targetLibraryId,
+    accessGroup,
     selectedPeriods=[],
     title
   }) {
@@ -736,6 +737,13 @@ class StreamStore {
         {}
     });
     const targetObjectId = createResponse.id;
+
+    if(accessGroup) {
+      editStore.AddAccessGroupPermission({
+        objectId: targetObjectId,
+        groupName: accessGroup
+      });
+    }
 
     // Set editable permission
     yield this.client.SetPermission({
