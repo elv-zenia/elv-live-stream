@@ -18,7 +18,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@eluvio/elv-client-js": "^4.0.98",
+    "@eluvio/elv-client-js": "git+https://github.com/eluv-io/elv-client-js#live-stream-reconnect",
     "@eluvio/elv-player-js": "^2.0.19",
     "@mantine/core": "7.13.1",
     "@mantine/dates": "7.13.1",
