@@ -149,7 +149,7 @@ class StreamStore {
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Unable to configure stream", error);
-      return {};
+      throw error;
     }
   });
 
