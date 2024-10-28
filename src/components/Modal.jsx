@@ -49,7 +49,10 @@ const Modal = ({
               !error ? null :
                 <div className="modal__error">
                   <Text size="xs">Error: { error?.message }</Text>
-                  <Text size="xs">{ error?.cause }</Text>
+                  {
+                    error?.cause &&
+                    <Text size="xs">{ error?.cause }</Text>
+                  }
                 </div>
             }
             <div className="modal__actions">
@@ -76,8 +79,10 @@ const Modal = ({
                     console.error(error);
 
                     const ErrorCause = (error) => {
-                      if(!error.cause || typeof error === "string") {
+                      if(typeof error === "string") {
                         return error;
+                      } else if(!error.cause) {
+                        return null;
                       }
 
                       return ErrorCause(error.cause);
