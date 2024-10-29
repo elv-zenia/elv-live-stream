@@ -80,7 +80,11 @@ const Modal = ({
 
                     const ErrorCause = (error) => {
                       if(typeof error === "string") {
-                        return error;
+                        if(error.includes("EAV_OPEN_INPUT")) {
+                          return "There is another probe running on that port.";
+                        } else {
+                          return "There was an unexpected error.";
+                        }
                       } else if(!error.cause) {
                         return null;
                       }
