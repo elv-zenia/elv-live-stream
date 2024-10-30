@@ -371,6 +371,10 @@ class DataStore {
 
       const urls = {};
       Object.keys(response || {}).forEach(protocol => {
+        // urls[protocol] = response[protocol]
+        //   .filter(obj => !obj.active)
+        //   .map(obj => obj.url);
+
         response[protocol].forEach(protocolObject => {
           urls[protocolObject.url] = {
             ...protocolObject,

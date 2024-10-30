@@ -1,17 +1,19 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
-import {Radio, Select, TextInput} from "@/components/Inputs.jsx";
 import Accordion from "@/components/Accordion.jsx";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "@/components/Loader.jsx";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Alert, Button, Flex, Text} from "@mantine/core";
+import {Alert, Box, Button, Flex, Radio, Select, Stack, Text, TextInput} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
-import AudioTracksTable from "@/pages/create/AudioTracksTable";
+import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
 import classes from "@/assets/stylesheets/modules/CreatePage.module.css";
 import ProbeConfirmation from "@/pages/ProbeConfirmation";
+import {useForm} from "@mantine/form";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
+import AdvancedSelect from "@/components/advanced-select/AdvancedSelect.jsx";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -19,67 +21,33 @@ const FORM_KEYS = {
   DRM: "DRM"
 };
 
-const Permissions = observer(({permission, UpdateCallback}) => {
+const Permissions = observer(({form}) => {
   const permissionLevels = rootStore.client.permissionLevels;
 
   return (
-    <Select
+    <AdvancedSelect
       label="Permission"
-      labelDescription="Set a permission level."
-      tooltip={
-        Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
-          <div key={`permission-info-${short}`} className="form__tooltip-item">
-            <div className="form__tooltip-item__permission-title">{ short }:</div>
-            <div>{ description }</div>
-          </div>
-        )
-      }
-      value={permission}
-      onChange={UpdateCallback}
-      options={
+      description="Set a permission level."
+      name="permission"
+      placeholder="Select Permission"
+      data={
         Object.keys(permissionLevels || {}).map(permissionName => (
           {
             label: permissionLevels[permissionName].short,
-            value: permissionName
+            value: permissionName,
+            description: permissionLevels[permissionName].description
           }
         ))
       }
-    />
-  );
-});
-
-const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
-  const options = ENCRYPTION_OPTIONS;
-
-  return (
-    <Select
-      label="Playback Encryption"
-      labelDescription="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-      formName="playbackEncryption"
-      options={options}
-      defaultOption={{
-        value: "",
-        label: "Select Encryption"
-      }}
-      value={drmFormData.encryption}
-      onChange={event => UpdateCallback({event, key: "encryption"})}
-      tooltip={
-        options.map(({label, title, id}) =>
-          <div key={`encryption-info-${id}`} className="form__tooltip-item">
-            <div className="form__tooltip-item__encryption-title">{ label }:</div>
-            <div>{ title }</div>
-          </div>
-        )
-      }
+      SetValue={(value) => form.setFieldValue("permission", value)}
+      value={form.getValues().permission}
+      mb={16}
+      {...form.getInputProps("permission")}
     />
   );
 });
 
 const AdvancedSection = observer(({
-  advancedData,
-  AdvancedUpdateCallback,
-  drmFormData,
-  DrmUpdateCallback,
   AdvancedSettingsCallback,
   objectProbed=false,
   audioTracks,
@@ -88,7 +56,8 @@ const AdvancedSection = observer(({
   setShowProbeConfirmation,
   objectData,
   useAdvancedSettings,
-  DisableProbeButton
+  DisableProbeButton,
+  form
 }) => {
   return (
     <>
@@ -103,22 +72,30 @@ const AdvancedSection = observer(({
           <>
             <Select
               label="Retention"
-              labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-              formName="retention"
-              options={RETENTION_OPTIONS}
-              value={advancedData.retention}
-              onChange={event => AdvancedUpdateCallback({
-                key: "retention",
-                event
-              })
-              }
+              description="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+              name="retention"
+              data={RETENTION_OPTIONS}
+              defaultValue="86400"
+              mb={16}
             />
-            <PlaybackEncryption
-              drmFormData={drmFormData}
-              UpdateCallback={({event, key}) => DrmUpdateCallback({
-                key,
-                event
-              })}
+            <Select
+              label="Playback Encryption"
+              description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+              name="playbackEncryption"
+              data={ENCRYPTION_OPTIONS}
+              placeholder="Selet Encryption"
+              // value={drmFormData.encryption}
+              // onChange={event => UpdateCallback({event, key: "encryption"})}
+              tooltip={
+                ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+                  <div key={`encryption-info-${id}`} className="form__tooltip-item">
+                    <div className="form__tooltip-item__encryption-title">{ label }:</div>
+                    <div>{ title }</div>
+                  </div>
+                )
+              }
+              mb={16}
+              {...form.getInputProps("playbackEncryption")}
             />
 
             {
@@ -169,9 +146,9 @@ const Create = observer(() => {
 
   useEffect(() => {
     Promise.all([
+      dataStore.LoadStreamUrls(),
       dataStore.LoadAccessGroups(),
-      dataStore.LoadLibraries(),
-      dataStore.LoadStreamUrls()
+      dataStore.LoadLibraries()
     ])
       .finally(() => setLoading(false));
   }, []);
@@ -186,6 +163,18 @@ const Create = observer(() => {
     accessGroup: "",
     permission: "editable"
   });
+
+  const form = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      protocol: "mpegts"
+    },
+    validate: {
+      name: (value) => /^.{3,}$/.test(value) ? null : "Name must have at least 3 characters."
+    }
+  });
+
+  const [protocol, setProtocol] = useState("mpegts");
 
   const [advancedData, setAdvancedData] = useState({
     retention: 86400
@@ -206,10 +195,10 @@ const Create = observer(() => {
   const [objectData, setObjectData] = useState(null);
   const [audioTracks, setAudioTracks] = useState([]);
 
-  const urls = basicFormData.protocol === "custom" ?
+  const urls = protocol === "custom" ?
     [] :
     Object.keys(dataStore.liveStreamUrls || {})
-      .filter(url => dataStore.liveStreamUrls[url].protocol === basicFormData.protocol && !dataStore.liveStreamUrls[url].active);
+      .filter(url => dataStore.liveStreamUrls[url].protocol === protocol && !dataStore.liveStreamUrls[url].active);
 
   useEffect(() => {
     const LoadConfigData = async () => {
@@ -248,8 +237,9 @@ const Create = observer(() => {
     callback(newData);
   };
 
-  const HandleSubmit = async (event) => {
-    event.preventDefault();
+  const HandleSubmit = async () => {
+    // TODO: Parse input values as integer when appropriate
+    // TODO: I.e., Retention
     setIsCreating(true);
 
     try {
@@ -283,130 +273,98 @@ const Create = observer(() => {
   };
 
   return (
-    <div className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}>
-      <div className="page-header">Create Live Stream</div>
-      <form className="form" onSubmit={HandleSubmit}>
-        <Radio
-          label="Protocol"
-          options={[
-            {
-              optionLabel: "MPEGTS",
-              id: "mpegts",
-              value: "mpegts",
-              checked: basicFormData.protocol === "mpegts",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            },
-            {
-              optionLabel: "RTMP",
-              id: "rtmp",
-              value: "rtmp",
-              checked: basicFormData.protocol === "rtmp",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            },
-            {
-              optionLabel: "SRT",
-              id: "srt",
-              value: "srt",
-              checked: basicFormData.protocol === "srt",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            },
-            {
-              optionLabel: "Custom",
-              id: "customProtocol",
-              value: "custom",
-              checked: basicFormData.protocol === "custom",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            }
-          ]}
-        />
+    <PageContainer className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`} title="Create Live Stream" width="700px">
+      <form onSubmit={form.onSubmit(HandleSubmit)}>
+        <Radio.Group
+          name="protocol"
+          label="Streaming Protocol"
+          description="Choose a protocol based on your streaming needs:"
+          mb={16}
+          value={protocol}
+          onChange={(value) => {
+            setProtocol(value);
+            form.setFieldValue("url", undefined);
+          }}
+        >
+          <Stack mt="xs">
+            <Radio
+              value="mpegts"
+              label="MPEG-TS"
+              description="Reliable for stable broadcasts, ensuring high-quality video and audio transmission."
+            />
+            <Radio
+              value="rtmp"
+              label="RTMP"
+              description="Perfect for low-latency and interactive streams, widely used in live broadcasting applications."
+            />
+            <Radio
+              value="srt"
+              label="SRT"
+              description="Secure and adaptive, ideal for streaming over unpredictable networks with error recovery features."
+            />
+            <Radio
+              value="custom"
+              label="Custom"
+              description="Enter a custom streaming URL."
+            />
+          </Stack>
+        </Radio.Group>
         {
-          basicFormData.protocol === "custom" &&
+          protocol === "custom" &&
           <TextInput
             label="URL"
-            required={basicFormData.protocol === "custom"}
-            value={basicFormData.url}
+            name="customUrl"
+            required={protocol === "custom"}
             disabled={objectData !== null}
-            onChange={event => UpdateFormData({
-              key: "url",
-              value: event.target.value,
-              formKey: FORM_KEYS.BASIC
-            })}
+            {...form.getInputProps("customUrl")}
           />
         }
         {
-          basicFormData.protocol !== "custom" &&
+          protocol !== "custom" &&
           <Select
             label="URL"
+            name="url"
             required={true}
+            placeholder="Select URL"
             disabled={objectData !== null}
-            defaultValue={urls[0]}
-            options={urls.map(url => (
+            // defaultValue={urls[0]}
+            value={form.values.url}
+            data={urls.map(url => (
               {
                 label: url,
                 value: url
               }
             ))}
-            defaultOption={{
-              value: "",
-              label: "Select URL"
-            }}
-            onChange={event => UpdateFormData({
-              key: "url",
-              value: event.target.value,
-              formKey: FORM_KEYS.BASIC
-            })}
+            mb={16}
+            {...form.getInputProps("url")}
           />
         }
         <TextInput
           label="Name"
+          name="name"
           required={true}
-          value={basicFormData.name}
-          onChange={event => UpdateFormData({
-            key: "name",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+          mb={16}
+          {...form.getInputProps("name")}
         />
         <TextInput
           label="Description"
-          value={basicFormData.description}
-          onChange={event => UpdateFormData({
-            key: "description",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+          name="description"
+          mb={16}
+          {...form.getInputProps("description")}
         />
         <TextInput
           label="Display Title"
-          value={basicFormData.displayTitle}
-          onChange={event => UpdateFormData({
-            key: "displayTitle",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+          name="displayTitle"
+          mb={16}
+          {...form.getInputProps("displayTitle")}
         />
 
         <Select
           label="Access Group"
+          name="accessGroup"
           disabled={objectData !== null}
-          labelDescription="This is the Access Group that will manage your live stream object."
-          options={
+          description="This is the Access Group that will manage your live stream object."
+          data={
             Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
               {
                 label: accessGroupName,
@@ -414,32 +372,22 @@ const Create = observer(() => {
               }
             ))
           }
-          defaultOption={{
-            value: "",
-            label: "Select Access Group"
-          }}
-          onChange={event => UpdateFormData({
-            key: "accessGroup",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+          placeholder="Select Access Group"
+          mb={16}
+          {...form.getInputProps("accessGroup")}
         />
 
         <Permissions
-          permission={basicFormData.permission}
-          UpdateCallback={(event) => UpdateFormData({
-            key: "permission",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+          form={form}
         />
 
         <Select
           label="Library"
+          name="libraryId"
           disabled={objectData !== null}
-          labelDescription="This is the library where your live stream object will be created."
+          description="This is the library where your live stream object will be created."
           required={true}
-          options={
+          data={
             Object.keys(dataStore.libraries || {}).map(libraryId => (
               {
                 label: dataStore.libraries[libraryId].name || "",
@@ -447,16 +395,9 @@ const Create = observer(() => {
               }
             ))
           }
-          defaultOption={{
-            value: "",
-            label: "Select Library"
-          }}
-          value={basicFormData.libraryId}
-          onChange={event => UpdateFormData({
-            key: "libraryId",
-            value: event.target.value,
-            formKey: FORM_KEYS.BASIC
-          })}
+          placeholder="Select Library"
+          mb={16}
+          {...form.getInputProps("libraryId")}
         />
 
         <AdvancedSection
@@ -487,15 +428,16 @@ const Create = observer(() => {
               basicFormData.libraryId
             );
           }}
+          form={form}
         />
 
         <div style={{maxWidth: "200px"}}>
           { loading ? <Loader /> : null }
         </div>
 
-        <div className="form__actions">
+        <Box mt="2rem" mb="2.5rem">
           <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Save"} />
-        </div>
+        </Box>
       </form>
       <ProbeConfirmation
         show={showProbeConfirmation}
@@ -518,7 +460,7 @@ const Create = observer(() => {
           });
         }}
       />
-    </div>
+    </PageContainer>
   );
 });
 
