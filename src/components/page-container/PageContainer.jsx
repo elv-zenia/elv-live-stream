@@ -1,9 +1,8 @@
-import {Alert, Box, Flex, Group, Text, Title} from "@mantine/core";
+import {Alert, Box, Flex, Group, Text, TextInput, Title} from "@mantine/core";
 import styles from "@/components/page-container/PageContainer.module.css";
-import {useEffect, useRef} from "react";
-import HeaderSearchBar from "@/components/header/HeaderSearchBar.jsx";
-import HeaderTopActions from "@/components/header/HeaderTopActions.jsx";
-import StatusText from "@/components/status-text/StatusText.jsx";
+import {useEffect, useRef, useState} from "react";
+import classes from "@/assets/stylesheets/modules/SearchBar.module.css";
+import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
 
 const AlertMessage = ({error}) => {
   const errorRef = useRef(null);
@@ -32,28 +31,67 @@ const AlertMessage = ({error}) => {
   );
 };
 
+const SearchBar = () => {
+  const [value, setValue] = useState("");
+
+  return (
+    <Flex direction="row" align="center" className={classes.flexbox}>
+      <TextInput
+        classNames={{
+          input: classes.input,
+          root: classes.root,
+          section: classes.section
+        }}
+        size="xs"
+        placeholder="Search"
+        leftSection={<MagnifyingGlassIcon className={classes.icon} />}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+      />
+    </Flex>
+  );
+};
+
 const TopActions = ({showSearchBar, actions=[]}) => {
   if(!showSearchBar && actions.length === 0) { return null; }
 
   return (
     <Flex direction="row" align="center" justify="space-between" mb={32}>
-      { showSearchBar && <HeaderSearchBar/> }
+      { showSearchBar && <SearchBar/> }
       {
         actions.length > 0 ?
-          <HeaderTopActions actions={actions} /> : null
+          (
+            <Flex direction="row" gap="sm">
+              {
+                actions.map(({label, variant="filled", onClick, disabled}) => (
+                  <button
+                    type="button"
+                    className={variant === "filled" ? "button__primary" : "button__secondary"}
+                    onClick={onClick}
+                    key={`top-action-${label}`}
+                    disabled={disabled}
+                  >
+                    {label}
+                  </button>
+                ))
+              }
+            </Flex>
+          ) : null
       }
     </Flex>
   );
 };
 
-const TitleSection = ({title, subtitle, status, quality}) => {
+const TitleSection = ({title, subtitle, rightSection}) => {
   return (
-    <Flex direction="column">
+    <Flex direction="column" mb={24}>
       <Group>
-        <Title order={3} classNames={{root: styles.root}} mb={24}>
-          { title }
+        <Title order={3} classNames={{root: styles.root}}>
+        { title }
         </Title>
-        <StatusText status={status} quality={quality} withBorder />
+        {
+          rightSection ? rightSection : null
+        }
       </Group>
       <Box display="block">
         {
@@ -73,11 +111,11 @@ const PageContainer = ({
   error,
   showSearchBar=false,
   actions=[],
-  status,
-  quality
+  titleRightSection,
+  ...rest
 }) => {
   return (
-    <Box p="24 46 46" w={width}>
+    <Box p="24 46 46" w={width} {...rest}>
       <AlertMessage error={error} />
       <TopActions showSearchBar={showSearchBar} actions={actions} />
       {
@@ -85,8 +123,7 @@ const PageContainer = ({
         <TitleSection
           title={title}
           subtitle={subtitle}
-          status={status}
-          quality={quality}
+          rightSection={titleRightSection}
         />
       }
       { children }

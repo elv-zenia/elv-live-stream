@@ -1,5 +1,4 @@
 import {useEffect, useState} from "react";
-import PageHeader from "@/components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore, dataStore} from "@/stores";
 import {observer} from "mobx-react-lite";
@@ -10,6 +9,8 @@ import classes from "@/assets/stylesheets/modules/StreamDetails.module.css";
 import {Loader} from "@/components/Loader.jsx";
 import ConfirmModal from "@/components/ConfirmModal";
 import {StreamIsActive} from "@/utils/helpers";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
+import StatusText from "@/components/status-text/StatusText.jsx";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
@@ -144,14 +145,19 @@ const StreamDetailsPage = observer(() => {
   }
 
   return (
-    <div key={`stream-details-${pageVersion}`}>
-      <PageHeader
-        title={`Edit ${streamStore.streams?.[streamSlug]?.display_title || streamStore.streams?.[streamSlug]?.title || stream.objectId}`}
-        subtitle={stream.objectId}
-        status={stream.status}
-        quality={streamStore.streams?.[streamSlug]?.quality}
-        actions={actions}
-      />
+    <PageContainer
+      key={`stream-details-${pageVersion}`}
+      title={`Edit ${streamStore.streams?.[streamSlug]?.display_title || streamStore.streams?.[streamSlug]?.title || stream.objectId}`}
+      subtitle={stream.objectId}
+      titleRightSection={
+        <StatusText
+          status={stream.status}
+          quality={streamStore.streams?.[streamSlug]?.quality}
+          withBorder
+        />
+      }
+      actions={actions}
+    >
       <Tabs className={classes.root} value={activeTab} onChange={setActiveTab}>
         <Tabs.List className={classes.list}>
           {
@@ -195,7 +201,7 @@ const StreamDetailsPage = observer(() => {
         CloseCallback={close}
         ConfirmCallback={modalData.ConfirmCallback}
       />
-    </div>
+    </PageContainer>
   );
 });
 
