@@ -88,7 +88,7 @@ const RecordingPanel = observer(({
         <form onSubmit={HandleSubmit} className="form">
           <div className="form__section-header">Retention Period</div>
           <Select
-            labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+            labelDescription="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
             formName="retention"
             options={RETENTION_OPTIONS}
             value={retention}

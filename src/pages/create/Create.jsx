@@ -1,11 +1,22 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
-import Accordion from "@/components/Accordion.jsx";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "@/components/Loader.jsx";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Alert, Box, Button, Flex, Radio, Select, Stack, Text, TextInput} from "@mantine/core";
+import {
+  Accordion,
+  AccordionControl,
+  Alert,
+  Box,
+  Button,
+  Flex,
+  Radio,
+  Select,
+  Stack,
+  Text,
+  TextInput
+} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
@@ -14,6 +25,7 @@ import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import {useForm} from "@mantine/form";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import AdvancedSelect from "@/components/advanced-select/AdvancedSelect.jsx";
+import {CollapseIcon} from "@/assets/icons/index.js";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -47,98 +59,168 @@ const Permissions = observer(({form}) => {
   );
 });
 
-const AdvancedSection = observer(({
-  AdvancedSettingsCallback,
+const AdvancedSettingsPanel = observer(({
   objectProbed=false,
   audioTracks,
   audioFormData,
   setAudioFormData,
   setShowProbeConfirmation,
   objectData,
-  useAdvancedSettings,
   DisableProbeButton,
   form
 }) => {
   return (
     <>
-      <Accordion
-        title="Advanced Settings"
-        id="advanced-section"
-        value={useAdvancedSettings}
-        onValueChange={AdvancedSettingsCallback}
-      >
-        {
-          useAdvancedSettings &&
-          <>
-            <Select
-              label="Retention"
-              description="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-              name="retention"
-              data={RETENTION_OPTIONS}
-              defaultValue="86400"
-              mb={16}
-            />
-            <Select
-              label="Playback Encryption"
-              description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-              name="playbackEncryption"
-              data={ENCRYPTION_OPTIONS}
-              placeholder="Selet Encryption"
-              // value={drmFormData.encryption}
-              // onChange={event => UpdateCallback({event, key: "encryption"})}
-              tooltip={
-                ENCRYPTION_OPTIONS.map(({label, title, id}) =>
-                  <div key={`encryption-info-${id}`} className="form__tooltip-item">
-                    <div className="form__tooltip-item__encryption-title">{ label }:</div>
-                    <div>{ title }</div>
-                  </div>
-                )
-              }
-              mb={16}
-              {...form.getInputProps("playbackEncryption")}
-            />
-
-            {
-              !objectProbed &&
-              <Alert
-                variant="light"
-                color="blue"
-                mt={24}
-                mb={24}
-                icon={<IconAlertCircle/>}
-                classNames={{
-                  wrapper: classes.alertRoot
-                }}
-              >
-                <Flex justify="space-between" align="center">
-                  <Text>
-                    To apply audio stream settings, object must be probed first.
-                  </Text>
-                  <Button
-                    variant="subtle"
-                    onClick={() => setShowProbeConfirmation(true)}
-                    disabled={
-                      objectData !== null ||
-                      DisableProbeButton()
-                    }
-                  >
-                    Probe
-                  </Button>
-                </Flex>
-              </Alert>
-            }
-            <div className="form__section-header">Audio</div>
-            <AudioTracksTable
-              records={audioTracks}
-              audioFormData={audioFormData}
-              setAudioFormData={setAudioFormData}
-              disabled={!objectProbed}
-            />
-          </>
+      <Select
+        label="Retention"
+        description="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
+        name="retention"
+        data={RETENTION_OPTIONS}
+        defaultValue="86400"
+        mb={16}
+      />
+      <Select
+        label="Playback Encryption"
+        description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+        name="playbackEncryption"
+        data={ENCRYPTION_OPTIONS}
+        placeholder="Selet Encryption"
+        // value={drmFormData.encryption}
+        // onChange={event => UpdateCallback({event, key: "encryption"})}
+        tooltip={
+          ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+            <div key={`encryption-info-${id}`} className="form__tooltip-item">
+              <div className="form__tooltip-item__encryption-title">{ label }:</div>
+              <div>{ title }</div>
+            </div>
+          )
         }
-      </Accordion>
+        mb={16}
+        {...form.getInputProps("playbackEncryption")}
+      />
+
+      {
+        !objectProbed &&
+        <Alert
+          variant="light"
+          color="blue"
+          mt={24}
+          mb={24}
+          icon={<IconAlertCircle/>}
+          classNames={{
+            wrapper: classes.alertRoot
+          }}
+        >
+          <Flex justify="space-between" align="center">
+            <Text>
+              To apply audio stream settings, object must be probed first.
+            </Text>
+            <Button
+              variant="subtle"
+              onClick={() => setShowProbeConfirmation(true)}
+              disabled={
+                objectData !== null ||
+                DisableProbeButton()
+              }
+            >
+              Probe
+            </Button>
+          </Flex>
+        </Alert>
+      }
+      <div className="form__section-header">Audio</div>
+      <AudioTracksTable
+        records={audioTracks}
+        audioFormData={audioFormData}
+        setAudioFormData={setAudioFormData}
+        disabled={!objectProbed}
+      />
     </>
   );
+  // return (
+  //   <>
+  //     <Accordion
+  //       value={useAdvancedSettings}
+  //       onChange={ToggleAdvancedSettings}
+  //       chevron={<CollapseIcon />}
+  //     >
+  //       <Accordion.Item value="advanced-item">
+  //         <AccordionControl>Advanced Settings</AccordionControl>
+  //         <Accordion.Panel>
+  //           {
+  //             useAdvancedSettings &&
+  //             <>
+  //               <Select
+  //                 label="Retention"
+  //                 description="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
+  //                 name="retention"
+  //                 data={RETENTION_OPTIONS}
+  //                 defaultValue="86400"
+  //                 mb={16}
+  //               />
+  //               <Select
+  //                 label="Playback Encryption"
+  //                 description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+  //                 name="playbackEncryption"
+  //                 data={ENCRYPTION_OPTIONS}
+  //                 placeholder="Selet Encryption"
+  //                 // value={drmFormData.encryption}
+  //                 // onChange={event => UpdateCallback({event, key: "encryption"})}
+  //                 tooltip={
+  //                   ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+  //                     <div key={`encryption-info-${id}`} className="form__tooltip-item">
+  //                       <div className="form__tooltip-item__encryption-title">{ label }:</div>
+  //                       <div>{ title }</div>
+  //                     </div>
+  //                   )
+  //                 }
+  //                 mb={16}
+  //                 {...form.getInputProps("playbackEncryption")}
+  //               />
+  //
+  //               {
+  //                 !objectProbed &&
+  //                 <Alert
+  //                   variant="light"
+  //                   color="blue"
+  //                   mt={24}
+  //                   mb={24}
+  //                   icon={<IconAlertCircle/>}
+  //                   classNames={{
+  //                     wrapper: classes.alertRoot
+  //                   }}
+  //                 >
+  //                   <Flex justify="space-between" align="center">
+  //                     <Text>
+  //                       To apply audio stream settings, object must be probed first.
+  //                     </Text>
+  //                     <Button
+  //                       variant="subtle"
+  //                       onClick={() => setShowProbeConfirmation(true)}
+  //                       disabled={
+  //                         objectData !== null ||
+  //                         DisableProbeButton()
+  //                       }
+  //                     >
+  //                       Probe
+  //                     </Button>
+  //                   </Flex>
+  //                 </Alert>
+  //               }
+  //               <div className="form__section-header">Audio</div>
+  //               <AudioTracksTable
+  //                 records={audioTracks}
+  //                 audioFormData={audioFormData}
+  //                 setAudioFormData={setAudioFormData}
+  //                 disabled={!objectProbed}
+  //               />
+  //             </>
+  //           }
+  //         </Accordion.Panel>
+  //       </Accordion.Item>
+  //     </Accordion>
+  //   </>
+  // );
 });
 
 const Create = observer(() => {
@@ -180,7 +262,7 @@ const Create = observer(() => {
     retention: 86400
   });
 
-  const [useAdvancedSettings, setUseAdvancedSettings] = useState();
+  const [useAdvancedSettings, setUseAdvancedSettings] = useState("");
 
   const [drmFormData, setDrmFormData] = useState({
     encryption: ""
@@ -278,7 +360,7 @@ const Create = observer(() => {
         <Radio.Group
           name="protocol"
           label="Streaming Protocol"
-          description="Choose a protocol based on your streaming needs:"
+          description="Select a protocol to see available pre-allocated URLs."
           mb={16}
           value={protocol}
           onChange={(value) => {
@@ -305,7 +387,7 @@ const Create = observer(() => {
             <Radio
               value="custom"
               label="Custom"
-              description="Enter a custom streaming URL."
+              description="Enter a custom URL."
             />
           </Stack>
         </Radio.Group>
@@ -363,7 +445,7 @@ const Create = observer(() => {
           label="Access Group"
           name="accessGroup"
           disabled={objectData !== null}
-          description="This is the Access Group that will manage your live stream object."
+          description="Select an Access Group to manage your live stream object."
           data={
             Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
               {
@@ -385,7 +467,7 @@ const Create = observer(() => {
           label="Library"
           name="libraryId"
           disabled={objectData !== null}
-          description="This is the library where your live stream object will be created."
+          description="Select the library where your live stream object will be created."
           required={true}
           data={
             Object.keys(dataStore.libraries || {}).map(libraryId => (
@@ -400,36 +482,45 @@ const Create = observer(() => {
           {...form.getInputProps("libraryId")}
         />
 
-        <AdvancedSection
-          advancedData={advancedData}
-          drmFormData={drmFormData}
-          useAdvancedSettings={useAdvancedSettings}
-          DrmUpdateCallback={({event, key}) => UpdateFormData({
-            key,
-            value: event.target.value,
-            formKey: FORM_KEYS.DRM
-          })}
-          AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
-            key,
-            value: value ? value : event?.target?.value,
-            formKey: FORM_KEYS.ADVANCED
-          })}
-          AdvancedSettingsCallback={setUseAdvancedSettings}
-          objectProbed={objectData !== null}
-          audioTracks={audioTracks}
-          audioFormData={audioFormData}
-          setAudioFormData={setAudioFormData}
-          setShowProbeConfirmation={setShowProbeConfirmation}
-          objectData={objectData}
-          DisableProbeButton={() => {
-            return !(
-              basicFormData.url &&
-              basicFormData.name &&
-              basicFormData.libraryId
-            );
-          }}
-          form={form}
-        />
+        <Accordion
+          value={useAdvancedSettings}
+          onChange={setUseAdvancedSettings}
+          chevron={<CollapseIcon />}
+        >
+          <Accordion.Item value="advanced-item">
+            <AccordionControl>Advanced Settings</AccordionControl>
+            <Accordion.Panel>
+              <AdvancedSettingsPanel
+                advancedData={advancedData}
+                drmFormData={drmFormData}
+                DrmUpdateCallback={({event, key}) => UpdateFormData({
+                  key,
+                  value: event.target.value,
+                  formKey: FORM_KEYS.DRM
+                })}
+                AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
+                  key,
+                  value: value ? value : event?.target?.value,
+                  formKey: FORM_KEYS.ADVANCED
+                })}
+                objectProbed={objectData !== null}
+                audioTracks={audioTracks}
+                audioFormData={audioFormData}
+                setAudioFormData={setAudioFormData}
+                setShowProbeConfirmation={setShowProbeConfirmation}
+                objectData={objectData}
+                DisableProbeButton={() => {
+                  return !(
+                    basicFormData.url &&
+                    basicFormData.name &&
+                    basicFormData.libraryId
+                  );
+                }}
+                form={form}
+              />
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
 
         <div style={{maxWidth: "200px"}}>
           { loading ? <Loader /> : null }

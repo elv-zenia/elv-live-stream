@@ -80,7 +80,7 @@ const CopyToVodModal = observer(({
             (
               <Select
                 label="Access Group"
-                labelDescription="This is the Access Group that will manage your live stream object."
+                labelDescription="Select an Access Group to manage your live stream object."
                 options={
                   Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
                     {

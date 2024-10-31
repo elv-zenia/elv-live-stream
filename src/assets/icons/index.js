@@ -1,5 +1,6 @@
 import CircleInfoIcon from "@/assets/icons/CircleInfoIcon.jsx";
 import ClipboardIcon from "@/assets/icons/ClipboardIcon.jsx";
+import CollapseIcon from "@/assets/icons/CollapseIcon.jsx";
 import EditIcon from "@/assets/icons/EditIcon.jsx";
 import ExternalLinkIcon from "@/assets/icons/ExternalLinkIcon.jsx";
 import GearIcon from "@/assets/icons/GearIcon.jsx";
@@ -14,6 +15,7 @@ import VideoPlusIcon from "@/assets/icons/VideoPlusIcon.jsx";
 export {
   CircleInfoIcon,
   ClipboardIcon,
+  CollapseIcon,
   EditIcon,
   ExternalLinkIcon,
   GearIcon,
