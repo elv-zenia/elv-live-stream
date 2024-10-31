@@ -67,6 +67,17 @@ class StreamStore {
           "audio"
         ]
       });
+
+      const recordingConfig = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/recording_config",
+        select: [
+          "recording_params/xc_params/connection_timeout",
+          "recording_params/reconnect_timeout"
+        ]
+      });
+
       const customSettings = {};
 
       const edgeWriteToken = yield this.client.ContentObjectMetadata({
@@ -82,6 +93,14 @@ class StreamStore {
 
       if(liveRecordingConfig.part_ttl) {
         customSettings["part_ttl"] = liveRecordingConfig.part_ttl;
+      }
+
+      if(recordingConfig?.recording_params?.xc_params?.connection_timeout) {
+        customSettings["connection_timeout"] = recordingConfig.recording_params.xc_params.connection_timeout;
+      }
+
+      if(recordingConfig?.recording_params?.reconnect_timeout) {
+        customSettings["reconnect_timeout"] = recordingConfig.recording_params.reconnect_timeout;
       }
 
       if(liveRecordingConfig.audio) {
@@ -130,7 +149,7 @@ class StreamStore {
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Unable to configure stream", error);
-      return {};
+      throw error;
     }
   });
 
@@ -661,6 +680,8 @@ class StreamStore {
 
   CopyToVod = flow(function * ({
     objectId,
+    targetLibraryId,
+    accessGroup,
     selectedPeriods=[],
     title
   }) {
@@ -693,7 +714,10 @@ class StreamStore {
     // Create content object
     const titleType = dataStore.titleContentType;
 
-    const targetLibraryId = yield this.client.ContentObjectLibraryId({objectId});
+    if(!targetLibraryId) {
+      targetLibraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+
     const streamSlug = Object.keys(this.streams || {}).find(slug => (
       this.streams[slug].objectId === objectId
     ));
@@ -713,6 +737,13 @@ class StreamStore {
         {}
     });
     const targetObjectId = createResponse.id;
+
+    if(accessGroup) {
+      editStore.AddAccessGroupPermission({
+        objectId: targetObjectId,
+        groupName: accessGroup
+      });
+    }
 
     // Set editable permission
     yield this.client.SetPermission({

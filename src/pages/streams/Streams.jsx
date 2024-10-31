@@ -177,10 +177,16 @@ const Streams = observer(() => {
                               description: record.status === STATUS_MAP.INACTIVE ? "Are you sure you want to check the stream? This will override your saved configuration." : "Are you sure you want to check the stream?",
                               loadingText: `Please send your stream to ${SanitizeUrl({url}) || "the URL you specified"}.`,
                               ConfirmCallback: async () => {
-                                await streamStore.ConfigureStream({
-                                  objectId: record.objectId,
-                                  slug: record.slug
-                                });
+                                try {
+                                  await streamStore.ConfigureStream({
+                                    objectId: record.objectId,
+                                    slug: record.slug
+                                  });
+                                } catch(error) {
+                                  // eslint-disable-next-line no-console
+                                  console.error("Configure Modal - Failed to check stream", error);
+                                  throw error;
+                                }
                               },
                               CloseCallback: () => ResetModal()
                             });

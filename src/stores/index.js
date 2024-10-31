@@ -30,7 +30,7 @@ class RootStore {
     try {
       this.client = new FrameClient({
         target: window.parent,
-        timeout: 240
+        timeout: 900
       });
 
       window.client = this.client;
@@ -42,7 +42,7 @@ class RootStore {
       /* eslint-disable no-console */
       console.error("Failed to initialize application");
       console.error(error);
-       
+
     } finally {
       this.loaded = true;
     }

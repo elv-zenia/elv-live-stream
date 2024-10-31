@@ -14,6 +14,7 @@ import {Runtime} from "@/pages/stream-details/details/DetailsPanel";
 const RecordingPeriodsTable = observer(({
   records,
   objectId,
+  libraryId,
   title,
   CopyCallback,
   currentTimeMs,
@@ -23,12 +24,16 @@ const RecordingPeriodsTable = observer(({
   const [copyingToVod, setCopyingToVod] = useState(false);
   const [showCopyModal, {open, close}] = useDisclosure(false);
   const [vodTitle, setVodTitle] = useState(`${title} VoD`);
+  const [vodLibraryId, setVodLibraryId] = useState(libraryId);
+  const [vodAccessGroup, setVodAccessGroup] = useState(null);
 
   const HandleCopy = async ({title}) => {
     try {
       setCopyingToVod(true);
       const response = await streamStore.CopyToVod({
         objectId,
+        targetLibraryId: vodLibraryId,
+        accessGroup: vodAccessGroup,
         selectedPeriods: selectedRecords,
         title
       });
@@ -210,10 +215,18 @@ const RecordingPeriodsTable = observer(({
       />
       <DetailsCopyModal
         show={showCopyModal}
-        close={close}
+        close={() => {
+          setVodLibraryId(libraryId);
+          setVodAccessGroup(null);
+          close();
+        }}
         Callback={(title) => HandleCopy({title})}
         title={vodTitle}
         setTitle={setVodTitle}
+        libraryId={vodLibraryId}
+        setLibraryId={setVodLibraryId}
+        accessGroup={vodAccessGroup}
+        setAccessGroup={setVodAccessGroup}
       />
     </>
   );
