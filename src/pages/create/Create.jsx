@@ -4,7 +4,7 @@ import {observer} from "mobx-react-lite";
 
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
 import {CircleInfoIcon, CollapseIcon} from "@/assets/icons/index.js";
-import classes from "@/assets/stylesheets/modules/CreatePage.module.css";
+import styles from "./CreatePage.module.css";
 import {Loader} from "@/components/Loader.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
@@ -150,7 +150,7 @@ const AdvancedSettingsPanel = observer(({
           mb={24}
           icon={<IconAlertCircle/>}
           classNames={{
-            wrapper: classes.alertRoot
+            wrapper: styles.alertRoot
           }}
         >
           <Flex justify="space-between" align="center">

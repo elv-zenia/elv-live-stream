@@ -5,7 +5,7 @@ import {ActionIcon, AspectRatio, Box} from "@mantine/core";
 import {PlayCircleIcon as PlayIcon} from "@/assets/icons/index.js";
 import Video from "@/components/Video.jsx";
 import {IconX} from "@tabler/icons-react";
-import classes from "@/assets/stylesheets/modules/VideoContainer.module.css";
+import styles from "./VideoContainer.module.css";
 
 export const VideoContainer = observer(({slug, index, showPreview, allowClose=true}) => {
   const [play, setPlay] = useState(false);
@@ -48,7 +48,7 @@ export const VideoContainer = observer(({slug, index, showPreview, allowClose=tr
   }, [frameKey, frameSegmentUrl]);
 
   return (
-    <div className={classes.videoWrapper}>
+    <div className={styles.videoWrapper}>
       <AspectRatio ratio={16 / 9} mx="auto" pos="relative" h="100%">
         {
           !play ?
@@ -72,7 +72,7 @@ export const VideoContainer = observer(({slug, index, showPreview, allowClose=tr
                 {
                   allowClose &&
                   <ActionIcon
-                  className={classes.closeButton}
+                  className={styles.closeButton}
                   title="Stop Playback"
                   color="gray.1"
                   variant="transparent"

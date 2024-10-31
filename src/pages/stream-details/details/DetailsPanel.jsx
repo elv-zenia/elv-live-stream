@@ -8,7 +8,7 @@ import {STATUS_MAP, QUALITY_TEXT, RETENTION_TEXT} from "@/utils/constants";
 import RecordingPeriodsTable from "@/pages/stream-details/details/RecordingPeriodsTable";
 import RecordingCopiesTable from "@/pages/stream-details/details/RecordingCopiesTable";
 import {IconAlertCircle, IconCheck} from "@tabler/icons-react";
-import VideoContainer from "@/components/VideoContainer.jsx";
+import VideoContainer from "@/components/video-container/VideoContainer.jsx";
 import {CopyToClipboard} from "@/utils/helpers";
 import {ClipboardIcon} from "@/assets/icons";
 

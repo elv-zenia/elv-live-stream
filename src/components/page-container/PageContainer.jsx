@@ -1,32 +1,34 @@
-import {Alert, Box, Flex, Group, Text, TextInput, Title} from "@mantine/core";
-import styles from "@/components/page-container/PageContainer.module.css";
-import {useEffect, useRef, useState} from "react";
-import classes from "@/assets/stylesheets/modules/SearchBar.module.css";
+import {useState} from "react";
+import {Box, Flex, Group, Text, TextInput, Title} from "@mantine/core";
 import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
+import AlertMessage from "@/components/alert-message/AlertMessage.jsx";
+import titleSectionStyles from "./TitleSection.module.css";
+import searchBarStyles from "./SearchBar.module.css";
 
-const AlertMessage = ({error}) => {
-  const errorRef = useRef(null);
-
-  useEffect(() => {
-    if(errorRef && errorRef.current) {
-      errorRef.current.scrollIntoView();
-    }
-  }, [error]);
-
-  if(!error) { return null; }
-
-  const {title, message} = error;
-
+const PageContainer = ({
+  title,
+  subtitle,
+  children,
+  width="100%",
+  error,
+  showSearchBar=false,
+  actions=[],
+  titleRightSection,
+  ...rest
+}) => {
   return (
-    <Box ref={errorRef} mb={16}>
-      <Alert
-        variant="light"
-        color="elv-red.4"
-        title={title}
-        withCloseButton
-      >
-        { message }
-      </Alert>
+    <Box p="24 46 46" w={width} {...rest}>
+      <AlertMessage error={error} />
+      <TopActions showSearchBar={showSearchBar} actions={actions} />
+      {
+        title &&
+        <TitleSection
+          title={title}
+          subtitle={subtitle}
+          rightSection={titleRightSection}
+        />
+      }
+      { children }
     </Box>
   );
 };
@@ -35,16 +37,16 @@ const SearchBar = () => {
   const [value, setValue] = useState("");
 
   return (
-    <Flex direction="row" align="center" className={classes.flexbox}>
+    <Flex direction="row" align="center" className={searchBarStyles.flexbox}>
       <TextInput
         classNames={{
-          input: classes.input,
-          root: classes.root,
-          section: classes.section
+          input: searchBarStyles.input,
+          root: searchBarStyles.root,
+          section: searchBarStyles.section
         }}
         size="xs"
         placeholder="Search"
-        leftSection={<MagnifyingGlassIcon className={classes.icon} />}
+        leftSection={<MagnifyingGlassIcon className={searchBarStyles.icon} />}
         value={value}
         onChange={(event) => setValue(event.target.value)}
       />
@@ -57,7 +59,7 @@ const TopActions = ({showSearchBar, actions=[]}) => {
 
   return (
     <Flex direction="row" align="center" justify="space-between" mb={32}>
-      { showSearchBar && <SearchBar/> }
+      { showSearchBar && <SearchBar /> }
       {
         actions.length > 0 ?
           (
@@ -86,8 +88,8 @@ const TitleSection = ({title, subtitle, rightSection}) => {
   return (
     <Flex direction="column" mb={24}>
       <Group>
-        <Title order={3} classNames={{root: styles.root}}>
-        { title }
+        <Title order={3} classNames={{root: titleSectionStyles.root}}>
+          { title }
         </Title>
         {
           rightSection ? rightSection : null
@@ -100,34 +102,6 @@ const TitleSection = ({title, subtitle, rightSection}) => {
         }
       </Box>
     </Flex>
-  );
-};
-
-const PageContainer = ({
-  title,
-  subtitle,
-  children,
-  width="100%",
-  error,
-  showSearchBar=false,
-  actions=[],
-  titleRightSection,
-  ...rest
-}) => {
-  return (
-    <Box p="24 46 46" w={width} {...rest}>
-      <AlertMessage error={error} />
-      <TopActions showSearchBar={showSearchBar} actions={actions} />
-      {
-        title &&
-        <TitleSection
-          title={title}
-          subtitle={subtitle}
-          rightSection={titleRightSection}
-        />
-      }
-      { children }
-    </Box>
   );
 };
 

@@ -7,7 +7,7 @@ import {dataStore, streamStore} from "@/stores";
 import {Loader} from "@/components/Loader.jsx";
 import {SortTable} from "@/utils/helpers";
 import {STATUS_TEXT} from "@/utils/constants";
-import VideoContainer from "@/components/VideoContainer.jsx";
+import VideoContainer from "@/components/video-container/VideoContainer.jsx";
 
 const Monitor = observer(() => {
   const [filter, setFilter] = useState("");

@@ -1,7 +1,7 @@
-import {VideoPlusIcon, StreamIcon, MediaIcon} from "@/assets/icons";
+import {VideoPlusIcon, StreamIcon, MediaIcon} from "@/assets/icons/index.js";
 import {AppShell, NavLink} from "@mantine/core";
 import {useLocation, useNavigate} from "react-router-dom";
-import classes from "@/assets/stylesheets/modules/Navbar.module.css";
+import styles from "./LeftNavigation.module.css";
 
 const NAV_LINKS = [
   {path: "/create", label: "Create", icon: <VideoPlusIcon />},
@@ -14,12 +14,12 @@ const LeftNavigation = () => {
   const location = useLocation();
 
   return (
-    <AppShell.Navbar p="12 0" classNames={classes}>
+    <AppShell.Navbar p="12 0" classNames={styles}>
       {
         NAV_LINKS.map(({path, label, icon}) => (
           <NavLink
             key={`navigation-link-${path}`}
-            className={classes.navLink}
+            className={styles.navLink}
             href="#"
             onClick={() => navigate(path)}
             label={label}

@@ -10,7 +10,7 @@ import {editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
-import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
+import styles from "./PlayoutPanel.module.css";
 import {EditIcon, TrashIcon} from "@/assets/icons";
 
 const WatermarkBox = ({type, value, actions=[]}) => {
@@ -141,7 +141,7 @@ const PlayoutPanel = observer(({
 
   return (
     <>
-      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={classes.box}>
+      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={styles.box}>
         <div className="form__section-header">Playout</div>
         <Select
           label="DRM"
@@ -165,7 +165,7 @@ const PlayoutPanel = observer(({
         />
       </Box>
 
-      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} maw="50%" className={classes.box}>
+      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} maw="50%" className={styles.box}>
         <div className="form__section-header">DVR</div>
 
         <Box mb={24}>
@@ -194,10 +194,10 @@ const PlayoutPanel = observer(({
                 w="100%"
                 size="md"
                 classNames={{
-                  label: classes.datePickerLabel,
-                  description: classes.datePickerDescription,
-                  input: classes.datePickerInput,
-                  placeholder: classes.datePickerPlaceholder
+                  label: styles.datePickerLabel,
+                  description: styles.datePickerDescription,
+                  input: styles.datePickerInput,
+                  placeholder: styles.datePickerPlaceholder
               }}
                 clearable
                 withSeconds
