@@ -1,9 +1,16 @@
 import {useEffect, useState} from "react";
-import {observer} from "mobx-react-lite";
-import {dataStore, editStore, streamStore, rootStore} from "@/stores";
 import {useNavigate} from "react-router-dom";
+import {observer} from "mobx-react-lite";
+
+import {dataStore, editStore, streamStore, rootStore} from "@/stores";
+import {CircleInfoIcon, CollapseIcon} from "@/assets/icons/index.js";
+import classes from "@/assets/stylesheets/modules/CreatePage.module.css";
 import {Loader} from "@/components/Loader.jsx";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
+import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
+import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
+
 import {
   Accordion,
   AccordionControl,
@@ -15,17 +22,12 @@ import {
   Select,
   Stack,
   Text,
-  TextInput
+  TextInput,
+  Tooltip
 } from "@mantine/core";
-import {IconAlertCircle} from "@tabler/icons-react";
-import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
-import {notifications} from "@mantine/notifications";
-import classes from "@/assets/stylesheets/modules/CreatePage.module.css";
-import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import {useForm} from "@mantine/form";
-import PageContainer from "@/components/page-container/PageContainer.jsx";
-import AdvancedSelect from "@/components/advanced-select/AdvancedSelect.jsx";
-import {CollapseIcon} from "@/assets/icons/index.js";
+import {notifications} from "@mantine/notifications";
+import {IconAlertCircle} from "@tabler/icons-react";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -37,8 +39,33 @@ const Permissions = observer(({form}) => {
   const permissionLevels = rootStore.client.permissionLevels;
 
   return (
-    <AdvancedSelect
-      label="Permission"
+    <Select
+      label={
+        <Flex align="center" gap={6}>
+          Permission
+          <Tooltip
+            multiline
+            w={460}
+            label={
+              Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
+                <Flex
+                  key={`permission-info-${short}`}
+                  gap="1rem"
+                  lh={1.25}
+                  pb={5}
+                >
+                  <Flex flex="0 0 25%">{ short }:</Flex>
+                  <Text fz="sm">{ description }</Text>
+                </Flex>
+              )
+            }
+          >
+            <Flex w={16}>
+              <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+            </Flex>
+          </Tooltip>
+        </Flex>
+      }
       description="Set a permission level."
       name="permission"
       placeholder="Select Permission"
@@ -80,21 +107,36 @@ const AdvancedSettingsPanel = observer(({
         mb={16}
       />
       <Select
-        label="Playback Encryption"
+        label={
+          <Flex align="center" gap={6}>
+            Playback Encryption
+            <Tooltip
+              multiline
+              w={460}
+              label={
+                ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+                  <Flex
+                    key={`encryption-info-${id}`}
+                    gap="1rem"
+                    lh={1.25}
+                    pb={5}
+                  >
+                    <Flex flex="0 0 35%">{ label }:</Flex>
+                    <Text fz="sm">{ title }</Text>
+                  </Flex>
+                )
+              }
+            >
+              <Flex w={16}>
+                <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+              </Flex>
+            </Tooltip>
+          </Flex>
+        }
         description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
         name="playbackEncryption"
         data={ENCRYPTION_OPTIONS}
         placeholder="Selet Encryption"
-        // value={drmFormData.encryption}
-        // onChange={event => UpdateCallback({event, key: "encryption"})}
-        tooltip={
-          ENCRYPTION_OPTIONS.map(({label, title, id}) =>
-            <div key={`encryption-info-${id}`} className="form__tooltip-item">
-              <div className="form__tooltip-item__encryption-title">{ label }:</div>
-              <div>{ title }</div>
-            </div>
-          )
-        }
         mb={16}
         {...form.getInputProps("playbackEncryption")}
       />
@@ -137,90 +179,6 @@ const AdvancedSettingsPanel = observer(({
       />
     </>
   );
-  // return (
-  //   <>
-  //     <Accordion
-  //       value={useAdvancedSettings}
-  //       onChange={ToggleAdvancedSettings}
-  //       chevron={<CollapseIcon />}
-  //     >
-  //       <Accordion.Item value="advanced-item">
-  //         <AccordionControl>Advanced Settings</AccordionControl>
-  //         <Accordion.Panel>
-  //           {
-  //             useAdvancedSettings &&
-  //             <>
-  //               <Select
-  //                 label="Retention"
-  //                 description="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
-  //                 name="retention"
-  //                 data={RETENTION_OPTIONS}
-  //                 defaultValue="86400"
-  //                 mb={16}
-  //               />
-  //               <Select
-  //                 label="Playback Encryption"
-  //                 description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-  //                 name="playbackEncryption"
-  //                 data={ENCRYPTION_OPTIONS}
-  //                 placeholder="Selet Encryption"
-  //                 // value={drmFormData.encryption}
-  //                 // onChange={event => UpdateCallback({event, key: "encryption"})}
-  //                 tooltip={
-  //                   ENCRYPTION_OPTIONS.map(({label, title, id}) =>
-  //                     <div key={`encryption-info-${id}`} className="form__tooltip-item">
-  //                       <div className="form__tooltip-item__encryption-title">{ label }:</div>
-  //                       <div>{ title }</div>
-  //                     </div>
-  //                   )
-  //                 }
-  //                 mb={16}
-  //                 {...form.getInputProps("playbackEncryption")}
-  //               />
-  //
-  //               {
-  //                 !objectProbed &&
-  //                 <Alert
-  //                   variant="light"
-  //                   color="blue"
-  //                   mt={24}
-  //                   mb={24}
-  //                   icon={<IconAlertCircle/>}
-  //                   classNames={{
-  //                     wrapper: classes.alertRoot
-  //                   }}
-  //                 >
-  //                   <Flex justify="space-between" align="center">
-  //                     <Text>
-  //                       To apply audio stream settings, object must be probed first.
-  //                     </Text>
-  //                     <Button
-  //                       variant="subtle"
-  //                       onClick={() => setShowProbeConfirmation(true)}
-  //                       disabled={
-  //                         objectData !== null ||
-  //                         DisableProbeButton()
-  //                       }
-  //                     >
-  //                       Probe
-  //                     </Button>
-  //                   </Flex>
-  //                 </Alert>
-  //               }
-  //               <div className="form__section-header">Audio</div>
-  //               <AudioTracksTable
-  //                 records={audioTracks}
-  //                 audioFormData={audioFormData}
-  //                 setAudioFormData={setAudioFormData}
-  //                 disabled={!objectProbed}
-  //               />
-  //             </>
-  //           }
-  //         </Accordion.Panel>
-  //       </Accordion.Item>
-  //     </Accordion>
-  //   </>
-  // );
 });
 
 const Create = observer(() => {
@@ -409,7 +367,6 @@ const Create = observer(() => {
             required={true}
             placeholder="Select URL"
             disabled={objectData !== null}
-            // defaultValue={urls[0]}
             value={form.values.url}
             data={urls.map(url => (
               {
