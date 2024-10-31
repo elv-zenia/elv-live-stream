@@ -165,7 +165,7 @@ const PlayoutPanel = observer(({
         />
       </Box>
 
-      <Box mb={24} maw="50%">
+      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} maw="50%" className={classes.box}>
         <div className="form__section-header">DVR</div>
 
         <Box mb={24}>
