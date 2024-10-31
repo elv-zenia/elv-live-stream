@@ -1,38 +1,8 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Group, Indicator, Text} from "@mantine/core";
+import {Box, Flex, Group, Text} from "@mantine/core";
 import HeaderSearchBar from "@/components/header/HeaderSearchBar.jsx";
 import HeaderTopActions from "@/components/header/HeaderTopActions";
-import {StatusIndicator} from "@/utils/helpers";
-import classes from "@/assets/stylesheets/modules/PageHeader.module.css";
-import {QUALITY_MAP, STATUS_TEXT} from "@/utils/constants";
-import {IconAlertCircle} from "@tabler/icons-react";
-
-export const StatusText = ({status, quality, withBorder=false}) => {
-  if(!status) { return null; }
-
-  if(quality === QUALITY_MAP.GOOD || !quality) {
-    return (
-      <Box className={withBorder ? classes.box : ""} title={STATUS_TEXT[status]}>
-        <Indicator color={StatusIndicator(status)} position="middle-start" size={8} offset={8}>
-          <Text fz="sm" ml="xl">
-            {STATUS_TEXT[status]}
-          </Text>
-        </Indicator>
-      </Box>
-    );
-  } else {
-    return (
-      <Box className={withBorder ? classes.box : ""}>
-        <Group gap={0}>
-          <IconAlertCircle color="var(--mantine-color-elv-orange-3)" width={15} />
-          <Text fz="sm" ml="md">
-            {STATUS_TEXT[status]}
-          </Text>
-        </Group>
-      </Box>
-    );
-  }
-};
+import StatusText from "@/components/status-text/StatusText.jsx";
 
 const PageHeader = observer(({
   title,
