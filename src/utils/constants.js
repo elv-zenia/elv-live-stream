@@ -33,10 +33,10 @@ export const DEFAULT_WATERMARK_TEXT = {
 };
 
 export const DRM_MAP = {
-  ALL: ["hls-sample-aes", "hls-aes128", "hls-fairplay", "hls-widevine-cenc", "hls-playready-cenc"],
-  PUBLIC: ["hls-sample-aes", "hls-aes128"],
+  ALL: ["hls-sample-aes", "hls-aes128", "hls-fairplay", "hls-widevine-cenc", "hls-playready-cenc", "dash-widevine", "dash-playready-cenc"],
+  PUBLIC: ["hls-sample-aes", "hls-aes128", "dash-widevine", "dash-playready-cenc"],
   FAIRPLAY: ["hls-fairplay"],
-  CLEAR: ["hls-clear"],
+  CLEAR: ["hls-clear", "dash-clear"],
   HLS_WIDEVINE: ["hls-widevine-cenc"],
   PLAYREADY: ["hls-playready-cenc"]
 };
