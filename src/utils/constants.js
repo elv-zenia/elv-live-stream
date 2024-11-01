@@ -42,12 +42,12 @@ export const DRM_MAP = {
 };
 
 export const ENCRYPTION_OPTIONS = [
-  {value: "drm-public", label: "DRM - Public Access", title: "Playout Formats - HLS Sample AES, HLS AES-128", format: DRM_MAP.PUBLIC, id: "drm-public"},
-  {value: "drm-all", label: "DRM - All Formats", title: "Playout Formats - HLS Sample AES, HLS AES-128, HLS Fairplay", format: DRM_MAP.ALL, id: "drm-all"},
+  {value: "drm-public", label: "DRM - Public Access", title: "Playout Formats - HLS Sample AES, HLS AES-128, Dash Widevine, Dash PlayReady", format: DRM_MAP.PUBLIC, id: "drm-public"},
+  {value: "drm-all", label: "DRM - All Formats", title: "Playout Formats - HLS Sample AES, HLS AES-128, HLS Fairplay, Dash Widevine, Dash PlayReady", format: DRM_MAP.ALL, id: "drm-all"},
   {value: "drm-fairplay", label: "DRM - Fairplay", title: "Playout Formats - HLS Fairplay", format: DRM_MAP.FAIRPLAY, id: "drm-fairplay"},
   {value: "drm-widevine", label: "DRM - HLS Widevine", title: "Playout Formats - HLS Widevine", format: DRM_MAP.HLS_WIDEVINE, id: "drm-widevine"},
   {value: "drm-playready", label: "DRM - HLS PlayReady", title: "Playout Formats - HLS PlayReady", format: DRM_MAP.PLAYREADY, id: "drm-playready"},
-  {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear", format: DRM_MAP.CLEAR, id: "clear"}
+  {value: "clear", label: "Clear", title: "Playout Formats - HLS Clear, Dash Clear", format: DRM_MAP.CLEAR, id: "clear"}
 ];
 
 export const QUALITY_MAP = {
