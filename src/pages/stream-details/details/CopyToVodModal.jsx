@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Modal, Text} from "@mantine/core";
-import {Select, TextInput} from "@/components/Inputs.jsx";
+import {Box, Flex, Modal, Select, Text, TextInput} from "@mantine/core";
 import {Loader} from "@/components/Loader.jsx";
 import {dataStore} from "@/stores/index.js";
 
@@ -55,7 +54,7 @@ const CopyToVodModal = observer(({
               <Select
                 label="Library"
                 required={true}
-                options={
+                data={
                   Object.keys(dataStore.libraries || {}).map(libraryId => (
                     {
                       label: dataStore.libraries[libraryId].name || "",
@@ -63,12 +62,9 @@ const CopyToVodModal = observer(({
                     }
                   ))
                 }
-                defaultOption={{
-                  value: "",
-                  label: "Select Library"
-                }}
+                placeholder="Select Library"
                 value={libraryId}
-                onChange={event => setLibraryId(event.target.value)}
+                onChange={value => setLibraryId(value)}
                 style={{width: "100%", marginBottom: "1rem"}}
               />
             )
@@ -80,8 +76,8 @@ const CopyToVodModal = observer(({
             (
               <Select
                 label="Access Group"
-                labelDescription="Select an Access Group to manage your live stream object."
-                options={
+                description="Select an Access Group to manage your live stream object."
+                data={
                   Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
                     {
                       label: accessGroupName,
@@ -89,19 +85,16 @@ const CopyToVodModal = observer(({
                     }
                   ))
                 }
-                defaultOption={{
-                  value: "",
-                  label: "Select Access Group"
-                }}
+                placeholder="Select Access Group"
                 value={accessGroup}
-                onChange={event => setAccessGroup(event.target.value)}
+                onChange={value => setAccessGroup(value)}
                 style={{width: "100%", marginBottom: "1rem"}}
               />
             )
         }
 
         <TextInput
-          label="Enter a title for the VoD"
+          label="VoD Title"
           required={true}
           value={title}
           onChange={event => setTitle(event.target.value)}
