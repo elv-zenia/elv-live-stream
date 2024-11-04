@@ -1,8 +1,7 @@
 import {observer} from "mobx-react-lite";
-import {Checkbox, Text, TextInput} from "@mantine/core";
+import {Checkbox, Select, Text, TextInput} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
 import {AudioBitrateReadable} from "@/utils/helpers.js";
-import {Select} from "@/components/Inputs.jsx";
 import {RECORDING_BITRATE_OPTIONS, AudioCodec} from "@/utils/constants.js";
 
 const AudioTracksTable = observer(({
@@ -13,7 +12,7 @@ const AudioTracksTable = observer(({
 }) => {
   const HandleFormChange = ({index, key, value}) => {
     const audioIndexSpecific = audioFormData[index];
-    audioIndexSpecific[key] = value;
+    audioIndexSpecific[key] = value ? value.toString() : null;
 
     setAudioFormData({
       ...audioFormData,
@@ -93,13 +92,13 @@ const AudioTracksTable = observer(({
                 <Select
                   label=""
                   style={{minWidth: "125px"}}
-                  options={RECORDING_BITRATE_OPTIONS}
+                  data={RECORDING_BITRATE_OPTIONS}
                   disabled={disabled}
-                  onChange={(event) => {
+                  onChange={(value) => {
                     HandleFormChange({
                       index: item.stream_index,
                       key: "recording_bitrate",
-                      value: parseInt(event.target.value)
+                      value: parseInt(value)
                     });
                   }}
                   value={audioFormData[item.stream_index].recording_bitrate}

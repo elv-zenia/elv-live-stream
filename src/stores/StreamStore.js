@@ -828,6 +828,10 @@ class StreamStore {
       objectId
     });
 
+    Object.keys(audioData || {}).forEach(audioIndex => {
+      audioData[audioIndex].recording_bitrate = parseInt(audioData[audioIndex].recording_bitrate);
+    });
+
     yield this.client.ReplaceMetadata({
       libraryId,
       objectId,
