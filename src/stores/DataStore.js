@@ -270,9 +270,13 @@ class DataStore {
       const videoStream = (probeMeta?.streams || []).find(stream => stream.codec_type === "video");
       const audioStreamCount = probeMeta?.streams ? (probeMeta?.streams || []).filter(stream => stream.codec_type === "audio").length : undefined;
 
+      const connectionTimeout = streamMeta?.live_recording?.recording_config?.recording_params?.xc_params?.connection_timeout;
+      const reconnectionTimeout = streamMeta?.live_recording?.recording_config?.recording_params?.reconnect_timeout;
+      const partTtl = streamMeta?.live_recording_config?.part_ttl;
+
       return {
         codecName: videoStream?.codec_name,
-        connectionTimeout: streamMeta?.live_recording?.recording_config?.recording_params?.xc_params?.connection_timeout,
+        connectionTimeout: connectionTimeout ? connectionTimeout.toString() : null,
         description: streamMeta?.public?.description,
         display_title: streamMeta?.public?.asset_metadata?.display_title,
         drm: streamMeta?.live_recording_config?.drm_type,
@@ -282,8 +286,8 @@ class DataStore {
         format: probeType,
         imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
         originUrl: streamMeta?.live_recording?.recording_config?.recording_params?.origin_url || streamMeta?.live_recording_config?.url,
-        partTtl: streamMeta?.live_recording_config?.part_ttl,
-        reconnectionTimeout: streamMeta?.live_recording?.recording_config?.recording_params?.reconnect_timeout,
+        partTtl: partTtl ? partTtl.toString() : null,
+        reconnectionTimeout: reconnectionTimeout ? reconnectionTimeout.toString() : null,
         referenceUrl: streamMeta?.live_recording_config?.reference_url,
         simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
         title: streamMeta?.public?.name,

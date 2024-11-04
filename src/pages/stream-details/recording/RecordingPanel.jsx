@@ -4,9 +4,8 @@ import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {Loader} from "@/components/Loader.jsx";
-import {Box} from "@mantine/core";
+import {Box, Select} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
-import {Select} from "@/components/Inputs.jsx";
 import {
   CONNECTION_TIMEOUT_OPTIONS,
   RECONNECTION_TIMEOUT_OPTIONS,
@@ -24,7 +23,7 @@ const RecordingPanel = observer(({
   const [audioTracks, setAudioTracks] = useState([]);
   const [audioFormData, setAudioFormData] = useState(null);
   const [retention, setRetention] = useState(currentRetention);
-  const [connectionTimeout, setConnectionTimeout] = useState(currentConnectionTimeout === undefined ? 600 : CONNECTION_TIMEOUT_OPTIONS.map(item => item.value).includes(currentConnectionTimeout) ? currentConnectionTimeout : undefined);
+  const [connectionTimeout, setConnectionTimeout] = useState(currentConnectionTimeout === undefined ? "600" : CONNECTION_TIMEOUT_OPTIONS.map(item => item.value).includes(currentConnectionTimeout) ? currentConnectionTimeout : undefined);
   const [reconnectionTimeout, setReconnectionTimeout] = useState(RECONNECTION_TIMEOUT_OPTIONS.map(item => item.value).includes(currentReconnectionTimeout) ? currentReconnectionTimeout : undefined);
   const [applyingChanges, setApplyingChanges] = useState(false);
 
@@ -57,9 +56,9 @@ const RecordingPanel = observer(({
       await editStore.UpdateConfigMetadata({
         objectId: params.id,
         slug,
-        retention,
-        connectionTimeout,
-        reconnectionTimeout
+        retention: retention ? parseInt(retention) : null,
+        connectionTimeout: connectionTimeout ? parseInt(connectionTimeout) : null,
+        reconnectionTimeout: reconnectionTimeout ? parseInt(reconnectionTimeout) : null
       });
 
       await LoadConfigData();
@@ -88,38 +87,36 @@ const RecordingPanel = observer(({
         <form onSubmit={HandleSubmit} className="form">
           <div className="form__section-header">Retention Period</div>
           <Select
-            labelDescription="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
-            formName="retention"
-            options={RETENTION_OPTIONS}
+            description="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
+            name="retention"
+            data={RETENTION_OPTIONS}
+            placeholder="Select Retention"
             value={retention}
-            onChange={event => setRetention(event.target.value)}
+            onChange={value => setRetention(value)}
+            mb={16}
           />
           <div className="form__section-header">Timeout</div>
           <Select
             label="Connection Timeout"
-            labelDescription="The stream will remain active and wait for an input feed for this duration."
-            formName="connectionTimeout"
-            options={CONNECTION_TIMEOUT_OPTIONS}
+            description="The stream will remain active and wait for an input feed for this duration."
+            name="connectionTimeout"
+            data={CONNECTION_TIMEOUT_OPTIONS}
             style={{width: "100%"}}
-            defaultOption={{
-              value: "",
-              label: "Select Time Duration"
-            }}
+            placeholder="Select Time Duration"
             value={connectionTimeout}
-            onChange={(event) => setConnectionTimeout(event.target.value)}
+            onChange={(value) => setConnectionTimeout(value)}
+            mb={16}
           />
           <Select
             label="Reconnection Timeout"
-            labelDescription="If the input feed is disconnected, the stream will remain active and wait for a reconnection for this duration."
-            formName="reconnectionTimeout"
-            options={RECONNECTION_TIMEOUT_OPTIONS}
+            description="If the input feed is disconnected, the stream will remain active and wait for a reconnection for this duration."
+            name="reconnectionTimeout"
+            data={RECONNECTION_TIMEOUT_OPTIONS}
             style={{width: "100%"}}
-            defaultOption={{
-              value: "",
-              label: "Select Time Duration"
-            }}
+            placeholder="Select Time Duration"
             value={reconnectionTimeout}
-            onChange={(event) => setReconnectionTimeout(event.target.value)}
+            onChange={(value) => setReconnectionTimeout(value)}
+            mb={16}
           />
 
           <div className="form__section-header">Audio Tracks</div>

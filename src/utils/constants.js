@@ -82,18 +82,18 @@ export const DVR_DURATION_OPTIONS = [
 ];
 
 export const CONNECTION_TIMEOUT_OPTIONS = [
-  {label: "10 Minutes", value: 600},
-  {label: "30 Minutes", value: 1800},
-  {label: "1 Hour", value: 3600},
-  {label: "4 Hours", value: 14400}
+  {label: "10 Minutes", value: "600"},
+  {label: "30 Minutes", value: "1800"},
+  {label: "1 Hour", value: "3600"},
+  {label: "4 Hours", value: "14400"}
 ];
 
 export const RECONNECTION_TIMEOUT_OPTIONS = [
-  {label: "No Reconnection", value: -1},
-  {label: "10 Minutes", value: 600},
-  {label: "30 Minutes", value: 1800},
-  {label: "1 Hour", value: 3600},
-  {label: "4 Hours", value: 14400}
+  {label: "No Reconnection", value: "-1"},
+  {label: "10 Minutes", value: "600"},
+  {label: "30 Minutes", value: "1800"},
+  {label: "1 Hour", value: "3600"},
+  {label: "4 Hours", value: "14400"}
 ];
 
 // Human-readable text
