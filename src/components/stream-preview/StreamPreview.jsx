@@ -2,10 +2,10 @@ import {observer} from "mobx-react-lite";
 import {useParams, useNavigate} from "react-router-dom";
 import {rootStore, streamStore} from "@/stores/index.js";
 import AppFrame from "@/components/app-frame/AppFrame.jsx";
-import {Loader} from "@/components/Loader.jsx";
 import styles from "./StreamPreview.module.css";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import {ChevronLeftIcon} from "@/assets/icons";
+import {Flex, Loader} from "@mantine/core";
 
 const StreamPreview = observer(() => {
   const {id} = useParams();
@@ -17,17 +17,9 @@ const StreamPreview = observer(() => {
 
   if(!streamObject) {
     return (
-      <div
-        style={{
-          display: "flex",
-          height: "500px",
-          width: "100%",
-          alignItems: "center"
-        }}
-        className="stream-preview"
-      >
+      <Flex justify="center" h="50vh" align="center">
         <Loader />
-      </div>
+      </Flex>
     );
   }
 

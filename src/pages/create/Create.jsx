@@ -5,7 +5,6 @@ import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
 import {CircleInfoIcon, CollapseIcon} from "@/assets/icons";
 import styles from "./CreatePage.module.css";
-import {Loader} from "@/components/Loader.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
@@ -17,6 +16,7 @@ import {
   Box,
   Button,
   Flex,
+  Loader,
   Radio,
   Select,
   Stack,
@@ -511,7 +511,14 @@ const Create = observer(() => {
         </Accordion>
 
         <div style={{maxWidth: "200px"}}>
-          { loading ? <Loader /> : null }
+          {
+            loading ?
+              (
+                <Flex justify="center" m="16 0">
+                  <Loader />
+                </Flex>
+              ) : null
+          }
         </div>
 
         <Box mt="2rem" mb="2.5rem">

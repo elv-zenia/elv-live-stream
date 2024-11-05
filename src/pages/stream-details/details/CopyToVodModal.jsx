@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Box, Button, Flex, Modal, Select, Text, TextInput} from "@mantine/core";
-import {Loader} from "@/components/Loader.jsx";
+import {Box, Button, Flex, Loader, Modal, Select, Text, TextInput} from "@mantine/core";
 import {dataStore} from "@/stores/index.js";
 
 const CopyToVodModal = observer(({
@@ -104,12 +103,12 @@ const CopyToVodModal = observer(({
       </Box>
       {
         !error ? null :
-          <div className="modal__error">
+          <Text c="elv-red.4" fz="12px" mt="20px">
             Error: { error }
-          </div>
+          </Text>
       }
-      <Flex direction="row" align="center" className="modal__actions">
-        <Button variant="outline" onClick={close}>
+      <Flex direction="row" align="center" mt="1.5rem" justify="flex-end">
+        <Button variant="outline" onClick={close} mr="0.5rem">
           Cancel
         </Button>
         <Button
@@ -128,7 +127,7 @@ const CopyToVodModal = observer(({
             }
           }}
         >
-          {loading ? <Loader loader="inline" className="modal__loader"/> : "Copy"}
+          {loading ? <Loader type="dots" size="xs" /> : "Copy"}
         </Button>
       </Flex>
     </Modal>

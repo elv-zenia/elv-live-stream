@@ -1,10 +1,9 @@
 import {observer} from "mobx-react-lite";
-import {Box, Button, Flex, Select, TextInput, Tooltip} from "@mantine/core";
+import {Box, Button, Flex, Loader, Select, TextInput, Tooltip} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
-import {Loader} from "@/components/Loader.jsx";
 import {CircleInfoIcon} from "@/assets/icons";
 
 const GeneralPanel = observer(({slug}) => {
@@ -204,7 +203,7 @@ const GeneralPanel = observer(({slug}) => {
             />
           </Box>
           <Button type="submit" disabled={applyingChanges}>
-            {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Save"}
+            {applyingChanges ? <Loader type="dots" size="xs" /> : "Save"}
           </Button>
         </form>
       </Flex>

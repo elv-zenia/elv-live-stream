@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Flex, Modal, Text} from "@mantine/core";
-import {Loader} from "@/components/Loader.jsx";
+import {Button, Flex, Modal, Text, Loader} from "@mantine/core";
 
 const ConfirmModal = observer(({
   message,
@@ -33,12 +32,12 @@ const ConfirmModal = observer(({
       }
       {
         !error ? null :
-          <div className="modal__error">
+          <Text c="elv-red.4" fz="12px" mt="20px">
             Error: { error }
-          </div>
+          </Text>
       }
-      <Flex direction="row" align="center" className="modal__actions">
-        <Button variant="outline" onClick={CloseCallback}>
+      <Flex direction="row" align="center" mt="1.5rem" justify="flex-end">
+        <Button variant="outline" onClick={CloseCallback} mr="0.5rem">
           {cancelText}
         </Button>
         <Button
@@ -48,6 +47,7 @@ const ConfirmModal = observer(({
               setError(undefined);
               setLoading(true);
               await ConfirmCallback();
+              CloseCallback();
             } catch(error) {
               // eslint-disable-next-line no-console
               console.error(error);
@@ -57,7 +57,7 @@ const ConfirmModal = observer(({
             }
           }}
         >
-          {loading ? <Loader loader="inline" className="modal__loader"/> : confirmText}
+          {loading ? <Loader type="dots" size="xs" /> : confirmText}
         </Button>
       </Flex>
     </Modal>

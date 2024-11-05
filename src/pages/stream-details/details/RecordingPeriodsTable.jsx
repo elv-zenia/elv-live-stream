@@ -4,9 +4,8 @@ import {useDisclosure} from "@mantine/hooks";
 import {streamStore} from "@/stores";
 import {notifications} from "@mantine/notifications";
 import {RECORDING_STATUS_TEXT} from "@/utils/constants";
-import {Button, Flex, Text} from "@mantine/core";
+import {Button, Flex, Loader, Text} from "@mantine/core";
 import {DateFormat, Pluralize} from "@/utils/helpers";
-import {Loader} from "@/components/Loader.jsx";
 import {DataTable} from "mantine-datatable";
 import DetailsCopyModal from "@/pages/stream-details/details/CopyToVodModal";
 import {Runtime} from "@/pages/stream-details/details/DetailsPanel";
@@ -124,7 +123,7 @@ const RecordingPeriodsTable = observer(({
           style={{marginLeft: "auto"}}
           onClick={open}
         >
-          {copyingToVod ? <Loader loader="inline" className="modal__loader"/> : "Copy to VoD"}
+          {copyingToVod ? <Loader type="dots" size="xs" /> : "Copy to VoD"}
         </Button>
       </Flex>
       <DataTable

@@ -2,11 +2,10 @@ import {useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore, dataStore} from "@/stores";
 import {observer} from "mobx-react-lite";
-import {Tabs, Text} from "@mantine/core";
+import {Flex, Loader, Tabs, Text} from "@mantine/core";
 import {useDebouncedCallback, useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS, STATUS_MAP} from "@/utils/constants";
 import styles from "./StreamDetails.module.css";
-import {Loader} from "@/components/Loader.jsx";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {StreamIsActive} from "@/utils/helpers";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
@@ -70,7 +69,11 @@ const StreamDetailsPage = observer(() => {
   }, 500);
 
   if(!stream) {
-    return <Loader />;
+    return (
+      <Flex justify="center" h="50vh" align="center">
+        <Loader />
+      </Flex>
+    );
   }
 
   const actions = [

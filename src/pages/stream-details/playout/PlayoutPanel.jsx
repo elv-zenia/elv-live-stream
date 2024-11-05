@@ -9,6 +9,7 @@ import {
   FileButton,
   Flex,
   Group,
+  Loader,
   Menu,
   Paper,
   Select,
@@ -21,7 +22,6 @@ import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
 import {editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
-import {Loader} from "@/components/Loader.jsx";
 import styles from "./PlayoutPanel.module.css";
 import {CircleInfoIcon, EditIcon, TrashIcon} from "@/assets/icons";
 
@@ -366,7 +366,7 @@ const PlayoutPanel = observer(({
         disabled={applyingChanges}
         onClick={HandleSubmit}
       >
-        {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+        {applyingChanges ? <Loader type="dots" size="xs" /> : "Apply"}
       </Button>
     </>
   );

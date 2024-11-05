@@ -3,8 +3,7 @@ import {observer} from "mobx-react-lite";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Loader} from "@/components/Loader.jsx";
-import {Box, Button, Select} from "@mantine/core";
+import {Box, Button, Select, Loader} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {
   CONNECTION_TIMEOUT_OPTIONS,
@@ -130,7 +129,7 @@ const RecordingPanel = observer(({
               type="submit"
               disabled={applyingChanges}
             >
-              {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+              {applyingChanges ? <Loader type="dots" size="xs" /> : "Apply"}
             </Button>
           </Box>
         </form>

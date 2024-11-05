@@ -1,10 +1,9 @@
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Anchor, Box, Flex, Grid, Text, TextInput} from "@mantine/core";
+import {Anchor, Box, Flex, Grid, Loader, Text, TextInput} from "@mantine/core";
 import {useDebouncedValue} from "@mantine/hooks";
 
 import {dataStore, streamStore} from "@/stores";
-import {Loader} from "@/components/Loader.jsx";
 import {SortTable} from "@/utils/helpers";
 import {STATUS_MAP, STATUS_TEXT} from "@/utils/constants";
 import VideoContainer from "@/components/video-container/VideoContainer.jsx";

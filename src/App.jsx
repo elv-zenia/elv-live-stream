@@ -7,19 +7,16 @@ import "mantine-datatable/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
 
-import {AppShell, MantineProvider} from "@mantine/core";
+import {AppShell, Flex, Loader, MantineProvider} from "@mantine/core";
 import {Notifications} from "@mantine/notifications";
 
 import AppRoutes from "./Routes.jsx";
 import MantineTheme from "@/assets/MantineTheme";
-import {PageLoader} from "@/components/Loader.jsx";
 import LeftNavigation from "@/components/left-navigation/LeftNavigation.jsx";
 import DataWrapper from "@/components/data-wrapper/DataWrapper.jsx";
 import ErrorBanner from "@/components/error/ErrorBanner";
 
 const App = observer(() => {
-  if(!rootStore.loaded) { return <PageLoader />; }
-
   return (
     <MantineProvider withCSSVariables theme={MantineTheme}>
       <BrowserRouter>
@@ -29,7 +26,15 @@ const App = observer(() => {
             <ErrorBanner />
             <Notifications zIndex={1000} position="top-right" autoClose={10000} />
             <DataWrapper>
-              { rootStore.loaded ? <AppRoutes /> : null}
+              {
+                rootStore.loaded ?
+                  <AppRoutes /> :
+                  (
+                    <Flex justify="center" h="50vh" align="center">
+                      <Loader />
+                    </Flex>
+                  )
+              }
             </DataWrapper>
           </AppShell.Main>
         </AppShell>
