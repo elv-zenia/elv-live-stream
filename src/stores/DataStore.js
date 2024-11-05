@@ -273,6 +273,7 @@ class DataStore {
       const connectionTimeout = streamMeta?.live_recording?.recording_config?.recording_params?.xc_params?.connection_timeout;
       const reconnectionTimeout = streamMeta?.live_recording?.recording_config?.recording_params?.reconnect_timeout;
       const partTtl = streamMeta?.live_recording_config?.part_ttl;
+      const dvrMaxDuration = streamMeta?.live_recording?.playout_config?.dvr_max_duration;
 
       return {
         codecName: videoStream?.codec_name,
@@ -282,7 +283,7 @@ class DataStore {
         drm: streamMeta?.live_recording_config?.drm_type,
         dvrEnabled: streamMeta?.live_recording?.playout_config?.dvr_enabled,
         dvrStartTime: streamMeta?.live_recording?.playout_config?.dvr_start_time,
-        dvrMaxDuration: streamMeta?.live_recording?.playout_config?.dvr_max_duration,
+        dvrMaxDuration: dvrMaxDuration ? dvrMaxDuration.toString() : null,
         format: probeType,
         imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
         originUrl: streamMeta?.live_recording?.recording_config?.recording_params?.origin_url || streamMeta?.live_recording_config?.url,

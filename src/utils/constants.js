@@ -74,11 +74,11 @@ export const RETENTION_OPTIONS = [
 ];
 
 export const DVR_DURATION_OPTIONS = [
-  {label: "10 Minutes", value: 600},
-  {label: "30 Minutes", value: 1800},
-  {label: "1 Hour", value: 3600},
-  {label: "2 Hours", value: 7200},
-  {label: "4 Hours", value: 14400}
+  {label: "10 Minutes", value: "600"},
+  {label: "30 Minutes", value: "1800"},
+  {label: "1 Hour", value: "3600"},
+  {label: "2 Hours", value: "7200"},
+  {label: "4 Hours", value: "14400"}
 ];
 
 export const CONNECTION_TIMEOUT_OPTIONS = [

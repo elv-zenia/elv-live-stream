@@ -2,16 +2,28 @@ import {cloneElement, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import path from "path";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Box, Checkbox, FileButton, Flex, Group, Menu, Paper, Text, Textarea} from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Checkbox,
+  FileButton,
+  Flex,
+  Group,
+  Menu,
+  Paper,
+  Select,
+  Text,
+  Textarea,
+  Tooltip
+} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
 import {editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
-import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
 import styles from "./PlayoutPanel.module.css";
-import {EditIcon, TrashIcon} from "@/assets/icons";
+import {CircleInfoIcon, EditIcon, TrashIcon} from "@/assets/icons";
 
 const WatermarkBox = ({type, value, actions=[]}) => {
   if(value === undefined) { return null; }
@@ -65,7 +77,7 @@ const PlayoutPanel = observer(({
   const [showTextWatermarkInput, setShowTextWatermarkInput] = useState(false);
   const [dvrEnabled, setDvrEnabled] = useState(currentDvrEnabled || false);
   const [dvrStartTime, setDvrStartTime] = useState(currentDvrStartTime !== undefined ? new Date(currentDvrStartTime) : null);
-  const [dvrMaxDuration, setDvrMaxDuration] = useState(currentDvrMaxDuration !== undefined ? currentDvrMaxDuration : 0);
+  const [dvrMaxDuration, setDvrMaxDuration] = useState(currentDvrMaxDuration !== undefined ? currentDvrMaxDuration : "0");
 
   const [applyingChanges, setApplyingChanges] = useState(false);
   const resetRef = useRef(null);
@@ -144,24 +156,38 @@ const PlayoutPanel = observer(({
       <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={styles.box}>
         <div className="form__section-header">Playout</div>
         <Select
-          label="DRM"
-          formName="playbackEncryption"
-          options={ENCRYPTION_OPTIONS}
-          style={{width: "100%"}}
-          defaultOption={{
-            value: "",
-            label: "Select DRM"
-          }}
-          value={drm}
-          onChange={(event) => setDrm(event.target.value)}
-          tooltip={
-            ENCRYPTION_OPTIONS.map(({label, title, value}) =>
-              <div key={`encryption-info-${value}`} className="form__tooltip-item">
-                <div className="form__tooltip-item__encryption-title">{label}:</div>
-                <div>{title}</div>
-              </div>
-            )
+          label={
+            <Flex align="center" gap={6}>
+              DRM
+              <Tooltip
+                multiline
+                w={460}
+                label={
+                  ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+                    <Flex
+                      key={`encryption-info-${id}`}
+                      gap="1rem"
+                      lh={1.25}
+                      pb={5}
+                    >
+                      <Flex flex="0 0 35%">{ label }:</Flex>
+                      <Text fz="sm">{ title }</Text>
+                    </Flex>
+                  )
+                }
+              >
+                <Flex w={16}>
+                  <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+                </Flex>
+              </Tooltip>
+            </Flex>
           }
+          name="playbackEncryption"
+          data={ENCRYPTION_OPTIONS}
+          style={{width: "100%"}}
+          placeholder="Select DRM"
+          value={drm}
+          onChange={(value) => setDrm(value)}
         />
       </Box>
 
@@ -192,29 +218,20 @@ const PlayoutPanel = observer(({
                 valueFormat={"MM/DD/YYYY, HH:mm:ss A"}
                 minDate={new Date()}
                 w="100%"
-                size="md"
-                classNames={{
-                  label: styles.datePickerLabel,
-                  description: styles.datePickerDescription,
-                  input: styles.datePickerInput,
-                  placeholder: styles.datePickerPlaceholder
-              }}
+                size="sm"
                 clearable
                 withSeconds
               />
             </Box>
             <Select
               label="Max Duration"
-              labelDescription="Users are only able to seek back this many minutes. Useful for 24/7 streams and long events."
-              formName="maxDuration"
-              options={DVR_DURATION_OPTIONS}
+              description="Users are only able to seek back this many minutes. Useful for 24/7 streams and long events."
+              name="maxDuration"
+              data={DVR_DURATION_OPTIONS}
               style={{width: "100%"}}
-              defaultOption={{
-                value: "",
-                label: "Select Max Duration"
-              }}
+              placeholder="Select Max Duration"
               value={dvrMaxDuration}
-              onChange={(event) => setDvrMaxDuration(event.target.value)}
+              onChange={(value) => setDvrMaxDuration(value)}
               disabled={!dvrEnabled}
             />
           </>

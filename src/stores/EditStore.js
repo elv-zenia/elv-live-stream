@@ -636,8 +636,9 @@ class EditStore {
         metadata: playoutMeta
       });
 
+      // Update form values so as not to reload all data
       updateValue.dvrEnabled = dvrEnabled;
-      updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : parseInt(dvrMaxDuration);
+      updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : (dvrMaxDuration);
       updateValue.dvrStartTime = dvrStartTime ? dvrStartTime.toISOString() : undefined;
     }
 
