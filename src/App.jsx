@@ -14,7 +14,7 @@ import AppRoutes from "./Routes.jsx";
 import MantineTheme from "@/assets/MantineTheme";
 import {PageLoader} from "@/components/Loader.jsx";
 import LeftNavigation from "@/components/left-navigation/LeftNavigation.jsx";
-import DataWrapper from "@/components/DataWrapper.jsx";
+import DataWrapper from "@/components/data-wrapper/DataWrapper.jsx";
 import ErrorBanner from "@/components/error/ErrorBanner";
 
 const App = observer(() => {

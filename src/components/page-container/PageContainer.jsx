@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Box, Flex, Group, Text, TextInput, Title} from "@mantine/core";
+import {Box, Button, Flex, Group, Text, TextInput, Title} from "@mantine/core";
 import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
 import AlertMessage from "@/components/alert-message/AlertMessage.jsx";
 import titleSectionStyles from "./TitleSection.module.css";
@@ -65,16 +65,17 @@ const TopActions = ({showSearchBar, actions=[]}) => {
           (
             <Flex direction="row" gap="sm">
               {
-                actions.map(({label, variant="filled", onClick, disabled}) => (
-                  <button
+                actions.map(({label, variant="filled", onClick, disabled, leftSection}) => (
+                  <Button
                     type="button"
-                    className={variant === "filled" ? "button__primary" : "button__secondary"}
                     onClick={onClick}
                     key={`top-action-${label}`}
                     disabled={disabled}
+                    leftSection={leftSection}
+                    variant={variant}
                   >
-                    {label}
-                  </button>
+                    { label ? label : null }
+                  </Button>
                 ))
               }
             </Flex>

@@ -7,10 +7,11 @@ import {useDebouncedCallback, useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS, STATUS_MAP} from "@/utils/constants";
 import styles from "./StreamDetails.module.css";
 import {Loader} from "@/components/Loader.jsx";
-import ConfirmModal from "@/components/ConfirmModal";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {StreamIsActive} from "@/utils/helpers";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import StatusText from "@/components/status-text/StatusText.jsx";
+import {ChevronLeftIcon} from "@/assets/icons/index.js";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
@@ -74,10 +75,10 @@ const StreamDetailsPage = observer(() => {
 
   const actions = [
     {
-      label: "Back",
+      label: "Streams",
+      leftSection: <ChevronLeftIcon />,
       variant: "filled",
-      uppercase: true,
-      onClick: () => navigate(-1)
+      onClick: () => navigate("/streams")
     },
     {
       label: "Delete",

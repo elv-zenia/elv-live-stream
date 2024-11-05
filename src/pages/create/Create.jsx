@@ -8,7 +8,6 @@ import styles from "./CreatePage.module.css";
 import {Loader} from "@/components/Loader.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
-import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
 
 import {
@@ -28,6 +27,7 @@ import {
 import {useForm} from "@mantine/form";
 import {notifications} from "@mantine/notifications";
 import {IconAlertCircle} from "@tabler/icons-react";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -278,6 +278,23 @@ const Create = observer(() => {
     callback(newData);
   };
 
+  const HandleProbeConfirm = async () => {
+    const {objectId, slug} = await editStore.InitLiveStreamObject({
+      basicFormData,
+      advancedData,
+      drmFormData
+    });
+
+    await streamStore.ConfigureStream({objectId, slug});
+
+    setObjectData({objectId, slug});
+
+    notifications.show({
+      title: "Probed stream",
+      message: "Stream object was successfully created and probed"
+    });
+  };
+
   const HandleSubmit = async () => {
     // TODO: Parse input values as integer when appropriate
     // TODO: I.e., Retention
@@ -501,25 +518,21 @@ const Create = observer(() => {
           <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Save"} />
         </Box>
       </form>
-      <ProbeConfirmation
+      <ConfirmModal
         show={showProbeConfirmation}
-        url={basicFormData.url}
         CloseCallback={() => setShowProbeConfirmation(false)}
+        title="Create and Probe Stream"
+        message="Are you sure you want to probe the stream? This will also create the content object."
+        loadingText={`Please send your stream to ${basicFormData.url || "the URL you specified"}.`}
         ConfirmCallback={async () => {
-          const {objectId, slug} = await editStore.InitLiveStreamObject({
-            basicFormData,
-            advancedData,
-            drmFormData
-          });
-
-          await streamStore.ConfigureStream({objectId, slug});
-
-          setObjectData({objectId, slug});
-
-          notifications.show({
-            title: "Probed stream",
-            message: "Stream object was successfully created and probed"
-          });
+          try {
+            await HandleProbeConfirm();
+            setShowProbeConfirmation(false);
+          } catch(error) {
+            // eslint-disable-next-line no-console
+            console.error("Unable to probe stream", error);
+            throw Error(error);
+          }
         }}
       />
     </PageContainer>

@@ -8,7 +8,7 @@ from the core app, which owns user account information and keys
 import URI from "urijs";
 import {observer} from "mobx-react-lite";
 import React, {useEffect, useRef} from "react";
-import {rootStore} from "@/stores";
+import {rootStore} from "@/stores/index.js";
 
 // Ensure error objects can be properly serialized in messages
 if(!("toJSON" in Error.prototype)) {
@@ -100,7 +100,7 @@ const IFrameBase = ({
       allow="encrypted-media *"
       allowFullScreen
       sandbox={SandboxPermissions()}
-      className={"app-frame " + (className || "")}
+      className={className}
     />
   );
 };

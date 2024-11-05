@@ -134,6 +134,10 @@ input[type="submit"],
   }
 }
 
+.button--icon {
+  min-width: fit-content;
+}
+
 a.button {
   display: inline-block;
   height: 35px;

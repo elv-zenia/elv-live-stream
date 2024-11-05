@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import Create from "@/pages/create/Create.jsx";
 import Streams from "@/pages/streams/Streams.jsx";
 import Monitor from "@/pages/monitor/Monitor.jsx";
-import StreamPreview from "@/pages/streams/StreamPreview.jsx";
+import StreamPreview from "@/components/stream-preview/StreamPreview.jsx";
 import StreamDetailsPage from "@/pages/stream-details/StreamDetailsPage";
 
 const AppRoutes = observer(() => {

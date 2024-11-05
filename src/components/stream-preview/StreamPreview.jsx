@@ -1,10 +1,11 @@
 import {observer} from "mobx-react-lite";
-import {useParams, Link} from "react-router-dom";
-import {IconArrowBackUp} from "@tabler/icons-react";
-import {ActionIcon} from "@mantine/core";
-import {rootStore, streamStore} from "@/stores";
-import AppFrame from "@/components/AppFrame.jsx";
+import {useParams, useNavigate} from "react-router-dom";
+import {rootStore, streamStore} from "@/stores/index.js";
+import AppFrame from "@/components/app-frame/AppFrame.jsx";
 import {Loader} from "@/components/Loader.jsx";
+import styles from "./StreamPreview.module.css";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
+import {ChevronLeftIcon} from "@/assets/icons/index.js";
 
 const StreamPreview = observer(() => {
   const {id} = useParams();
@@ -12,6 +13,7 @@ const StreamPreview = observer(() => {
     streamStore.streams[slug].objectId === id
   ));
   const streamObject = streamStore.streams?.[streamSlug];
+  const navigate = useNavigate();
 
   if(!streamObject) {
     return (
@@ -41,22 +43,26 @@ const StreamPreview = observer(() => {
   const appUrl = EluvioConfiguration.displayAppUrl;
 
   return (
-    <div className="stream-preview">
-      <div className="page-header">
-        <ActionIcon component={Link} to="/streams" title="Back to Streams">
-          <IconArrowBackUp />
-        </ActionIcon>
-        Preview { streamObject.display_title || streamObject.title || streamObject.objectId }
-      </div>
+    <PageContainer
+      title={`Preview ${streamObject.display_title || streamObject.title || streamObject.objectId}`}
+      actions={[
+        {
+          label: "Streams",
+          leftSection: <ChevronLeftIcon />,
+          variant: "filled",
+          onClick: () => navigate("/streams")
+        }
+      ]}
+    >
       <AppFrame
-        className="display-frame"
+        className={styles.root}
         appUrl={appUrl}
         queryParams={queryParams}
         onComplete={() => this.setState({completed: true})}
         onCancel={() => this.setState({completed: true})}
         Reload={() => this.setState({pageVersion: this.state.pageVersion + 1})}
       />
-    </div>
+    </PageContainer>
   );
 });
 

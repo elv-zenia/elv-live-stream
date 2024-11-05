@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import {streamStore} from "@/stores/index.js";
 import {ActionIcon, AspectRatio, Box} from "@mantine/core";
 import {PlayCircleIcon as PlayIcon} from "@/assets/icons/index.js";
-import Video from "@/components/Video.jsx";
+import Video from "@/components/video/Video.jsx";
 import {IconX} from "@tabler/icons-react";
 import styles from "./VideoContainer.module.css";
 
