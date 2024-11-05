@@ -4,7 +4,7 @@ import {useDisclosure} from "@mantine/hooks";
 import {streamStore} from "@/stores";
 import {notifications} from "@mantine/notifications";
 import {RECORDING_STATUS_TEXT} from "@/utils/constants";
-import {Flex, Text} from "@mantine/core";
+import {Button, Flex, Text} from "@mantine/core";
 import {DateFormat, Pluralize} from "@/utils/helpers";
 import {Loader} from "@/components/Loader.jsx";
 import {DataTable} from "mantine-datatable";
@@ -119,15 +119,13 @@ const RecordingPeriodsTable = observer(({
         {
           selectedRecords.length === 0 ? "" : `${Pluralize({base: "item", count: selectedRecords.length})} selected`
         }
-        <button
-          type="button"
-          className="button__primary"
+        <Button
           disabled={selectedRecords.length === 0 || copyingToVod}
           style={{marginLeft: "auto"}}
           onClick={open}
         >
           {copyingToVod ? <Loader loader="inline" className="modal__loader"/> : "Copy to VoD"}
-        </button>
+        </Button>
       </Flex>
       <DataTable
         mb="4rem"

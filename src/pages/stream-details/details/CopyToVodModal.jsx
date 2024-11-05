@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Modal, Select, Text, TextInput} from "@mantine/core";
+import {Box, Button, Flex, Modal, Select, Text, TextInput} from "@mantine/core";
 import {Loader} from "@/components/Loader.jsx";
 import {dataStore} from "@/stores/index.js";
 
@@ -109,13 +109,11 @@ const CopyToVodModal = observer(({
           </div>
       }
       <Flex direction="row" align="center" className="modal__actions">
-        <button type="button" className="button__secondary" onClick={close}>
+        <Button variant="outline" onClick={close}>
           Cancel
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           disabled={loading || !libraryId || !title}
-          className="button__primary"
           onClick={async () => {
             try {
               setError(undefined);
@@ -131,7 +129,7 @@ const CopyToVodModal = observer(({
           }}
         >
           {loading ? <Loader loader="inline" className="modal__loader"/> : "Copy"}
-        </button>
+        </Button>
       </Flex>
     </Modal>
   );

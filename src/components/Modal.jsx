@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Root, Overlay, Content, Title, Description, Close} from "@radix-ui/react-dialog";
 import {Loader} from "@/components/Loader.jsx";
-import {Text} from "@mantine/core";
+import {Button, Text} from "@mantine/core";
 
 const modalSizes = {
   "XS": "xs",
@@ -59,15 +59,13 @@ const Modal = ({
               {
                 !hideCancelButton &&
                 <Close asChild>
-                  <button type="button" className="button__secondary" onClick={CancelCallback}>
+                  <Button variant="outline" onClick={CancelCallback}>
                     { cancelText }
-                  </button>
+                  </Button>
                 </Close>
               }
-              <button
-                type="button"
+              <Button
                 disabled={loading}
-                className="button__primary"
                 onClick={async () => {
                   try {
                     setError(undefined);
@@ -104,7 +102,7 @@ const Modal = ({
                 }}
               >
                 { loading ? <Loader loader="inline" className="modal__loader" /> : confirmText }
-              </button>
+              </Button>
             </div>
           </Content>
         </Overlay>

@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Flex, Modal, Text} from "@mantine/core";
+import {Button, Flex, Modal, Text} from "@mantine/core";
 import {Loader} from "@/components/Loader.jsx";
 
 const ConfirmModal = observer(({
@@ -38,13 +38,11 @@ const ConfirmModal = observer(({
           </div>
       }
       <Flex direction="row" align="center" className="modal__actions">
-        <button type="button" className="button__secondary" onClick={CloseCallback}>
+        <Button variant="outline" onClick={CloseCallback}>
           {cancelText}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           disabled={loading}
-          className="button__primary"
           onClick={async () => {
             try {
               setError(undefined);
@@ -60,7 +58,7 @@ const ConfirmModal = observer(({
           }}
         >
           {loading ? <Loader loader="inline" className="modal__loader"/> : confirmText}
-        </button>
+        </Button>
       </Flex>
     </Modal>
   );

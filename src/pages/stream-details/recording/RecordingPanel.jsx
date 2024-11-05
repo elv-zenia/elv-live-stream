@@ -4,7 +4,7 @@ import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {Loader} from "@/components/Loader.jsx";
-import {Box, Select} from "@mantine/core";
+import {Box, Button, Select} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {
   CONNECTION_TIMEOUT_OPTIONS,
@@ -126,13 +126,12 @@ const RecordingPanel = observer(({
             setAudioFormData={setAudioFormData}
           />
           <Box mt="24px">
-            <button
+            <Button
               type="submit"
-              className="button__primary"
               disabled={applyingChanges}
             >
               {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
-            </button>
+            </Button>
           </Box>
         </form>
       </Box>

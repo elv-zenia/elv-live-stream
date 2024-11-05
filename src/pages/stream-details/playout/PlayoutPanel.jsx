@@ -4,7 +4,7 @@ import path from "path";
 import {observer} from "mobx-react-lite";
 import {
   ActionIcon,
-  Box,
+  Box, Button,
   Checkbox,
   FileButton,
   Flex,
@@ -246,7 +246,7 @@ const PlayoutPanel = observer(({
         {/* Add WM button */}
         <Menu>
           <Menu.Target>
-            <button type="button" className="button__secondary">Add Watermark</button>
+            <Button variant="outline">Add Watermark</Button>
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item onClick={() => {
@@ -361,14 +361,13 @@ const PlayoutPanel = observer(({
           ]}
         />
       </Box>
-      <button
+      <Button
         type="button"
         disabled={applyingChanges}
-        className="button__primary"
         onClick={HandleSubmit}
       >
         {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
-      </button>
+      </Button>
     </>
   );
 });

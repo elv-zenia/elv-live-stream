@@ -1,5 +1,5 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Select, TextInput, Tooltip} from "@mantine/core";
+import {Box, Button, Flex, Select, TextInput, Tooltip} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
@@ -203,9 +203,9 @@ const GeneralPanel = observer(({slug}) => {
               mb={16}
             />
           </Box>
-          <button type="submit" className="button__primary" disabled={applyingChanges}>
+          <Button type="submit" disabled={applyingChanges}>
             {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Save"}
-          </button>
+          </Button>
         </form>
       </Flex>
     </>

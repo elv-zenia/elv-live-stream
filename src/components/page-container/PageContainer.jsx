@@ -67,7 +67,6 @@ const TopActions = ({showSearchBar, actions=[]}) => {
               {
                 actions.map(({label, variant="filled", onClick, disabled, leftSection}) => (
                   <Button
-                    type="button"
                     onClick={onClick}
                     key={`top-action-${label}`}
                     disabled={disabled}

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
+import {ActionIcon, Box, Code, Flex, Grid, Skeleton, Stack, Text} from "@mantine/core";
 import {streamStore} from "@/stores";
 import {observer} from "mobx-react-lite";
 import {useParams} from "react-router-dom";
@@ -152,7 +152,7 @@ const DetailsPanel = observer(({libraryId, title, recordingInfo, currentRetentio
                   embedUrl &&
                   <Flex direction="row" justify="center" align="center">
                     <Text size="xs" truncate="end" maw={300} ta="center">{embedUrl}</Text>
-                    <button type="button" onClick={() => {
+                    <ActionIcon variant="transparent" onClick={() => {
                       CopyToClipboard({text: embedUrl});
                       setCopied(true);
 
@@ -164,7 +164,7 @@ const DetailsPanel = observer(({libraryId, title, recordingInfo, currentRetentio
                         copied ?
                           <IconCheck height={16} width={16}/> : <ClipboardIcon/>
                       }
-                    </button>
+                    </ActionIcon>
                   </Flex>
                 }
               </Skeleton>

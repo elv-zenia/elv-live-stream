@@ -1,4 +1,3 @@
-import ArrowBackIcon from "@/assets/icons/ArrowBackIcon.jsx";
 import ArrowNarrowLeftIcon from "@/assets/icons/ArrowNarrowLeftIcon.jsx";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeftIcon.jsx";
 import CircleInfoIcon from "@/assets/icons/CircleInfoIcon.jsx";
@@ -16,7 +15,6 @@ import TrashIcon from "@/assets/icons/TrashIcon.jsx";
 import VideoPlusIcon from "@/assets/icons/VideoPlusIcon.jsx";
 
 export {
-  ArrowBackIcon,
   ArrowNarrowLeftIcon,
   ChevronLeftIcon,
   CircleInfoIcon,
