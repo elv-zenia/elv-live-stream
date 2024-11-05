@@ -1,12 +1,12 @@
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {TextInput} from "@mantine/core";
+import {Anchor, Box, Flex, Grid, Text, TextInput} from "@mantine/core";
 import {useDebouncedValue} from "@mantine/hooks";
 
 import {dataStore, streamStore} from "@/stores";
 import {Loader} from "@/components/Loader.jsx";
 import {SortTable} from "@/utils/helpers";
-import {STATUS_TEXT} from "@/utils/constants";
+import {STATUS_MAP, STATUS_TEXT} from "@/utils/constants";
 import VideoContainer from "@/components/video-container/VideoContainer.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 
@@ -50,50 +50,55 @@ const Monitor = observer(() => {
               <Loader />
             </div> :
             streams.length === 0 ? (debouncedFilter ? "No Matching Streams" : "No Streams Found") :
-              <div className="monitor__grid-items">
+              <Grid gutter="lg">
                 {
-                  streams
-                    .map((stream, index) => {
+                  streams.map((stream, index) => {
                       return (
-                        <div key={stream.slug} className="monitor__grid-item-container">
-                          <VideoContainer index={index} slug={stream.slug} showPreview={streamStore.showMonitorPreviews} />
-                          <div className="monitor__grid-item-details">
-                            <div className="monitor__grid-item-details-content">
-                              <div className="monitor__grid-item-details-top">
-                                <div className="monitor__grid-item-title">
-                                  { stream.title }
-                                </div>
-                                <div className="monitor__grid-item-id">
-                                  { stream.objectId || "" }
-                                </div>
-                              </div>
-                              <div className="monitor__grid-item-details-bottom">
-                                {
-                                  !stream.status ? <div /> :
-                                    <div className={`monitor__grid-item-status ${stream.status === "running" ? "monitor__grid-item-details--green" : ""}`}>
-                                      {STATUS_TEXT[stream.status]}
-                                    </div>
-                                }
-                                {
-                                  stream.embedUrl &&
-                                  <a
-                                    className="monitor__grid-item-link"
-                                    href={stream.embedUrl}
-                                    target="_blank" rel="noreferrer"
-                                  >
-                                    <div className="monitor__grid-item-link-text">
+                        <Grid.Col key={stream.slug} span="content">
+                          <Flex w={300} h={300} direction="column">
+                            <VideoContainer index={index} slug={stream.slug} showPreview={streamStore.showMonitorPreviews} />
+                            <Flex flex={1} p="0.5rem 0.75rem" bg="gray.9">
+                              <Flex direction="column" justify="space-between" w="100%">
+                                <Box>
+                                  <Text fw={700} c="elv-neutral.0">
+                                    { stream.title }
+                                  </Text>
+                                  <Text c="elv-neutral.0" fz="0.6rem">
+                                    { stream.objectId || "" }
+                                  </Text>
+                                </Box>
+                                <Flex align="flex-end" justify="space-between">
+                                  {
+                                    !stream.status ?
+                                      <div /> :
+                                      (
+                                        <Text fz="0.6rem" c={(stream.status === STATUS_MAP.RUNNING) ? "elv-green.5" : "elv-neutral.0"}>
+                                          {STATUS_TEXT[stream.status]}
+                                        </Text>
+                                      )
+                                  }
+                                  {
+                                    stream.embedUrl &&
+                                    <Anchor
+                                      href={stream.embedUrl}
+                                      underline="never"
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      fz="0.6rem"
+                                      style={{textDecoration: "none"}}
+                                    >
                                       Embed URL
-                                    </div>
-                                  </a>
-                                }
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                                    </Anchor>
+                                  }
+                                </Flex>
+                              </Flex>
+                            </Flex>
+                          </Flex>
+                        </Grid.Col>
                       );
                     })
                 }
-              </div>
+              </Grid>
       }
     </PageContainer>
   );

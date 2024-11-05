@@ -56,7 +56,7 @@ export const VideoContainer = observer(({slug, index, showPreview, allowClose=tr
               role="button"
               tabIndex={1}
               onClick={() => setPlay(true)}
-              className="monitor__video-placeholder"
+              className={styles.videoPlaceholder}
             >
               {
                 status === "running" &&
@@ -64,7 +64,7 @@ export const VideoContainer = observer(({slug, index, showPreview, allowClose=tr
               }
               {
                 (!showPreview || !frameSegmentUrl) ? null :
-                  <video src={frameSegmentUrl} className="monitor__video-frame" controls={false} onContextMenu={e => e.preventDefault()} />
+                  <video src={frameSegmentUrl} className={styles.videoFrame} controls={false} onContextMenu={e => e.preventDefault()} />
               }
             </button> :
             <>
