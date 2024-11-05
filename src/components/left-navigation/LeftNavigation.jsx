@@ -1,4 +1,4 @@
-import {VideoPlusIcon, StreamIcon, MediaIcon} from "@/assets/icons/index.js";
+import {VideoPlusIcon, StreamIcon, MediaIcon} from "@/assets/icons";
 import {AppShell, NavLink} from "@mantine/core";
 import {useLocation, useNavigate} from "react-router-dom";
 import styles from "./LeftNavigation.module.css";

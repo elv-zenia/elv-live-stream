@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom";
 import {observer} from "mobx-react-lite";
 
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
-import {CircleInfoIcon, CollapseIcon} from "@/assets/icons/index.js";
+import {CircleInfoIcon, CollapseIcon} from "@/assets/icons";
 import styles from "./CreatePage.module.css";
 import {Loader} from "@/components/Loader.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";

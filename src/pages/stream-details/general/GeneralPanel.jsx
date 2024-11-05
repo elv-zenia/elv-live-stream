@@ -5,7 +5,7 @@ import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
 import {Loader} from "@/components/Loader.jsx";
-import {CircleInfoIcon} from "@/assets/icons/index.js";
+import {CircleInfoIcon} from "@/assets/icons";
 
 const GeneralPanel = observer(({slug}) => {
   const [formData, setFormData] = useState({

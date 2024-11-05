@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {Box, Button, Flex, Group, Text, TextInput, Title} from "@mantine/core";
-import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
+import {MagnifyingGlassIcon} from "@/assets/icons";
 import AlertMessage from "@/components/alert-message/AlertMessage.jsx";
 import titleSectionStyles from "./TitleSection.module.css";
 import searchBarStyles from "./SearchBar.module.css";

@@ -8,6 +8,7 @@ import {Loader} from "@/components/Loader.jsx";
 import {SortTable} from "@/utils/helpers";
 import {STATUS_TEXT} from "@/utils/constants";
 import VideoContainer from "@/components/video-container/VideoContainer.jsx";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
 
 const Monitor = observer(() => {
   const [filter, setFilter] = useState("");
@@ -25,15 +26,16 @@ const Monitor = observer(() => {
       .sort(SortTable({sortStatus: {columnAccessor: "title", direction: "asc"}}));
 
   return (
-    <div className="monitor">
-      <div className="page-header monitor__page-header">
-        <div>
-          Monitor
-        </div>
-        <button className="button__secondary" onClick={() => streamStore.ToggleMonitorPreviews()}>
-          { streamStore.showMonitorPreviews ? "Hide Previews" : "Show Previews"}
-        </button>
-      </div>
+    <PageContainer
+      title="Monitor"
+      actions={[
+        {
+          label: streamStore.showMonitorPreviews ? "Hide Previews" : "Show Previews",
+          variant: "outline",
+          onClick: () => streamStore.ToggleMonitorPreviews()
+        }
+      ]}
+    >
       <TextInput
         maw={400}
         placeholder="Search by name or object ID"
@@ -93,7 +95,7 @@ const Monitor = observer(() => {
                 }
               </div>
       }
-    </div>
+    </PageContainer>
   );
 });
 

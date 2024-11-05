@@ -11,7 +11,7 @@ import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {StreamIsActive} from "@/utils/helpers";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import StatusText from "@/components/status-text/StatusText.jsx";
-import {ChevronLeftIcon} from "@/assets/icons/index.js";
+import {ChevronLeftIcon} from "@/assets/icons";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();

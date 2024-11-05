@@ -5,7 +5,7 @@ import AppFrame from "@/components/app-frame/AppFrame.jsx";
 import {Loader} from "@/components/Loader.jsx";
 import styles from "./StreamPreview.module.css";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
-import {ChevronLeftIcon} from "@/assets/icons/index.js";
+import {ChevronLeftIcon} from "@/assets/icons";
 
 const StreamPreview = observer(() => {
   const {id} = useParams();
