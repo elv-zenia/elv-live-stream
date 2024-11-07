@@ -15,6 +15,13 @@ export default defineConfig({
     }),
     react()
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler"
+      }
+    }
+  },
   optimizeDeps: {
     include: ["hash.js", "@eluvio/elv-client-js", "mux-embed"],
   },
