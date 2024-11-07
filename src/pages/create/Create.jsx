@@ -21,7 +21,7 @@ import {
   Select,
   Stack,
   Text,
-  TextInput,
+  TextInput, Title,
   Tooltip
 } from "@mantine/core";
 import {useForm} from "@mantine/form";
@@ -171,7 +171,7 @@ const AdvancedSettingsPanel = observer(({
           </Flex>
         </Alert>
       }
-      <div className="form__section-header">Audio</div>
+      <Title order={3} c="elv-gray.8">Audio</Title>
       <AudioTracksTable
         records={audioTracks}
         audioFormData={audioFormData}
@@ -522,7 +522,9 @@ const Create = observer(() => {
         </div>
 
         <Box mt="2rem" mb="2.5rem">
-          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Save"} />
+          <Button disabled={isCreating} type="submit">
+            { isCreating ? "Submitting..." : "Save" }
+          </Button>
         </Box>
       </form>
       <ConfirmModal

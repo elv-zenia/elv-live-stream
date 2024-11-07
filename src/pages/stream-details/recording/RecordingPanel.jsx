@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Box, Button, Select, Loader} from "@mantine/core";
+import {Box, Button, Select, Loader, Title} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {
   CONNECTION_TIMEOUT_OPTIONS,
@@ -82,9 +82,9 @@ const RecordingPanel = observer(({
 
   return (
     <>
-      <Box mb="24px" maw="60%">
-        <form onSubmit={HandleSubmit} className="form">
-          <div className="form__section-header">Retention Period</div>
+      <Box mb="24px" w="700px">
+        <form onSubmit={HandleSubmit}>
+          <Title order={3} c="elv-gray.8">Retention Period</Title>
           <Select
             description="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
             name="retention"
@@ -94,7 +94,7 @@ const RecordingPanel = observer(({
             onChange={value => setRetention(value)}
             mb={16}
           />
-          <div className="form__section-header">Timeout</div>
+          <Title order={3} c="elv-gray.8">Timeout</Title>
           <Select
             label="Connection Timeout"
             description="The stream will remain active and wait for an input feed for this duration."
@@ -118,7 +118,7 @@ const RecordingPanel = observer(({
             mb={16}
           />
 
-          <div className="form__section-header">Audio Tracks</div>
+          <Title order={3} c="elv-gray.8">Audio Tracks</Title>
           <AudioTracksTable
             records={audioTracks}
             audioFormData={audioFormData}

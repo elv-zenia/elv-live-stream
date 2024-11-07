@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {
   IconPlayerPlay,
   IconPlayerStop,
@@ -15,10 +15,11 @@ import {dataStore, editStore, streamStore} from "@/stores";
 import {SanitizeUrl, SortTable, VideoBitrateReadable, StreamIsActive} from "@/utils/helpers";
 import {STATUS_MAP} from "@/utils/constants";
 import {CODEC_TEXT, FORMAT_TEXT} from "@/utils/constants";
+import styles from "./Streams.module.css";
 
 import {useDebouncedCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
-import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import {Text, ActionIcon, Group, TextInput, Button} from "@mantine/core";
 import StatusText from "@/components/status-text/StatusText.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
@@ -27,6 +28,7 @@ const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
+  const navigate = useNavigate();
 
   const ResetModal = () => {
     setModalData({
@@ -89,18 +91,17 @@ const Streams = observer(() => {
         records={records}
         emptyState={
           // Mantine bug where empty state link still present underneath table rows
-          !records &&
-          <div className="streams__empty-data-table">
-            <div className="streams__empty-data-table-text">
+          (!records || records.length === 0) &&
+          <div className={styles.emptyDataTable}>
+            <div className={styles.emptyDataTableText}>
               No streams available
             </div>
-            <Link className="button button__primary" to="/create">
-              <div className="button__link-inner">
-                <span className="button__link-text">
-                  Create New Stream
-                </span>
-              </div>
-            </Link>
+            <Button
+              onClick={() => navigate("/create")}
+              variant="filled"
+            >
+              Create New Stream
+            </Button>
           </div>
         }
         sortStatus={sortStatus}
@@ -108,7 +109,7 @@ const Streams = observer(() => {
         columns={[
           { accessor: "title", title: "Name", sortable: true, render: record => (
             <div className="table__multi-line">
-              <Link to={`/streams/${record.objectId || record.slug}`}>
+              <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
                 <Text fw={600}>{record.display_title || record.slug}</Text>
               </Link>
               <Text c="dimmed" fz="xs">{record.objectId}</Text>

@@ -14,7 +14,7 @@ import {
   Paper,
   Select,
   Text,
-  Textarea,
+  Textarea, Title,
   Tooltip
 } from "@mantine/core";
 import {notifications} from "@mantine/notifications";
@@ -152,9 +152,9 @@ const PlayoutPanel = observer(({
   };
 
   return (
-    <>
-      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={styles.box}>
-        <div className="form__section-header">Playout</div>
+    <Box w="700px">
+      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" className={styles.box}>
+        <Title order={3} c="elv-gray.8">Playout</Title>
         <Select
           label={
             <Flex align="center" gap={6}>
@@ -191,8 +191,8 @@ const PlayoutPanel = observer(({
         />
       </Box>
 
-      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} maw="50%" className={styles.box}>
-        <div className="form__section-header">DVR</div>
+      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} className={styles.box}>
+        <Title order={3} c="elv-gray.8">DVR</Title>
 
         <Box mb={24}>
           <Checkbox
@@ -238,9 +238,9 @@ const PlayoutPanel = observer(({
         }
       </Box>
 
-      <Box mb="24px" maw="50%">
+      <Box mb="24px">
         <Group mb={16}>
-          <div className="form__section-header">Visible Watermark</div>
+          <Title order={3} c="elv-gray.8">Visible Watermark</Title>
         </Group>
 
         {/* Add WM button */}
@@ -368,7 +368,7 @@ const PlayoutPanel = observer(({
       >
         {applyingChanges ? <Loader type="dots" size="xs" /> : "Apply"}
       </Button>
-    </>
+    </Box>
   );
 });
 

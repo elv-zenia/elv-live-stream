@@ -1,5 +1,5 @@
 import {observer} from "mobx-react-lite";
-import {Box, Button, Flex, Loader, Select, TextInput, Tooltip} from "@mantine/core";
+import {Box, Button, Flex, Loader, Select, Text, TextInput, Tooltip} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
@@ -111,8 +111,8 @@ const GeneralPanel = observer(({slug}) => {
   return (
     <>
       <Flex direction="column" style={{flexGrow: "1"}}>
-        <form className="form" onSubmit={HandleSubmit}>
-          <Box mb="24px" maw="70%">
+        <form onSubmit={HandleSubmit}>
+          <Box mb="24px" w="700px">
             <TextInput
               label="Name"
               name="name"
@@ -167,10 +167,15 @@ const GeneralPanel = observer(({slug}) => {
                     w={460}
                     label={
                       Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
-                        <div key={`permission-info-${short}`} className="form__tooltip-item">
-                          <div className="form__tooltip-item__permission-title">{ short }:</div>
-                          <div>{ description }</div>
-                        </div>
+                        <Flex
+                          key={`permission-info-${short}`}
+                          gap="1rem"
+                          lh={1.25}
+                          pb={5}
+                        >
+                          <Flex flex="0 0 25%">{ short }:</Flex>
+                          <Text fz="sm">{ description }</Text>
+                        </Flex>
                       )
                     }
                   >
