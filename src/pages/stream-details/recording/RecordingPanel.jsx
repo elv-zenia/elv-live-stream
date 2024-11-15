@@ -89,7 +89,6 @@ const RecordingPanel = observer(({
             description="Select a retention period to specify how long stream parts will remain in the fabric before being removed."
             name="retention"
             data={RETENTION_OPTIONS}
-            placeholder="Select Retention"
             value={retention}
             onChange={value => setRetention(value)}
             mb={16}
@@ -101,7 +100,6 @@ const RecordingPanel = observer(({
             name="connectionTimeout"
             data={CONNECTION_TIMEOUT_OPTIONS}
             style={{width: "100%"}}
-            placeholder="Select Time Duration"
             value={connectionTimeout}
             onChange={(value) => setConnectionTimeout(value)}
             mb={16}
@@ -112,7 +110,6 @@ const RecordingPanel = observer(({
             name="reconnectionTimeout"
             data={RECONNECTION_TIMEOUT_OPTIONS}
             style={{width: "100%"}}
-            placeholder="Select Time Duration"
             value={reconnectionTimeout}
             onChange={(value) => setReconnectionTimeout(value)}
             mb={16}

@@ -148,7 +148,6 @@ const GeneralPanel = observer(({slug}) => {
                 ))
               }
               value={formData.accessGroup}
-              placeholder="Select Access Group"
               onChange={value => {
                 HandleFormChange({
                   target: {
@@ -187,7 +186,6 @@ const GeneralPanel = observer(({slug}) => {
               }
               description="Set a permission level."
               name="permission"
-              placeholder="Select Permission"
               value={formData.permission}
               onChange={value => {
                 HandleFormChange({

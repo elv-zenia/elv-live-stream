@@ -24,16 +24,11 @@ import {
   TextInput, Title,
   Tooltip
 } from "@mantine/core";
-import {useForm} from "@mantine/form";
+import {isNotEmpty, useForm} from "@mantine/form";
 import {notifications} from "@mantine/notifications";
 import {IconAlertCircle} from "@tabler/icons-react";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
-
-const FORM_KEYS = {
-  BASIC: "BASIC",
-  ADVANCED: "ADVANCED",
-  DRM: "DRM"
-};
+import {ValidateTextField} from "@/utils/validators.js";
 
 const Permissions = observer(({form}) => {
   const permissionLevels = rootStore.client.permissionLevels;
@@ -68,7 +63,6 @@ const Permissions = observer(({form}) => {
       }
       description="Set a permission level."
       name="permission"
-      placeholder="Select Permission"
       data={
         Object.keys(permissionLevels || {}).map(permissionName => (
           {
@@ -135,11 +129,10 @@ const AdvancedSettingsPanel = observer(({
           </Flex>
         }
         description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-        name="playbackEncryption"
+        name="encryption"
         data={ENCRYPTION_OPTIONS}
-        placeholder="Selet Encryption"
         mb={16}
-        {...form.getInputProps("playbackEncryption")}
+        {...form.getInputProps("encryption")}
       />
 
       {
@@ -183,7 +176,10 @@ const AdvancedSettingsPanel = observer(({
 });
 
 const Create = observer(() => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [objectData, setObjectData] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -193,53 +189,6 @@ const Create = observer(() => {
     ])
       .finally(() => setLoading(false));
   }, []);
-
-  const [basicFormData, setBasicFormData] = useState({
-    url: "",
-    protocol: "mpegts",
-    name: "",
-    description: "",
-    displayTitle: "",
-    libraryId: "",
-    accessGroup: "",
-    permission: "editable"
-  });
-
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
-      protocol: "mpegts"
-    },
-    validate: {
-      name: (value) => /^.{3,}$/.test(value) ? null : "Name must have at least 3 characters."
-    }
-  });
-
-  const [protocol, setProtocol] = useState("mpegts");
-
-  const [advancedData, setAdvancedData] = useState({
-    retention: 86400
-  });
-
-  const [useAdvancedSettings, setUseAdvancedSettings] = useState("");
-
-  const [drmFormData, setDrmFormData] = useState({
-    encryption: ""
-  });
-
-  const [audioFormData, setAudioFormData] = useState(null);
-
-  const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
-
-  const navigate = useNavigate();
-  const [isCreating, setIsCreating] = useState(false);
-  const [objectData, setObjectData] = useState(null);
-  const [audioTracks, setAudioTracks] = useState([]);
-
-  const urls = protocol === "custom" ?
-    [] :
-    Object.keys(dataStore.liveStreamUrls || {})
-      .filter(url => dataStore.liveStreamUrls[url].protocol === protocol && !dataStore.liveStreamUrls[url].active);
 
   useEffect(() => {
     const LoadConfigData = async () => {
@@ -256,33 +205,58 @@ const Create = observer(() => {
     }
   }, [objectData, streamStore.streams]);
 
-  const UpdateFormData = ({formKey, key, value}) => {
-    const FORM_MAP = {
-      "BASIC": {
-        data: basicFormData,
-        callback: setBasicFormData
-      },
-      "ADVANCED": {
-        data: advancedData,
-        callback: setAdvancedData
-      },
-      "DRM": {
-        data: drmFormData,
-        callback: setDrmFormData
-      }
-    };
-    const {data, callback} = FORM_MAP[formKey];
-    const newData = Object.assign({}, data);
-    newData[key] = value;
+  // Controlled form values that need state variables
+  const [protocol, setProtocol] = useState("mpegts");
 
-    callback(newData);
-  };
+  const [useAdvancedSettings, setUseAdvancedSettings] = useState("");
+  const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
+  const [audioFormData, setAudioFormData] = useState(null);
+  const [audioTracks, setAudioTracks] = useState([]);
+
+  const form = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      accessGroup: "",
+      description: "",
+      displayTitle: "",
+      encryption: "",
+      libraryId: "",
+      name: "",
+      protocol: "mpegts",
+      permission: "editable",
+      retention: "86400",
+    },
+    validate: {
+      name: isNotEmpty("Enter a name"),
+      url: protocol !== "custom" ? isNotEmpty("Select a URL") : null,
+      customUrl: protocol === "custom" ? isNotEmpty("Enter a URL") : null,
+      libraryId: isNotEmpty("Select a library"),
+      description: (value) => ValidateTextField({value, key: "Description"}),
+      displayTitle: (value) => ValidateTextField({value, key: "Display Title"})
+    }
+  });
+
+  const urls = protocol === "custom" ?
+    [] :
+    Object.keys(dataStore.liveStreamUrls || {})
+      .filter(url => dataStore.liveStreamUrls[url].protocol === protocol && !dataStore.liveStreamUrls[url].active);
 
   const HandleProbeConfirm = async () => {
+    const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, protocol, retention, url: urlValue, customUrl} = form.getValues();
+
+    const url = protocol === "custom" ? customUrl : urlValue;
+
     const {objectId, slug} = await editStore.InitLiveStreamObject({
-      basicFormData,
-      advancedData,
-      drmFormData
+      accessGroup,
+      description,
+      displayTitle,
+      encryption,
+      libraryId,
+      name,
+      permission,
+      protocol,
+      retention,
+      url
     });
 
     await streamStore.ConfigureStream({objectId, slug});
@@ -296,13 +270,13 @@ const Create = observer(() => {
   };
 
   const HandleSubmit = async () => {
-    // TODO: Parse input values as integer when appropriate
-    // TODO: I.e., Retention
     setIsCreating(true);
 
     try {
       let objectId;
-      const {accessGroup, description, displayTitle, playbackEncryption: encryption, libraryId, name, permission, protocol, retention, url} = form.getValues();
+      const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, protocol, retention, url: urlValue, customUrl} = form.getValues();
+
+      const url = customUrl || urlValue;
 
       if(objectData === null) {
         const response = await editStore.InitLiveStreamObject({
@@ -354,7 +328,6 @@ const Create = observer(() => {
           value={protocol}
           onChange={(value) => {
             setProtocol(value);
-            form.setFieldValue("url", undefined);
           }}
         >
           <Stack mt="xs">
@@ -381,39 +354,39 @@ const Create = observer(() => {
           </Stack>
         </Radio.Group>
         {
-          protocol === "custom" &&
-          <TextInput
-            label="URL"
-            name="customUrl"
-            required={protocol === "custom"}
-            disabled={objectData !== null}
-            {...form.getInputProps("customUrl")}
-          />
-        }
-        {
-          protocol !== "custom" &&
-          <Select
-            label="URL"
-            name="url"
-            required={true}
-            placeholder="Select URL"
-            disabled={objectData !== null}
-            value={form.values.url}
-            data={urls.map(url => (
-              {
-                label: url,
-                value: url
-              }
-            ))}
-            mb={16}
-            {...form.getInputProps("url")}
-          />
+          protocol === "custom" ?
+            (
+              <TextInput
+                label="URL"
+                name="customUrl"
+                disabled={objectData !== null}
+                mb={16}
+                {...form.getInputProps("customUrl")}
+                withAsterisk={protocol === "custom"}
+              />
+            ) :
+            (
+              <Select
+                label="URL"
+                name="url"
+                disabled={objectData !== null}
+                data={urls.map(url => (
+                  {
+                    label: url,
+                    value: url
+                  }
+                ))}
+                mb={16}
+                {...form.getInputProps("url")}
+                withAsterisk={protocol !== "custom"}
+              />
+            )
         }
         <TextInput
           label="Name"
           name="name"
-          required={true}
           mb={16}
+          withAsterisk
           {...form.getInputProps("name")}
         />
         <TextInput
@@ -442,7 +415,6 @@ const Create = observer(() => {
               }
             ))
           }
-          placeholder="Select Access Group"
           mb={16}
           {...form.getInputProps("accessGroup")}
         />
@@ -456,7 +428,6 @@ const Create = observer(() => {
           name="libraryId"
           disabled={objectData !== null}
           description="Select the library where your live stream object will be created."
-          required={true}
           data={
             Object.keys(dataStore.libraries || {}).map(libraryId => (
               {
@@ -465,8 +436,8 @@ const Create = observer(() => {
               }
             ))
           }
-          placeholder="Select Library"
           mb={16}
+          withAsterisk
           {...form.getInputProps("libraryId")}
         />
 
@@ -479,18 +450,6 @@ const Create = observer(() => {
             <AccordionControl>Advanced Settings</AccordionControl>
             <Accordion.Panel>
               <AdvancedSettingsPanel
-                advancedData={advancedData}
-                drmFormData={drmFormData}
-                DrmUpdateCallback={({event, key}) => UpdateFormData({
-                  key,
-                  value: event.target.value,
-                  formKey: FORM_KEYS.DRM
-                })}
-                AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
-                  key,
-                  value: value ? value : event?.target?.value,
-                  formKey: FORM_KEYS.ADVANCED
-                })}
                 objectProbed={objectData !== null}
                 audioTracks={audioTracks}
                 audioFormData={audioFormData}
@@ -498,10 +457,13 @@ const Create = observer(() => {
                 setShowProbeConfirmation={setShowProbeConfirmation}
                 objectData={objectData}
                 DisableProbeButton={() => {
+                  const {libraryId, name, url: urlValue, customUrl} = form.getValues();
+                  const url = customUrl || urlValue;
+
                   return !(
-                    basicFormData.url &&
-                    basicFormData.name &&
-                    basicFormData.libraryId
+                    url &&
+                    name &&
+                    libraryId
                   );
                 }}
                 form={form}
@@ -532,7 +494,7 @@ const Create = observer(() => {
         CloseCallback={() => setShowProbeConfirmation(false)}
         title="Create and Probe Stream"
         message="Are you sure you want to probe the stream? This will also create the content object."
-        loadingText={`Please send your stream to ${basicFormData.url || "the URL you specified"}.`}
+        loadingText={`Please send your stream to ${form.getValues().customUrl || form.getValues().url || "the URL you specified"}.`}
         ConfirmCallback={async () => {
           try {
             await HandleProbeConfirm();

@@ -9,7 +9,7 @@ export const ParseLiveConfigData = ({
   audioFormData
 }) => {
   const config = {
-    drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
+    drm: encryption?.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
     drm_type: encryption,
     audio: audioFormData ? audioFormData : null,
     part_ttl: parseInt(retention),

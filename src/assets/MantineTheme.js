@@ -100,34 +100,12 @@ const theme = createTheme({
   },
   // Default styles for components that need styles across components
   components: {
-    Tabs: {
-      styles: () => ({
-        // list: {
-        //   "--tab-border-color": "var(--mantine-color-elv-neutral-4)",
-        //   "--tabs-list-border-size": "1px"
-        // }
-      })
-    },
     Anchor: {
       styles: () => ({
         root: {
           "textDecoration": "underline",
           "fontWeight": "700",
           "fontSize": "0.75rem"
-        }
-      })
-    },
-    Radio: {
-      styles: () => ({
-        root: {
-          "--radio-icon-size": "0.5rem"
-        }
-      })
-    },
-    Group: {
-      styles: () => ({
-        root: {
-          "--mantine-spacing-xxs": "0.3125rem"
         }
       })
     },
@@ -138,10 +116,10 @@ const theme = createTheme({
         // }
       })
     },
-    Modal: {
+    Group: {
       styles: () => ({
-        title: {
-          "fontSize": "1.25rem"
+        root: {
+          "--mantine-spacing-xxs": "0.3125rem"
         }
       })
     },
@@ -151,7 +129,34 @@ const theme = createTheme({
           "lgg": "16px"
         }
       })
-    }
+    },
+    Modal: {
+      styles: () => ({
+        title: {
+          "fontSize": "1.25rem"
+        }
+      })
+    },
+    Radio: {
+      styles: () => ({
+        root: {
+          "--radio-icon-size": "0.5rem"
+        }
+      })
+    },
+    Select: {
+      defaultProps: {
+        placeholder: "Select"
+      }
+    },
+    Tabs: {
+      styles: () => ({
+        // list: {
+        //   "--tab-border-color": "var(--mantine-color-elv-neutral-4)",
+        //   "--tabs-list-border-size": "1px"
+        // }
+      })
+    },
   }
 });
 

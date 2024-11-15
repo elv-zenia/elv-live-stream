@@ -61,7 +61,6 @@ const CopyToVodModal = observer(({
                     }
                   ))
                 }
-                placeholder="Select Library"
                 value={libraryId}
                 onChange={value => setLibraryId(value)}
                 style={{width: "100%", marginBottom: "1rem"}}
@@ -84,7 +83,6 @@ const CopyToVodModal = observer(({
                     }
                   ))
                 }
-                placeholder="Select Access Group"
                 value={accessGroup}
                 onChange={value => setAccessGroup(value)}
                 style={{width: "100%", marginBottom: "1rem"}}

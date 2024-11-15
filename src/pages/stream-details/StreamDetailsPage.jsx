@@ -11,6 +11,7 @@ import {StreamIsActive} from "@/utils/helpers";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import StatusText from "@/components/status-text/StatusText.jsx";
 import {ChevronLeftIcon} from "@/assets/icons";
+import {notifications} from "@mantine/notifications";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
@@ -93,8 +94,26 @@ const StreamDetailsPage = observer(() => {
           title: "Delete Stream",
           message: "Are you sure you want to delete the stream? This action cannot be undone.",
           confirmText: "Delete",
-          ConfirmCallback: async () => await editStore.DeleteStream({objectId: stream.objectId})
+          ConfirmCallback: async () => {
+            try {
+              await editStore.DeleteStream({objectId: stream.objectId});
+            } catch(_e) {
+              notifications.show({
+                title: "Error",
+                color: "red",
+                message: "Unable to delete object"
+              });
+            } finally {
+              notifications.show({
+                title: "Content object deleted",
+                message: `${stream.objectId} successfully deleted`
+              });
+
+              navigate("/streams");
+            }
+          }
         });
+
         open();
       }
     },

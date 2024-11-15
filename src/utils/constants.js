@@ -150,9 +150,9 @@ export const AudioCodec = (value) => {
 };
 
 export const RETENTION_TEXT = {
-  3600: "1 Hour",
-  21600: "6 Hours",
-  86400: "1 Day",
-  604800: "1 Week",
-  2635200: "1 Month"
+  "3600": "1 Hour",
+  "21600": "6 Hours",
+  "86400": "1 Day",
+  "604800": "1 Week",
+  "2635200": "1 Month"
 };

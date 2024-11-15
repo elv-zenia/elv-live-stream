@@ -182,10 +182,9 @@ const PlayoutPanel = observer(({
               </Tooltip>
             </Flex>
           }
-          name="playbackEncryption"
+          name="encryption"
           data={ENCRYPTION_OPTIONS}
           style={{width: "100%"}}
-          placeholder="Select DRM"
           value={drm}
           onChange={(value) => setDrm(value)}
         />
@@ -229,7 +228,6 @@ const PlayoutPanel = observer(({
               name="maxDuration"
               data={DVR_DURATION_OPTIONS}
               style={{width: "100%"}}
-              placeholder="Select Max Duration"
               value={dvrMaxDuration}
               onChange={(value) => setDvrMaxDuration(value)}
               disabled={!dvrEnabled}
