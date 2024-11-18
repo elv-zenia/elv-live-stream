@@ -116,14 +116,23 @@ class StreamStore {
 
       yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
 
-      if(liveRecordingConfig?.drm) {
+      if((liveRecordingConfig?.drm_type || "").includes("drm")) {
         const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
 
-        yield this.client.StreamInitialize({
-          name: objectId,
-          drm: liveRecordingConfig?.drm === "clear" ? false : true,
-          format: drmOption?.format.join(",")
+        // Check for existing drm keys; if found, skip Stream Initialize
+        const drmKeyMeta = yield this.client.ContentObjectMetadata({
+          libraryId,
+          objectId,
+          metadataSubtree: "offerings/default/playout/drm_keys"
         });
+
+        if(!drmKeyMeta) {
+          yield this.client.StreamInitialize({
+            name: objectId,
+            drm: liveRecordingConfig?.drm === "clear" ? false : true,
+            format: drmOption?.format.join(",")
+          });
+        }
       }
 
       // Update stream link in site after stream configuration

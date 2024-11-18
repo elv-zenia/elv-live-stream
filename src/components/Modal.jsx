@@ -10,6 +10,10 @@ const modalSizes = {
   "LG": "lg"
 };
 
+const AvoidDefaultBehavior = (e) => {
+  e.preventDefault();
+};
+
 const Modal = ({
   title,
   description,
@@ -31,7 +35,7 @@ const Modal = ({
     <div className="modal">
       <Root open={open} onOpenChange={onOpenChange}>
         <Overlay className="modal__overlay">
-          <Content className={`modal__content modal__content--${modalSizes[size]}`}>
+          <Content className={`modal__content modal__content--${modalSizes[size]}`} onPointerDownOutside={AvoidDefaultBehavior} onInteractOutside={AvoidDefaultBehavior}>
             <Title className="modal__content__body__title">{ title }</Title>
             <div className="modal__content__body">
               {

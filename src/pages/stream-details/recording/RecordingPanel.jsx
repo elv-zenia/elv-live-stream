@@ -10,12 +10,14 @@ import {Select} from "@/components/Inputs.jsx";
 import {
   CONNECTION_TIMEOUT_OPTIONS,
   RECONNECTION_TIMEOUT_OPTIONS,
-  RETENTION_OPTIONS
+  RETENTION_OPTIONS, STATUS_MAP
 } from "@/utils/constants";
+import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
 
 const RecordingPanel = observer(({
   title,
   slug,
+  status,
   currentRetention,
   currentConnectionTimeout,
   currentReconnectionTimeout
@@ -83,9 +85,12 @@ const RecordingPanel = observer(({
   };
 
   return (
-    <>
-      <Box mb="24px" maw="60%">
-        <form onSubmit={HandleSubmit} className="form">
+    <Box w="700px" mb={24}>
+      <form onSubmit={HandleSubmit} className="form">
+        <DisabledTooltipWrapper
+          disabled={status !== STATUS_MAP.STOPPED}
+          tooltipLabel="Retention Period configuration is disabled when the stream is running"
+        >
           <div className="form__section-header">Retention Period</div>
           <Select
             labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
@@ -94,6 +99,12 @@ const RecordingPanel = observer(({
             value={retention}
             onChange={event => setRetention(event.target.value)}
           />
+        </DisabledTooltipWrapper>
+
+        <DisabledTooltipWrapper
+          disabled={status !== STATUS_MAP.STOPPED}
+          tooltipLabel="Timeout configuration is disabled when the stream is running"
+        >
           <div className="form__section-header">Timeout</div>
           <Select
             label="Connection Timeout"
@@ -121,25 +132,31 @@ const RecordingPanel = observer(({
             value={reconnectionTimeout}
             onChange={(event) => setReconnectionTimeout(event.target.value)}
           />
+        </DisabledTooltipWrapper>
 
+        <DisabledTooltipWrapper
+          disabled={status !== STATUS_MAP.STOPPED}
+          tooltipLabel="Audio Track configuration is disabled when the stream is running"
+        >
           <div className="form__section-header">Audio Tracks</div>
           <AudioTracksTable
             records={audioTracks}
             audioFormData={audioFormData}
             setAudioFormData={setAudioFormData}
           />
-          <Box mt="24px">
-            <button
-              type="submit"
-              className="button__primary"
-              disabled={applyingChanges}
-            >
-              {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
-            </button>
-          </Box>
-        </form>
-      </Box>
-    </>
+        </DisabledTooltipWrapper>
+
+        <Box mt="24px">
+          <button
+            type="submit"
+            className="button__primary"
+            disabled={applyingChanges}
+          >
+            {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+          </button>
+        </Box>
+      </form>
+    </Box>
   );
 });
 

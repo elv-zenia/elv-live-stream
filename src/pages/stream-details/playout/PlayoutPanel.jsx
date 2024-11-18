@@ -12,6 +12,7 @@ import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
 import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
 import {EditIcon, TrashIcon} from "@/assets/icons";
+import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
 
 const WatermarkBox = ({type, value, actions=[]}) => {
   if(value === undefined) { return null; }
@@ -140,8 +141,11 @@ const PlayoutPanel = observer(({
   };
 
   return (
-    <>
-      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={classes.box}>
+    <Box w="700px">
+      <DisabledTooltipWrapper
+        tooltipLabel="DRM configuration is disabled when the stream is active"
+        disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)}
+      >
         <div className="form__section-header">Playout</div>
         <Select
           label="DRM"
@@ -163,9 +167,9 @@ const PlayoutPanel = observer(({
             )
           }
         />
-      </Box>
+      </DisabledTooltipWrapper>
 
-      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} maw="50%" className={classes.box}>
+      <DisabledTooltipWrapper tooltipLabel="DVR configuration is disabled while the stream is running" disabled={status !== STATUS_MAP.STOPPED}>
         <div className="form__section-header">DVR</div>
 
         <Box mb={24}>
@@ -176,8 +180,6 @@ const PlayoutPanel = observer(({
               onChange={(event) => setDvrEnabled(event.target.checked)}
             />
         </Box>
-
-
         {
           dvrEnabled &&
           <>
@@ -219,9 +221,10 @@ const PlayoutPanel = observer(({
             />
           </>
         }
-      </Box>
+      </DisabledTooltipWrapper>
 
-      <Box mb="24px" maw="50%">
+
+      <Box mb="24px">
         <Group mb={16}>
           <div className="form__section-header">Visible Watermark</div>
         </Group>
@@ -352,7 +355,7 @@ const PlayoutPanel = observer(({
       >
         {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
       </button>
-    </>
+    </Box>
   );
 });
 

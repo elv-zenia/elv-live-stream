@@ -1,0 +1,11 @@
+.box {
+  &[data-disabled="true"] {
+    opacity: 0.5;
+
+    input,
+    select,
+    button {
+      pointer-events: none;
+    }
+  }
+}
