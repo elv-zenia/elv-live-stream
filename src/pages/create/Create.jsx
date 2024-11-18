@@ -72,8 +72,6 @@ const Permissions = observer(({form}) => {
           }
         ))
       }
-      SetValue={(value) => form.setFieldValue("permission", value)}
-      value={form.getValues().permission}
       mb={16}
       {...form.getInputProps("permission")}
     />
@@ -207,7 +205,10 @@ const Create = observer(() => {
 
   // Controlled form values that need state variables
   const [protocol, setProtocol] = useState("mpegts");
+  const [url, setUrl] = useState("");
+  const [customUrl, setCustomUrl] = useState("");
 
+  const [urlOptions, setUrlOptions] = useState([]);
   const [useAdvancedSettings, setUseAdvancedSettings] = useState("");
   const [showProbeConfirmation, setShowProbeConfirmation] = useState(false);
   const [audioFormData, setAudioFormData] = useState(null);
@@ -222,29 +223,33 @@ const Create = observer(() => {
       encryption: "",
       libraryId: "",
       name: "",
-      protocol: "mpegts",
+      protocol: "mpegts", // Controlled by local state
       permission: "editable",
       retention: "86400",
+      url: "", // Controlled by local state
+      customUrl: "" // Controlled by local state
     },
     validate: {
-      name: isNotEmpty("Enter a name"),
-      url: protocol !== "custom" ? isNotEmpty("Select a URL") : null,
-      customUrl: protocol === "custom" ? isNotEmpty("Enter a URL") : null,
-      libraryId: isNotEmpty("Select a library"),
+      name: isNotEmpty("Name is required"),
+      url: (value, values) => values.protocol === "custom" ? null : value ? null : "URL is required",
+      customUrl: (value, values) => values.protocol === "custom" ? value ? null : "Custom URL is required" : null,
+      libraryId: isNotEmpty("Library is required"),
       description: (value) => ValidateTextField({value, key: "Description"}),
       displayTitle: (value) => ValidateTextField({value, key: "Display Title"})
     }
   });
 
-  const urls = protocol === "custom" ?
-    [] :
-    Object.keys(dataStore.liveStreamUrls || {})
-      .filter(url => dataStore.liveStreamUrls[url].protocol === protocol && !dataStore.liveStreamUrls[url].active);
+  useEffect(() => {
+    const urls = protocol === "custom" ?
+      [] :
+      Object.keys(dataStore.liveStreamUrls || {})
+        .filter(url => dataStore.liveStreamUrls[url].protocol === protocol && !dataStore.liveStreamUrls[url].active);
+
+    setUrlOptions(urls);
+  }, [protocol, dataStore.liveStreamUrls]);
 
   const HandleProbeConfirm = async () => {
-    const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, protocol, retention, url: urlValue, customUrl} = form.getValues();
-
-    const url = protocol === "custom" ? customUrl : urlValue;
+    const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, protocol, retention} = form.getValues();
 
     const {objectId, slug} = await editStore.InitLiveStreamObject({
       accessGroup,
@@ -256,7 +261,7 @@ const Create = observer(() => {
       permission,
       protocol,
       retention,
-      url
+      url: protocol === "custom" ? customUrl : url
     });
 
     await streamStore.ConfigureStream({objectId, slug});
@@ -272,11 +277,10 @@ const Create = observer(() => {
   const HandleSubmit = async () => {
     setIsCreating(true);
 
+    return;
     try {
       let objectId;
-      const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, protocol, retention, url: urlValue, customUrl} = form.getValues();
-
-      const url = customUrl || urlValue;
+      const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, protocol, retention} = form.getValues();
 
       if(objectData === null) {
         const response = await editStore.InitLiveStreamObject({
@@ -289,7 +293,7 @@ const Create = observer(() => {
           permission,
           protocol,
           retention: retention ? parseInt(retention) : null,
-          url
+          url: protocol === "custom" ? customUrl : url
         });
 
         objectId = response.objectId;
@@ -328,6 +332,7 @@ const Create = observer(() => {
           value={protocol}
           onChange={(value) => {
             setProtocol(value);
+            form.setFieldValue("protocol", value);
           }}
         >
           <Stack mt="xs">
@@ -361,7 +366,12 @@ const Create = observer(() => {
                 name="customUrl"
                 disabled={objectData !== null}
                 mb={16}
-                {...form.getInputProps("customUrl")}
+                value={customUrl}
+                onChange={(event) => {
+                  setCustomUrl(event.target.value);
+                  form.setFieldValue("customUrl", event.target.value);
+                }}
+                error={protocol === "custom" ? form.errors.customUrl : null}
                 withAsterisk={protocol === "custom"}
               />
             ) :
@@ -370,14 +380,19 @@ const Create = observer(() => {
                 label="URL"
                 name="url"
                 disabled={objectData !== null}
-                data={urls.map(url => (
+                data={urlOptions.map(url => (
                   {
                     label: url,
                     value: url
                   }
                 ))}
                 mb={16}
-                {...form.getInputProps("url")}
+                value={url}
+                onChange={(value) => {
+                  setUrl(value);
+                  form.setFieldValue("url", value);
+                }}
+                error={protocol !== "custom" ? form.errors.url : null}
                 withAsterisk={protocol !== "custom"}
               />
             )
@@ -457,11 +472,10 @@ const Create = observer(() => {
                 setShowProbeConfirmation={setShowProbeConfirmation}
                 objectData={objectData}
                 DisableProbeButton={() => {
-                  const {libraryId, name, url: urlValue, customUrl} = form.getValues();
-                  const url = customUrl || urlValue;
+                  const {libraryId, name} = form.getValues();
 
                   return !(
-                    url &&
+                    (customUrl || url) &&
                     name &&
                     libraryId
                   );
@@ -494,7 +508,7 @@ const Create = observer(() => {
         CloseCallback={() => setShowProbeConfirmation(false)}
         title="Create and Probe Stream"
         message="Are you sure you want to probe the stream? This will also create the content object."
-        loadingText={`Please send your stream to ${form.getValues().customUrl || form.getValues().url || "the URL you specified"}.`}
+        loadingText={`Please send your stream to ${(protocol === "custom" ? customUrl : url) || "the URL you specified"}.`}
         ConfirmCallback={async () => {
           try {
             await HandleProbeConfirm();

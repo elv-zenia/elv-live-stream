@@ -1,7 +1,7 @@
 export const ValidateTextField = ({value, key}) => {
-  if(value.length === 0) { return null; }
+  const trimmedValue = value.trim();
 
-  if(!/^.{3,}$/.test(value)) {
+  if(value && trimmedValue.length < 3) {
     return `${key} must be at least 3 characters long`;
   }
 
