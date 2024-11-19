@@ -88,7 +88,7 @@ const RecordingPanel = observer(({
     <Box w="700px" mb={24}>
       <form onSubmit={HandleSubmit} className="form">
         <DisabledTooltipWrapper
-          disabled={status !== STATUS_MAP.STOPPED}
+          disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Retention Period configuration is disabled when the stream is running"
         >
           <div className="form__section-header">Retention Period</div>
@@ -102,7 +102,7 @@ const RecordingPanel = observer(({
         </DisabledTooltipWrapper>
 
         <DisabledTooltipWrapper
-          disabled={status !== STATUS_MAP.STOPPED}
+          disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Timeout configuration is disabled when the stream is running"
         >
           <div className="form__section-header">Timeout</div>
@@ -135,7 +135,7 @@ const RecordingPanel = observer(({
         </DisabledTooltipWrapper>
 
         <DisabledTooltipWrapper
-          disabled={status !== STATUS_MAP.STOPPED}
+          disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Audio Track configuration is disabled when the stream is running"
         >
           <div className="form__section-header">Audio Tracks</div>

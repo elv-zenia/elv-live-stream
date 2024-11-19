@@ -147,29 +147,31 @@ const PlayoutPanel = observer(({
         disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)}
       >
         <div className="form__section-header">Playout</div>
-        <Select
-          label="DRM"
-          formName="playbackEncryption"
-          options={ENCRYPTION_OPTIONS}
-          style={{width: "100%"}}
-          defaultOption={{
-            value: "",
-            label: "Select DRM"
-          }}
-          value={drm}
-          onChange={(event) => setDrm(event.target.value)}
-          tooltip={
-            ENCRYPTION_OPTIONS.map(({label, title, value}) =>
-              <div key={`encryption-info-${value}`} className="form__tooltip-item">
-                <div className="form__tooltip-item__encryption-title">{label}:</div>
-                <div>{title}</div>
-              </div>
-            )
-          }
-        />
+        <Box mb={24}>
+          <Select
+            label="DRM"
+            formName="playbackEncryption"
+            options={ENCRYPTION_OPTIONS}
+            style={{width: "100%"}}
+            defaultOption={{
+              value: "",
+              label: "Select DRM"
+            }}
+            value={drm}
+            onChange={(event) => setDrm(event.target.value)}
+            tooltip={
+              ENCRYPTION_OPTIONS.map(({label, title, value}) =>
+                <div key={`encryption-info-${value}`} className="form__tooltip-item">
+                  <div className="form__tooltip-item__encryption-title">{label}:</div>
+                  <div>{title}</div>
+                </div>
+              )
+            }
+          />
+        </Box>
       </DisabledTooltipWrapper>
 
-      <DisabledTooltipWrapper tooltipLabel="DVR configuration is disabled while the stream is running" disabled={status !== STATUS_MAP.STOPPED}>
+      <DisabledTooltipWrapper tooltipLabel="DVR configuration is disabled while the stream is running" disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}>
         <div className="form__section-header">DVR</div>
 
         <Box mb={24}>
