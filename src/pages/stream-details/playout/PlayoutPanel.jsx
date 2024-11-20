@@ -207,20 +207,22 @@ const PlayoutPanel = observer(({
                 withSeconds
               />
             </Box>
-            <Select
-              label="Max Duration"
-              labelDescription="Users are only able to seek back this many minutes. Useful for 24/7 streams and long events."
-              formName="maxDuration"
-              options={DVR_DURATION_OPTIONS}
-              style={{width: "100%"}}
-              defaultOption={{
-                value: "",
-                label: "Select Max Duration"
-              }}
-              value={dvrMaxDuration}
-              onChange={(event) => setDvrMaxDuration(event.target.value)}
-              disabled={!dvrEnabled}
-            />
+            <Box mb={24}>
+              <Select
+                label="Max Duration"
+                labelDescription="Users are only able to seek back this many minutes. Useful for 24/7 streams and long events."
+                formName="maxDuration"
+                options={DVR_DURATION_OPTIONS}
+                style={{width: "100%"}}
+                defaultOption={{
+                  value: "",
+                  label: "Select Max Duration"
+                }}
+                value={dvrMaxDuration}
+                onChange={(event) => setDvrMaxDuration(event.target.value)}
+                disabled={!dvrEnabled}
+              />
+            </Box>
           </>
         }
       </DisabledTooltipWrapper>
