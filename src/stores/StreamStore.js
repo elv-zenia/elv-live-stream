@@ -169,37 +169,38 @@ class StreamStore {
     showParams=false,
     update=false
   }) {
+    let response;
     try {
-      const response = yield this.client.StreamStatus({
+      response = yield this.client.StreamStatus({
         name: objectId,
         stopLro,
         showParams
       });
-
-      if(update) {
-        if(!slug) {
-          slug = Object.keys(this.streams || {}).find(slug => (
-            this.streams[slug].objectId === objectId
-          ));
-        }
-
-        this.UpdateStream({
-          key: slug,
-          value: {
-            status: response.state,
-            warnings: response.warnings,
-            quality: response.quality,
-            embedUrl: response?.playout_urls?.embed_url
-          }
-        });
-      }
-
-      return response;
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error(`Failed to load status for ${objectId || "object"}`, error);
       return {};
     }
+
+    if(update) {
+      if(!slug) {
+        slug = Object.keys(this.streams || {}).find(slug => (
+          this.streams[slug].objectId === objectId
+        ));
+      }
+
+      this.UpdateStream({
+        key: slug,
+        value: {
+          status: response.state,
+          warnings: response.warnings,
+          quality: response.quality,
+          embedUrl: response?.playout_urls?.embed_url
+        }
+      });
+    }
+
+    return response;
   });
 
   StartStream = flow(function * ({

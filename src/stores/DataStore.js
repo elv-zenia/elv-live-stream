@@ -403,13 +403,19 @@ class DataStore {
 
       if(!edgeWriteToken) { return {}; }
 
-      const metadata = yield this.client.ContentObjectMetadata({
-        libraryId,
-        objectId,
-        writeToken: edgeWriteToken,
-        metadataSubtree: "live_recording",
-        select: ["recordings", "recording_config"]
-      });
+      let metadata;
+      try {
+        metadata = yield this.client.ContentObjectMetadata({
+          libraryId,
+          objectId,
+          writeToken: edgeWriteToken,
+          metadataSubtree: "live_recording",
+          select: ["recordings", "recording_config"]
+        });
+      } catch(error) {
+        // eslint-disable-next-line no-console
+        console.error("Unable to load edge write token metadata", error);
+      }
 
       return {
         // First stream recording start time
