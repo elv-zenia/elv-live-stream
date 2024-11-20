@@ -9,6 +9,8 @@ import {rootStore} from "@/stores/index.js";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
+  // For displaying values while user potentionally edits name
+  const [customProfileNames, setCustomProfileNames] = useState([]);
 
   useEffect(() => {
     const LoadData = async() => {
@@ -17,6 +19,7 @@ const Settings = observer(() => {
         stringified.default = JSON.stringify(stringified.default, null, 2);
         stringified.custom = stringified.custom.map(item => JSON.stringify(item, null, 2));
         setProfileFormData(stringified);
+        setCustomProfileNames(dataStore.ladderProfiles.custom.map(item => item.name));
       } else {
         const profilesObject = {
           default: JSON.stringify(DefaultLadderProfile, null, 2),
@@ -61,6 +64,8 @@ const Settings = observer(() => {
       ...profileFormData,
       custom: updatedCustomItems
     });
+
+    setCustomProfileNames(profileFormData.custom.map(item => item.name));
   };
 
   const HandleSave = () => {
@@ -101,7 +106,7 @@ const Settings = observer(() => {
             <TextEditorBox
               key={`custom-${index}`}
               columns={[
-                {id: JSON.parse(profile).name, header: "Profile", value: JSON.parse(profile).name}
+                {id: customProfileNames[index], header: "Profile", value: customProfileNames[index]}
               ]}
               editorValue={profile}
               HandleEditorValueChange={(args) => HandleChange({...args, index})}
