@@ -18,6 +18,7 @@ class DataStore {
   siteId;
   siteLibraryId;
   liveStreamUrls;
+  ladderProfiles;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -41,6 +42,7 @@ class DataStore {
       this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
     }
 
+    yield this.LoadLadderProfiles();
     yield this.LoadStreams();
     yield streamStore.AllStreamsStatus(reload);
   });
@@ -92,6 +94,21 @@ class DataStore {
       // eslint-disable-next-line no-console
       console.error(error);
       throw Error(`Unable to load sites for tenant ${tenantContractId}.`);
+    }
+  });
+
+  LoadLadderProfiles = flow(function * () {
+    try {
+      const profiles = yield this.client.ContentObjectMetadata({
+        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
+        objectId: this.siteId,
+        metadataSubtree: "public/asset_metadata/profiles"
+      });
+
+      this.ladderProfiles = profiles;
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error("Unable to load ladder profiles from site object", error);
     }
   });
 
