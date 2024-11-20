@@ -88,7 +88,10 @@ const AdvancedSection = observer(({
   setShowProbeConfirmation,
   objectData,
   useAdvancedSettings,
-  DisableProbeButton
+  DisableProbeButton,
+  ladderProfilesData,
+  playoutProfile,
+  setPlayoutProfile
 }) => {
   return (
     <>
@@ -113,6 +116,21 @@ const AdvancedSection = observer(({
               })
               }
             />
+
+            <Select
+              label="Playout Ladder"
+              formName="playoutLadder"
+              options={ladderProfilesData}
+              defaultOption={{
+                value: "",
+                label: "Select Ladder Profile"
+              }}
+              style={{width: "100%"}}
+              helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+              value={playoutProfile}
+              onChange={(event) => setPlayoutProfile(event.target.value)}
+            />
+
             <PlaybackEncryption
               drmFormData={drmFormData}
               UpdateCallback={({event, key}) => DrmUpdateCallback({
@@ -205,11 +223,23 @@ const Create = observer(() => {
   const [isCreating, setIsCreating] = useState(false);
   const [objectData, setObjectData] = useState(null);
   const [audioTracks, setAudioTracks] = useState([]);
+  const [playoutProfile, setPlayoutProfile] = useState("Default");
 
   const urls = basicFormData.protocol === "custom" ?
     [] :
     Object.keys(dataStore.liveStreamUrls || {})
       .filter(url => dataStore.liveStreamUrls[url].protocol === basicFormData.protocol && !dataStore.liveStreamUrls[url].active);
+
+  const defaultOption = dataStore.ladderProfiles?.default ?
+    {
+      label: dataStore.ladderProfiles.default.name,
+      value: dataStore.ladderProfiles.default.name
+    } : {};
+  const ladderProfilesData = dataStore.ladderProfiles ?
+    [
+      defaultOption,
+      ...dataStore.ladderProfiles.custom.map(item => ({label: item.name, value: item.name}))
+    ] : [];
 
   useEffect(() => {
     const LoadConfigData = async () => {
@@ -256,7 +286,8 @@ const Create = observer(() => {
       const formData = {
         basicFormData,
         advancedData,
-        drmFormData
+        drmFormData,
+        playoutProfile
       };
       let objectId;
 
@@ -480,6 +511,9 @@ const Create = observer(() => {
           setAudioFormData={setAudioFormData}
           setShowProbeConfirmation={setShowProbeConfirmation}
           objectData={objectData}
+          ladderProfilesData={ladderProfilesData}
+          playoutProfile={playoutProfile}
+          setPlayoutProfile={setPlayoutProfile}
           DisableProbeButton={() => {
             return !(
               basicFormData.url &&

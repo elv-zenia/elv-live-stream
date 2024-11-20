@@ -181,6 +181,7 @@ const StreamDetailsPage = observer(() => {
                 currentDvrEnabled={stream.dvrEnabled}
                 currentDvrMaxDuration={stream.dvrMaxDuration}
                 currentDvrStartTime={stream.dvrStartTime}
+                currentPlayoutProfile={stream.playoutLadderProfile}
                 libraryId={stream.libraryId}
               />
             </Tabs.Panel>

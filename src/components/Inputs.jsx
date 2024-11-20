@@ -1,10 +1,12 @@
 import {useState} from "react";
 import Tooltip from "@/components/Tooltip.jsx";
+import {Text} from "@mantine/core";
 
 export const Select = ({
   options,
   label,
   labelDescription,
+  helperText,
   required,
   defaultOption={},
   formName,
@@ -66,6 +68,10 @@ export const Select = ({
           ))
         }
       </select>
+      {
+        helperText ?
+          <Text fz="xs" mt={6}>{ helperText }</Text> : null
+      }
     </>
   );
 };

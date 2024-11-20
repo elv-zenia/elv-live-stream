@@ -29,7 +29,8 @@ class EditStore {
   InitLiveStreamObject = flow(function * ({
     basicFormData,
     advancedData,
-    drmFormData
+    drmFormData,
+    playoutProfile
   }) {
     const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
     const {retention} = advancedData;
@@ -52,6 +53,7 @@ class EditStore {
     const config = ParseLiveConfigData({
       url,
       encryption,
+      playoutProfile,
       retention,
       referenceUrl: protocol === "custom" ? undefined : url
     });
@@ -539,7 +541,8 @@ class EditStore {
     reconnectionTimeout,
     dvrEnabled,
     dvrStartTime,
-    dvrMaxDuration
+    dvrMaxDuration,
+    playoutProfile
   }){
     if(!libraryId) {
       libraryId = yield this.client.ContentObjectLibraryId({objectId});
@@ -571,6 +574,17 @@ class EditStore {
       });
 
       updateValue.partTtl = parseInt(retention);
+    }
+
+    if(playoutProfile !== undefined) {
+      yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId,
+        writeToken,
+        metadataSubtree: "live_recording_config/playout_ladder_profile",
+        metadata: playoutProfile
+      });
+      updateValue.playoutLadderProfile = playoutProfile;
     }
 
     if(connectionTimeout !== undefined) {
@@ -649,6 +663,37 @@ class EditStore {
       value: updateValue
     });
   });
+
+
+  SaveLadderProfiles = flow(function * ({profileData}) {
+    try {
+      const libraryId = yield this.client.ContentObjectLibraryId({objectId: dataStore.siteId});
+      const {writeToken} = yield this.client.EditContentObject({
+        libraryId,
+        objectId: dataStore.siteId
+      });
+
+      const profiles = yield this.client.ReplaceMetadata({
+        libraryId,
+        objectId: dataStore.siteId,
+        writeToken,
+        metadataSubtree: "public/asset_metadata/profiles",
+        metadata: profileData
+      });
+
+      yield this.client.FinalizeContentObject({
+        libraryId,
+        objectId: dataStore.siteId,
+        writeToken
+      });
+
+      this.ladderProfiles = profiles;
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error("Unable to save ladder profiles", error);
+    }
+  });
+
 
   DeleteStream = flow(function * ({objectId}) {
     const streams = Object.assign({}, streamStore.streams);

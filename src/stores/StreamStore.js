@@ -64,7 +64,8 @@ class StreamStore {
           "part_ttl",
           "drm",
           "drm_type",
-          "audio"
+          "audio",
+          "playout_ladder_profile"
         ]
       });
 
@@ -101,6 +102,25 @@ class StreamStore {
 
       if(recordingConfig?.recording_params?.reconnect_timeout) {
         customSettings["reconnect_timeout"] = recordingConfig.recording_params.reconnect_timeout;
+      }
+
+      if(liveRecordingConfig.playout_ladder_profile) {
+        const allProfiles = yield this.client.ContentObjectMetadata({
+          libraryId: yield this.client.ContentObjectLibraryId({objectId: dataStore.siteId}),
+          objectId: dataStore.siteId,
+          metadataSubtree: "public/asset_metadata/profiles"
+        });
+
+        if(allProfiles) {
+          let profileData;
+          if(liveRecordingConfig.playout_ladder_profile.toLowerCase() === "default") {
+            profileData = allProfiles.default;
+          } else {
+            profileData = allProfiles.custom.find(item => item.name === liveRecordingConfig.playout_ladder_profile);
+          }
+
+          customSettings["ladder_profile"] = profileData.ladder_specs;
+        }
       }
 
       if(liveRecordingConfig.audio) {

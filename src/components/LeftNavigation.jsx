@@ -5,7 +5,7 @@ import classes from "@/assets/stylesheets/modules/Navbar.module.css";
 
 const iconDimensions = {
   width: 22,
-  height: "auto"
+  height: 20
 };
 
 const NAV_LINKS = [

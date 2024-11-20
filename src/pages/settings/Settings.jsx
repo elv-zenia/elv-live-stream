@@ -3,7 +3,7 @@ import TextEditorBox from "@/components/text-editor-box/TextEditorBox.jsx";
 import {useEffect, useState} from "react";
 import {DefaultLadderProfile} from "@/utils/profiles.js";
 import {observer} from "mobx-react-lite";
-import {dataStore} from "@/stores/index.js";
+import {dataStore, editStore} from "@/stores/index.js";
 import {PlusIcon} from "@/assets/icons/index.js";
 import {rootStore} from "@/stores/index.js";
 
@@ -11,14 +11,16 @@ const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
   // For displaying values while user potentionally edits name
   const [customProfileNames, setCustomProfileNames] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const LoadData = async() => {
       if(dataStore.ladderProfiles) {
-        const stringified = dataStore.ladderProfiles;
-        stringified.default = JSON.stringify(stringified.default, null, 2);
-        stringified.custom = stringified.custom.map(item => JSON.stringify(item, null, 2));
-        setProfileFormData(stringified);
+        const stringifiedProfiles = {
+          default: JSON.stringify(dataStore.ladderProfiles.default, null, 2),
+          custom: dataStore.ladderProfiles.custom.map(item => JSON.stringify(item, null, 2))
+        };
+        setProfileFormData(stringifiedProfiles);
         setCustomProfileNames(dataStore.ladderProfiles.custom.map(item => item.name));
       } else {
         const profilesObject = {
@@ -50,10 +52,11 @@ const Settings = observer(() => {
 
   const HandleAddCustom = () => {
     const updatedCustomItems = profileFormData.custom;
+    const newName = `Custom ${profileFormData.custom.length + 1}`;
 
     updatedCustomItems.push(
       JSON.stringify({
-        "name" : `Custom ${profileFormData.custom.length + 1}`,
+        "name" : `${newName}`,
         "ladder_specs": {
           "video": []
         }
@@ -65,13 +68,20 @@ const Settings = observer(() => {
       custom: updatedCustomItems
     });
 
-    setCustomProfileNames(profileFormData.custom.map(item => item.name));
+    setCustomProfileNames(updatedCustomItems.map(item => JSON.parse(item).name));
   };
 
   const HandleSave = () => {
-    const updatedFormData = profileFormData;
-    updatedFormData.default = JSON.parse(updatedFormData.default || {});
-    updatedFormData.custom = updatedFormData.custom.map(item => JSON.parse(item));
+    try {
+      setSaving(true);
+      const updatedFormData = profileFormData;
+      updatedFormData.default = JSON.parse(updatedFormData.default || {});
+      updatedFormData.custom = updatedFormData.custom.map(item => JSON.parse(item));
+
+      editStore.SaveLadderProfiles({profileData: updatedFormData});
+    } finally {
+      setSaving(false);
+    }
   };
 
   if(!rootStore.loaded) { return <Loader />; }
@@ -119,7 +129,7 @@ const Settings = observer(() => {
         className="button__primary"
         onClick={HandleSave}
       >
-        Save
+        {saving ? <Loader loader="inline" className="modal__loader"/> : "Save"}
       </button>
     </>
   );

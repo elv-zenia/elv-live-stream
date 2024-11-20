@@ -6,7 +6,8 @@ export const ParseLiveConfigData = ({
   referenceUrl,
   encryption,
   retention,
-  audioFormData
+  audioFormData,
+  playoutProfile
 }) => {
   const config = {
     drm: encryption.includes("drm") ? "drm" : encryption.includes("clear") ? "clear" : undefined,
@@ -14,7 +15,8 @@ export const ParseLiveConfigData = ({
     audio: audioFormData ? audioFormData : null,
     part_ttl: parseInt(retention),
     url,
-    reference_url: referenceUrl
+    reference_url: referenceUrl,
+    playout_ladder_profile: playoutProfile
   };
 
   return config;

@@ -261,7 +261,8 @@ class DataStore {
           "public/description",
           "public/name",
           "public/asset_metadata/display_title",
-          "live_recording_config/part_ttl"
+          "live_recording_config/part_ttl",
+          "live_recording_config/playout_ladder_profile"
         ]
       });
       let probeMeta = streamMeta?.live_recording_config?.probe_info;
@@ -300,6 +301,7 @@ class DataStore {
         imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
         originUrl: streamMeta?.live_recording?.recording_config?.recording_params?.origin_url || streamMeta?.live_recording_config?.url,
         partTtl: streamMeta?.live_recording_config?.part_ttl,
+        playoutLadderProfile: streamMeta?.live_recording_config?.playout_ladder_profile,
         reconnectionTimeout: streamMeta?.live_recording?.recording_config?.recording_params?.reconnect_timeout,
         referenceUrl: streamMeta?.live_recording_config?.reference_url,
         simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,

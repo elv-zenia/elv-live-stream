@@ -6,7 +6,7 @@ import {ActionIcon, Box, Checkbox, FileButton, Flex, Group, Menu, Paper, Text, T
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
-import {editStore, streamStore} from "@/stores";
+import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
@@ -53,10 +53,11 @@ const PlayoutPanel = observer(({
   title,
   currentDvrEnabled,
   currentDvrMaxDuration,
-  currentDvrStartTime
+  currentDvrStartTime,
+  currentPlayoutProfile
 }) => {
   const [drm, setDrm] = useState(currentDrm);
-  // const [formDrm, setFormDrm] = useState(currentDrm ? currentDrm : undefined);
+  const [playoutProfile, setPlayoutProfile] = useState(currentPlayoutProfile || "");
   const [formWatermarks, setFormWatermarks] = useState(
     {
       image: imageWatermark ? imageWatermark : undefined,
@@ -71,6 +72,17 @@ const PlayoutPanel = observer(({
   const [applyingChanges, setApplyingChanges] = useState(false);
   const resetRef = useRef(null);
   const params = useParams();
+
+  const defaultOption = dataStore.ladderProfiles?.default ?
+    {
+      label: dataStore.ladderProfiles.default.name,
+      value: dataStore.ladderProfiles.default.name
+    } : {};
+  const ladderProfilesData = dataStore.ladderProfiles ?
+    [
+      defaultOption,
+      ...dataStore.ladderProfiles.custom.map(item => ({label: item.name, value: item.name}))
+    ] : [];
 
   const ClearImageWatermark = () => {
     const value = {
@@ -119,7 +131,8 @@ const PlayoutPanel = observer(({
         slug,
         dvrEnabled,
         dvrMaxDuration,
-        dvrStartTime
+        dvrStartTime,
+        playoutProfile
       });
 
       notifications.show({
@@ -142,11 +155,28 @@ const PlayoutPanel = observer(({
 
   return (
     <Box w="700px">
+      <div className="form__section-header">Playout</div>
+      <Box mb={24}>
+        {
+          <Select
+            label="Playout Ladder"
+            formName="playoutLadder"
+            options={ladderProfilesData}
+            defaultOption={{
+              value: "",
+              label: "Select Ladder Profile"
+            }}
+            style={{width: "100%"}}
+            helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+            value={playoutProfile}
+            onChange={(event) => setPlayoutProfile(event.target.value)}
+          />
+        }
+      </Box>
       <DisabledTooltipWrapper
         tooltipLabel="DRM configuration is disabled when the stream is active"
         disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)}
       >
-        <div className="form__section-header">Playout</div>
         <Box mb={24}>
           <Select
             label="DRM"
