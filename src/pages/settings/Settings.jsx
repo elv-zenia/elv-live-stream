@@ -81,10 +81,12 @@ const Settings = observer(() => {
       updatedFormData.default = JSON.parse(updatedFormData.default || {});
       updatedFormData.custom = updatedFormData.custom.map(item => JSON.parse(item || {}));
 
-      editStore.SaveLadderProfiles({profileData: updatedFormData});
+      editStore.SaveLadderProfiles({
+        profileData: {...profileFormData}
+      });
 
       notifications.show({
-        title: "Profiles changed",
+        title: "Profile data changed",
         message: "Playout profiles successfully updated",
         autoClose: false
       });

@@ -674,7 +674,10 @@ class EditStore {
         objectId: dataStore.siteId
       });
 
-      const profiles = yield this.client.ReplaceMetadata({
+      profileData.default = JSON.parse(profileData.default || {});
+      profileData.custom = profileData.custom.map(item => JSON.parse(item || {}));
+
+      yield this.client.ReplaceMetadata({
         libraryId,
         objectId: dataStore.siteId,
         writeToken,
@@ -685,11 +688,12 @@ class EditStore {
       yield this.client.FinalizeContentObject({
         libraryId,
         objectId: dataStore.siteId,
+        writeToken,
         commitMessage: "Update playout ladder profiles",
-        writeToken
+        awaitCommitConfirmation: true
       });
 
-      this.ladderProfiles = profiles;
+      dataStore.UpdateLadderProfiles({profiles: profileData});
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Unable to save ladder profiles", error);

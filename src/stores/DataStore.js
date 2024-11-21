@@ -105,7 +105,7 @@ class DataStore {
         metadataSubtree: "public/asset_metadata/profiles"
       });
 
-      this.ladderProfiles = profiles;
+      this.UpdateLadderProfiles({profiles});
 
       return profiles;
     } catch(error) {
@@ -526,6 +526,10 @@ class DataStore {
       return "";
     }
   });
+
+  UpdateLadderProfiles = ({profiles}) => {
+    this.ladderProfiles = profiles;
+  };
 
   UpdateStreamUrls = ({urls}) => {
     this.liveStreamUrls = urls;
