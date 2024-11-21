@@ -1,4 +1,4 @@
-import {Box, Button, Loader, Title} from "@mantine/core";
+import {Box, Button, Title} from "@mantine/core";
 import TextEditorBox from "@/components/text-editor-box/TextEditorBox.jsx";
 import {useEffect, useState} from "react";
 import {DefaultLadderProfile} from "@/utils/profiles.js";
@@ -6,6 +6,8 @@ import {observer} from "mobx-react-lite";
 import {dataStore, editStore} from "@/stores/index.js";
 import {PlusIcon} from "@/assets/icons/index.js";
 import {rootStore} from "@/stores/index.js";
+import {Loader} from "@/components/Loader.jsx";
+import {notifications} from "@mantine/notifications";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
@@ -74,11 +76,27 @@ const Settings = observer(() => {
   const HandleSave = () => {
     try {
       setSaving(true);
-      const updatedFormData = profileFormData;
+      const updatedFormData = {...profileFormData};
+
       updatedFormData.default = JSON.parse(updatedFormData.default || {});
-      updatedFormData.custom = updatedFormData.custom.map(item => JSON.parse(item));
+      updatedFormData.custom = updatedFormData.custom.map(item => JSON.parse(item || {}));
 
       editStore.SaveLadderProfiles({profileData: updatedFormData});
+
+      notifications.show({
+        title: "Profiles changed",
+        message: "Playout profiles successfully updated",
+        autoClose: false
+      });
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error("Unable to update playout profiles", error);
+
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: "Unable to apply settings"
+      });
     } finally {
       setSaving(false);
     }
@@ -128,6 +146,7 @@ const Settings = observer(() => {
         type="button"
         className="button__primary"
         onClick={HandleSave}
+        disabled={saving}
       >
         {saving ? <Loader loader="inline" className="modal__loader"/> : "Save"}
       </button>
