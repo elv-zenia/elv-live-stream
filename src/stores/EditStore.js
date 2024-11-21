@@ -368,6 +368,7 @@ class EditStore {
       libraryId,
       objectId,
       writeToken,
+      commitMessage: "Create stream link",
       awaitCommitConfirmation: true
     });
   });
@@ -684,6 +685,7 @@ class EditStore {
       yield this.client.FinalizeContentObject({
         libraryId,
         objectId: dataStore.siteId,
+        commitMessage: "Update playout ladder profiles",
         writeToken
       });
 

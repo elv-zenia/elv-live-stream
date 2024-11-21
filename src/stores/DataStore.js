@@ -106,6 +106,8 @@ class DataStore {
       });
 
       this.ladderProfiles = profiles;
+
+      return profiles;
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Unable to load ladder profiles from site object", error);

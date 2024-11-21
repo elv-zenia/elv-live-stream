@@ -533,7 +533,7 @@ class StreamStore {
         libraryId,
         objectId,
         writeToken,
-        commitMessage: "Uploaded image"
+        commitMessage: "Upload image"
       });
 
       const imageWatermark = {
@@ -665,6 +665,47 @@ class StreamStore {
         }
       });
     }
+  });
+
+  UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
+    let profileData;
+
+    if(!libraryId) {
+      libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+
+    const {writeToken} = yield this.client.EditContentObject({
+      libraryId,
+      objectId
+    });
+
+    const ladderProfiles = yield dataStore.LoadLadderProfiles();
+
+    if(!ladderProfiles) {
+      throw Error("Unable to update ladder specs. No profiles were found.");
+    }
+
+    if(profile.toLowerCase() !== "default") {
+      profileData = ladderProfiles.custom.find(item => item.name === profile);
+    } else {
+      profileData = ladderProfiles.default;
+    }
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/ladder_specs",
+      metadata: profileData.ladder_specs
+    });
+
+    yield this.client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update ladder_specs",
+      awaitCommitConfirmation: true
+    });
   });
 
   FetchLiveRecordingCopies = flow(function * ({objectId, libraryId}) {
@@ -851,6 +892,26 @@ class StreamStore {
     }
   });
 
+  // CreateAudioStreamsConfig = ({audioData={}}) => {
+  //   let audioStreams = {};
+  //
+  //   for(let i = 0; i < Object.keys(audioData).length; i++) {
+  //     const audioIndex = Object.keys(audioData)[i];
+  //     const audio = audioData[audioIndex];
+  //
+  //     audioStreams[audioIndex] = {
+  //       recordingBitrate: audio.recording_bitrate || 192000,
+  //       recordingChannels: audio.recording_channels || 2,
+  //     };
+  //
+  //     if(audio.playout) {
+  //       audioStreams[audioIndex].playoutLabel = audio.playout_label || `Audio ${audioIndex}`;
+  //     }
+  //   }
+  //
+  //   return audioStreams;
+  // };
+
   UpdateStreamAudioSettings = flow(function * ({objectId, audioData}) {
     const libraryId = yield this.client.ContentObjectLibraryId({objectId});
     const {writeToken} = yield this.client.EditContentObject({
@@ -866,11 +927,26 @@ class StreamStore {
       metadata: audioData
     });
 
+    // const audioStreams = this.CreateAudioStreamsConfig({audioData});
+    // const audioIndexMeta = [];
+    //
+    // for(let i =0; i < Object.keys(audioStreams).length; i ++) {
+    //   audioIndexMeta[i] = parseInt(Object.keys(audioStreams || {})[i]);
+    // }
+    //
+    // yield this.client.ReplaceMetadata({
+    //   libraryId,
+    //   objectId,
+    //   writeToken,
+    //   metadataSubtree: "live_recording/recording_config/recording_params/xc_params/audio_index",
+    //   metadata: audioIndexMeta
+    // });
+
     yield this.client.FinalizeContentObject({
       libraryId,
       objectId,
       writeToken,
-      commitMessage: "Update metadata",
+      commitMessage: "Update audio settings",
       awaitCommitConfirmation: true
     });
   });

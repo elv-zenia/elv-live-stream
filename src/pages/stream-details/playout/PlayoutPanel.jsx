@@ -135,6 +135,12 @@ const PlayoutPanel = observer(({
         playoutProfile
       });
 
+      await streamStore.UpdateLadderSpecs({
+        objectId,
+        slug,
+        profile: playoutProfile
+      });
+
       notifications.show({
         title: `${title || params.id} updated`,
         message: "Settings have been applied successfully"
