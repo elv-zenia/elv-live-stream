@@ -668,7 +668,8 @@ class StreamStore {
   });
 
   UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
-    let profileData;
+    let profileData, topLadderRate;
+    const ladderSpecs = [];
 
     if(!libraryId) {
       libraryId = yield this.client.ContentObjectLibraryId({objectId});
@@ -681,6 +682,12 @@ class StreamStore {
 
     const ladderProfiles = yield dataStore.LoadLadderProfiles();
 
+    const audioData = yield this.client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: "live_recording_config/audio"
+    });
+
     if(!ladderProfiles) {
       throw Error("Unable to update ladder specs. No profiles were found.");
     }
@@ -691,12 +698,78 @@ class StreamStore {
       profileData = ladderProfiles.default;
     }
 
+    // Add fully-formed video specs
+    profileData.ladder_specs.video.forEach(spec => {
+      if(spec.bit_rate > topLadderRate) {
+        topLadderRate = spec.bit_rate;
+      }
+
+      const videoSpec = {
+        ...spec,
+        media_type: 1,
+        representation: `videovideo_${spec.width}x${spec.height}@${spec.bit_rate}`,
+        stream_index: 0,
+        stream_name: "video"
+      };
+
+      ladderSpecs.push(videoSpec);
+    });
+
+    // Add fully-formed audio specs
+    let globalAudioBitrate = 0, nAudio = 0;
+
+    const audioStreams = this.CreateAudioStreamsConfig({audioData});
+    Object.keys(audioStreams || {}).forEach((stream, i) => {
+      let audioLadderSpec = {};
+      const audioIndex = Object.keys(audioStreams)[i];
+      const audio = audioStreams[audioIndex];
+
+      for(let j = 0; j < profileData.ladder_specs.audio.length; j++) {
+        let element = profileData.ladder_specs.audio[j];
+        if(element.channels === audio.recordingChannels) {
+          audioLadderSpec = {...element};
+          break;
+        }
+      }
+
+      if(Object.keys(audioLadderSpec).length === 0) {
+        audioLadderSpec = {...profileData.ladder_specs.audio[0]};
+      }
+
+      audioLadderSpec.representation = `audioaudio_aac@${audioLadderSpec.bit_rate}`;
+      audioLadderSpec.channels = audio.recordingChannels;
+      audioLadderSpec.stream_index = parseInt(audioIndex);
+      audioLadderSpec.stream_name = `audio_${audioIndex}`;
+      audioLadderSpec.stream_label = audio.playoutLabel ? audio.playoutLabel : null;
+      audioLadderSpec.media_type = 2;
+
+      ladderSpecs.push(audioLadderSpec);
+
+      if(audio.recordingBitrate > globalAudioBitrate) {
+        globalAudioBitrate = audio.recordingBitrate;
+      }
+
+      nAudio = nAudio++;
+    });
+
+    yield this.client.MergeMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/xc_params",
+      metadata: {
+        audio_bitrate: globalAudioBitrate,
+        video_bitrate: topLadderRate,
+        n_audio: nAudio
+      }
+    });
+
     yield this.client.ReplaceMetadata({
       libraryId,
       objectId,
       writeToken,
       metadataSubtree: "live_recording/recording_config/recording_params/ladder_specs",
-      metadata: profileData.ladder_specs
+      metadata: ladderSpecs
     });
 
     yield this.client.FinalizeContentObject({
@@ -892,25 +965,25 @@ class StreamStore {
     }
   });
 
-  // CreateAudioStreamsConfig = ({audioData={}}) => {
-  //   let audioStreams = {};
-  //
-  //   for(let i = 0; i < Object.keys(audioData).length; i++) {
-  //     const audioIndex = Object.keys(audioData)[i];
-  //     const audio = audioData[audioIndex];
-  //
-  //     audioStreams[audioIndex] = {
-  //       recordingBitrate: audio.recording_bitrate || 192000,
-  //       recordingChannels: audio.recording_channels || 2,
-  //     };
-  //
-  //     if(audio.playout) {
-  //       audioStreams[audioIndex].playoutLabel = audio.playout_label || `Audio ${audioIndex}`;
-  //     }
-  //   }
-  //
-  //   return audioStreams;
-  // };
+  CreateAudioStreamsConfig = ({audioData={}}) => {
+    let audioStreams = {};
+
+    for(let i = 0; i < Object.keys(audioData).length; i++) {
+      const audioIndex = Object.keys(audioData)[i];
+      const audio = audioData[audioIndex];
+
+      audioStreams[audioIndex] = {
+        recordingBitrate: audio.recording_bitrate || 192000,
+        recordingChannels: audio.recording_channels || 2,
+      };
+
+      if(audio.playout) {
+        audioStreams[audioIndex].playoutLabel = audio.playout_label || `Audio ${audioIndex}`;
+      }
+    }
+
+    return audioStreams;
+  };
 
   UpdateStreamAudioSettings = flow(function * ({objectId, audioData}) {
     const libraryId = yield this.client.ContentObjectLibraryId({objectId});
