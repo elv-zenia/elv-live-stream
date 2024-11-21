@@ -8,12 +8,15 @@ import {PlusIcon} from "@/assets/icons/index.js";
 import {rootStore} from "@/stores/index.js";
 import {Loader} from "@/components/Loader.jsx";
 import {notifications} from "@mantine/notifications";
+import ConfirmModal from "@/components/ConfirmModal.jsx";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
   // For displaying values while user potentionally edits name
   const [customProfileNames, setCustomProfileNames] = useState([]);
+  const [deleteIndex, setDeleteIndex] = useState(-1);
   const [saving, setSaving] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const LoadData = async() => {
@@ -52,7 +55,7 @@ const Settings = observer(() => {
     });
   };
 
-  const HandleAddCustom = () => {
+  const HandleAddCustom = async () => {
     const updatedCustomItems = profileFormData.custom;
     const newName = `Custom ${profileFormData.custom.length + 1}`;
 
@@ -73,22 +76,51 @@ const Settings = observer(() => {
     setCustomProfileNames(updatedCustomItems.map(item => JSON.parse(item).name));
   };
 
-  const HandleSave = () => {
+  const HandleDeleteProfile = async({index}) => {
+    try {
+      let updatedCustomItems = [...profileFormData.custom];
+      updatedCustomItems = updatedCustomItems.slice(0, index).concat(updatedCustomItems.slice(index + 1));
+
+      const newData = {
+        ...profileFormData,
+        custom: updatedCustomItems
+      };
+
+      await editStore.SaveLadderProfiles({
+        profileData: newData
+      });
+
+      setProfileFormData(newData);
+
+      setCustomProfileNames(updatedCustomItems.map(item => JSON.parse(item).name));
+
+      notifications.show({
+        title: "Profile deleted",
+        message: "Playout profiles successfully updated"
+      });
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error("Unable to delete playout profile", error);
+
+      notifications.show({
+        title: "Error",
+        color: "red",
+        message: "Unable to apply settings"
+      });
+    }
+  };
+
+  const HandleSave = async() => {
     try {
       setSaving(true);
-      const updatedFormData = {...profileFormData};
 
-      updatedFormData.default = JSON.parse(updatedFormData.default || {});
-      updatedFormData.custom = updatedFormData.custom.map(item => JSON.parse(item || {}));
-
-      editStore.SaveLadderProfiles({
+      await editStore.SaveLadderProfiles({
         profileData: {...profileFormData}
       });
 
       notifications.show({
         title: "Profile data changed",
-        message: "Playout profiles successfully updated",
-        autoClose: false
+        message: "Playout profiles successfully updated"
       });
     } catch(error) {
       // eslint-disable-next-line no-console
@@ -128,18 +160,23 @@ const Settings = observer(() => {
           columns={[
             {id: "Default", header: "Profile", value: "Default"}
           ]}
+          hideDelete
           editorValue={profileFormData.default || {}}
           HandleEditorValueChange={(args) => HandleChange({...args, index: "default"})}
         />
         {
           (profileFormData.custom).map((profile, index) => (
             <TextEditorBox
-              key={`custom-${index}`}
+              key={`custom-${customProfileNames[index]}`}
               columns={[
                 {id: customProfileNames[index], header: "Profile", value: customProfileNames[index]}
               ]}
               editorValue={profile}
               HandleEditorValueChange={(args) => HandleChange({...args, index})}
+              HandleDelete={() => {
+                setShowModal(true);
+                setDeleteIndex(index);
+              }}
             />
           ))
         }
@@ -152,6 +189,17 @@ const Settings = observer(() => {
       >
         {saving ? <Loader loader="inline" className="modal__loader"/> : "Save"}
       </button>
+      <ConfirmModal
+        title="Delete Profile"
+        message="Are you sure you want to delete the profile? This action cannot be undone."
+        confirmText="Delete"
+        show={showModal}
+        CloseCallback={() => setShowModal(false)}
+        ConfirmCallback={async() => {
+          await HandleDeleteProfile({index: deleteIndex});
+          setShowModal(false);
+        }}
+      />
     </>
   );
 });

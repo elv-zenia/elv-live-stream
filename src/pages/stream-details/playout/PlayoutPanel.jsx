@@ -162,8 +162,11 @@ const PlayoutPanel = observer(({
   return (
     <Box w="700px">
       <div className="form__section-header">Playout</div>
-      <Box mb={24}>
-        {
+      <DisabledTooltipWrapper
+        tooltipLabel="Playout Ladder configuration is diabled whent the stream is running"
+        disabled={[STATUS_MAP.RUNNING].includes(status)}
+      >
+        <Box mb={24}>
           <Select
             label="Playout Ladder"
             formName="playoutLadder"
@@ -177,8 +180,8 @@ const PlayoutPanel = observer(({
             value={playoutProfile}
             onChange={(event) => setPlayoutProfile(event.target.value)}
           />
-        }
-      </Box>
+        </Box>
+      </DisabledTooltipWrapper>
       <DisabledTooltipWrapper
         tooltipLabel="DRM configuration is disabled when the stream is active"
         disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)}

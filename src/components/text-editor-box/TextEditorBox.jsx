@@ -24,11 +24,11 @@ const EditorField = ({
 const TextEditorBox = ({
   columns=[],
   editorValue,
-  HandleEditorValueChange
+  hideDelete=false,
+  HandleEditorValueChange,
+  HandleDelete
 }) => {
   const [showEditor, setShowEditor] = useState(false);
-
-  const HandleRemove = () => {};
 
   return (
     <Box w={700}>
@@ -51,14 +51,17 @@ const TextEditorBox = ({
             >
               <EditIcon />
             </ActionIcon>
-            <ActionIcon
-              size={20}
-              variant="transparent"
-              color="gray"
-              onClick={HandleRemove}
-            >
-              <TrashIcon />
-            </ActionIcon>
+            {
+              !hideDelete &&
+              <ActionIcon
+                size={20}
+                variant="transparent"
+                color="gray"
+                onClick={HandleDelete}
+              >
+                <TrashIcon />
+              </ActionIcon>
+            }
           </Group>
         </Group>
       </Paper>
