@@ -668,7 +668,8 @@ class StreamStore {
   });
 
   UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
-    let profileData, topLadderRate;
+    let profileData;
+    let topLadderRate = 0;
     const ladderSpecs = [];
 
     if(!libraryId) {
@@ -716,7 +717,8 @@ class StreamStore {
     });
 
     // Add fully-formed audio specs
-    let globalAudioBitrate = 0, nAudio = 0;
+    let globalAudioBitrate = 0;
+    let nAudio = 0;
 
     const audioStreams = this.CreateAudioStreamsConfig({audioData});
     Object.keys(audioStreams || {}).forEach((stream, i) => {
@@ -749,7 +751,7 @@ class StreamStore {
         globalAudioBitrate = audio.recordingBitrate;
       }
 
-      nAudio = nAudio++;
+      nAudio++;
     });
 
     yield this.client.MergeMetadata({
