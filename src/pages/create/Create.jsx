@@ -6,7 +6,7 @@ import Accordion from "@/components/Accordion.jsx";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "@/components/Loader.jsx";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Alert, Button, Flex, Text} from "@mantine/core";
+import {Alert, Box, Button, Flex, Text} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/AudioTracksTable";
 import {notifications} from "@mantine/notifications";
@@ -117,19 +117,21 @@ const AdvancedSection = observer(({
               }
             />
 
-            <Select
-              label="Playout Ladder"
-              formName="playoutLadder"
-              options={ladderProfilesData}
-              defaultOption={{
-                value: "",
-                label: "Select Ladder Profile"
-              }}
-              style={{width: "100%"}}
-              helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
-              value={playoutProfile}
-              onChange={(event) => setPlayoutProfile(event.target.value)}
-            />
+            <Box mb={16}>
+              <Select
+                label="Playout Ladder"
+                formName="playoutLadder"
+                options={ladderProfilesData}
+                defaultOption={{
+                  value: "",
+                  label: "Select Ladder Profile"
+                }}
+                style={{width: "100%", marginBottom: "0"}}
+                helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+                value={playoutProfile}
+                onChange={(event) => setPlayoutProfile(event.target.value)}
+              />
+            </Box>
 
             <PlaybackEncryption
               drmFormData={drmFormData}
