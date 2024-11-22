@@ -708,7 +708,7 @@ class StreamStore {
       const videoSpec = {
         ...spec,
         media_type: 1,
-        representation: `videovideo_${spec.width}x${spec.height}@${spec.bit_rate}`,
+        representation: `videovideo_${spec.width}x${spec.height}_h264@${spec.bit_rate}`,
         stream_index: 0,
         stream_name: "video"
       };
