@@ -7,6 +7,7 @@ import MagnifyingGlassIcon from "@/assets/icons/MagnifyingGlassIcon.jsx";
 import MediaIcon from "@/assets/icons/MediaIcon.jsx";
 import PlayCircleIcon from "@/assets/icons/PlayCircleIcon.jsx";
 import PlusIcon from "@/assets/icons/PlusIcon.jsx";
+import SettingsIcon from "@/assets/icons/SettingsIcon.jsx";
 import StreamIcon from "@/assets/icons/StreamIcon.jsx";
 import TrashIcon from "@/assets/icons/TrashIcon.jsx";
 import VideoPlusIcon from "@/assets/icons/VideoPlusIcon.jsx";
@@ -21,6 +22,7 @@ export {
   MediaIcon,
   PlayCircleIcon,
   PlusIcon,
+  SettingsIcon,
   StreamIcon,
   TrashIcon,
   VideoPlusIcon

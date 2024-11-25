@@ -165,24 +165,28 @@ const StreamDetailsPage = observer(() => {
         {
           DETAILS_TABS.map(tab => (
             <Tabs.Panel value={tab.value} key={`details-panel-${tab.value}`}>
-              <tab.Component
-                status={stream.status}
-                slug={stream.slug}
-                currentDrm={stream.drm}
-                simpleWatermark={stream.simpleWatermark}
-                imageWatermark={stream.imageWatermark}
-                title={stream.title}
-                embedUrl={stream.embedUrl}
-                url={stream.originUrl}
-                recordingInfo={recordingInfo}
-                currentRetention={stream.partTtl}
-                currentConnectionTimeout={stream.connectionTimeout}
-                currentReconnectionTimeout={stream.reconnectionTimeout}
-                currentDvrEnabled={stream.dvrEnabled}
-                currentDvrMaxDuration={stream.dvrMaxDuration}
-                currentDvrStartTime={stream.dvrStartTime}
-                libraryId={stream.libraryId}
-              />
+              {
+                stream.status ?
+                <tab.Component
+                  status={stream.status}
+                  slug={stream.slug}
+                  currentDrm={stream.drm}
+                  simpleWatermark={stream.simpleWatermark}
+                  imageWatermark={stream.imageWatermark}
+                  title={stream.title}
+                  embedUrl={stream.embedUrl}
+                  url={stream.originUrl}
+                  recordingInfo={recordingInfo}
+                  currentRetention={stream.partTtl}
+                  currentConnectionTimeout={stream.connectionTimeout}
+                  currentReconnectionTimeout={stream.reconnectionTimeout}
+                  currentDvrEnabled={stream.dvrEnabled}
+                  currentDvrMaxDuration={stream.dvrMaxDuration}
+                  currentDvrStartTime={stream.dvrStartTime}
+                  currentPlayoutProfile={stream.playoutLadderProfile}
+                  libraryId={stream.libraryId}
+                /> : <Loader />
+              }
             </Tabs.Panel>
           ))
         }

@@ -64,7 +64,8 @@ class StreamStore {
           "part_ttl",
           "drm",
           "drm_type",
-          "audio"
+          "audio",
+          "playout_ladder_profile"
         ]
       });
 
@@ -103,6 +104,25 @@ class StreamStore {
         customSettings["reconnect_timeout"] = recordingConfig.recording_params.reconnect_timeout;
       }
 
+      if(liveRecordingConfig.playout_ladder_profile) {
+        const allProfiles = yield this.client.ContentObjectMetadata({
+          libraryId: yield this.client.ContentObjectLibraryId({objectId: dataStore.siteId}),
+          objectId: dataStore.siteId,
+          metadataSubtree: "public/asset_metadata/profiles"
+        });
+
+        if(allProfiles) {
+          let profileData;
+          if(liveRecordingConfig.playout_ladder_profile.toLowerCase() === "default") {
+            profileData = allProfiles.default;
+          } else {
+            profileData = allProfiles.custom.find(item => item.name === liveRecordingConfig.playout_ladder_profile);
+          }
+
+          customSettings["ladder_profile"] = profileData.ladder_specs;
+        }
+      }
+
       if(liveRecordingConfig.audio) {
         // Remove audio tracks with a falsey record property
         Object.keys(liveRecordingConfig.audio).forEach(audioIndex => {
@@ -116,14 +136,23 @@ class StreamStore {
 
       yield this.client.StreamConfig({name: objectId, customSettings, probeMetadata});
 
-      if(liveRecordingConfig?.drm) {
+      if((liveRecordingConfig?.drm_type || "").includes("drm")) {
         const drmOption = liveRecordingConfig?.drm_type ? ENCRYPTION_OPTIONS.find(option => option.value === liveRecordingConfig.drm_type) : null;
 
-        yield this.client.StreamInitialize({
-          name: objectId,
-          drm: liveRecordingConfig?.drm === "clear" ? false : true,
-          format: drmOption?.format.join(",")
+        // Check for existing drm keys; if found, skip Stream Initialize
+        const drmKeyMeta = yield this.client.ContentObjectMetadata({
+          libraryId,
+          objectId,
+          metadataSubtree: "offerings/default/playout/drm_keys"
         });
+
+        if(!drmKeyMeta) {
+          yield this.client.StreamInitialize({
+            name: objectId,
+            drm: liveRecordingConfig?.drm === "clear" ? false : true,
+            format: drmOption?.format.join(",")
+          });
+        }
       }
 
       // Update stream link in site after stream configuration
@@ -160,37 +189,38 @@ class StreamStore {
     showParams=false,
     update=false
   }) {
+    let response;
     try {
-      const response = yield this.client.StreamStatus({
+      response = yield this.client.StreamStatus({
         name: objectId,
         stopLro,
         showParams
       });
-
-      if(update) {
-        if(!slug) {
-          slug = Object.keys(this.streams || {}).find(slug => (
-            this.streams[slug].objectId === objectId
-          ));
-        }
-
-        this.UpdateStream({
-          key: slug,
-          value: {
-            status: response.state,
-            warnings: response.warnings,
-            quality: response.quality,
-            embedUrl: response?.playout_urls?.embed_url
-          }
-        });
-      }
-
-      return response;
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error(`Failed to load status for ${objectId || "object"}`, error);
       return {};
     }
+
+    if(update) {
+      if(!slug) {
+        slug = Object.keys(this.streams || {}).find(slug => (
+          this.streams[slug].objectId === objectId
+        ));
+      }
+
+      this.UpdateStream({
+        key: slug,
+        value: {
+          status: response.state,
+          warnings: response.warnings,
+          quality: response.quality,
+          embedUrl: response?.playout_urls?.embed_url
+        }
+      });
+    }
+
+    return response;
   });
 
   StartStream = flow(function * ({
@@ -503,7 +533,7 @@ class StreamStore {
         libraryId,
         objectId,
         writeToken,
-        commitMessage: "Uploaded image"
+        commitMessage: "Upload image"
       });
 
       const imageWatermark = {
@@ -635,6 +665,122 @@ class StreamStore {
         }
       });
     }
+  });
+
+  UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
+    let profileData;
+    let topLadderRate = 0;
+    const ladderSpecs = [];
+
+    if(!libraryId) {
+      libraryId = yield this.client.ContentObjectLibraryId({objectId});
+    }
+
+    const {writeToken} = yield this.client.EditContentObject({
+      libraryId,
+      objectId
+    });
+
+    const ladderProfiles = yield dataStore.LoadLadderProfiles();
+
+    const audioData = yield this.client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: "live_recording_config/audio"
+    });
+
+    if(!ladderProfiles) {
+      throw Error("Unable to update ladder specs. No profiles were found.");
+    }
+
+    if(profile.toLowerCase() !== "default") {
+      profileData = ladderProfiles.custom.find(item => item.name === profile);
+    } else {
+      profileData = ladderProfiles.default;
+    }
+
+    // Add fully-formed video specs
+    profileData.ladder_specs.video.forEach(spec => {
+      if(spec.bit_rate > topLadderRate) {
+        topLadderRate = spec.bit_rate;
+      }
+
+      const videoSpec = {
+        ...spec,
+        media_type: 1,
+        representation: `videovideo_${spec.width}x${spec.height}_h264@${spec.bit_rate}`,
+        stream_index: 0,
+        stream_name: "video"
+      };
+
+      ladderSpecs.push(videoSpec);
+    });
+
+    // Add fully-formed audio specs
+    let globalAudioBitrate = 0;
+    let nAudio = 0;
+
+    const audioStreams = this.CreateAudioStreamsConfig({audioData});
+    Object.keys(audioStreams || {}).forEach((stream, i) => {
+      let audioLadderSpec = {};
+      const audioIndex = Object.keys(audioStreams)[i];
+      const audio = audioStreams[audioIndex];
+
+      for(let j = 0; j < profileData.ladder_specs.audio.length; j++) {
+        let element = profileData.ladder_specs.audio[j];
+        if(element.channels === audio.recordingChannels) {
+          audioLadderSpec = {...element};
+          break;
+        }
+      }
+
+      if(Object.keys(audioLadderSpec).length === 0) {
+        audioLadderSpec = {...profileData.ladder_specs.audio[0]};
+      }
+
+      audioLadderSpec.representation = `audioaudio_aac@${audioLadderSpec.bit_rate}`;
+      audioLadderSpec.channels = audio.recordingChannels;
+      audioLadderSpec.stream_index = parseInt(audioIndex);
+      audioLadderSpec.stream_name = `audio_${audioIndex}`;
+      audioLadderSpec.stream_label = audio.playoutLabel ? audio.playoutLabel : null;
+      audioLadderSpec.media_type = 2;
+
+      ladderSpecs.push(audioLadderSpec);
+
+      if(audio.recordingBitrate > globalAudioBitrate) {
+        globalAudioBitrate = audio.recordingBitrate;
+      }
+
+      nAudio++;
+    });
+
+    yield this.client.MergeMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/xc_params",
+      metadata: {
+        audio_bitrate: globalAudioBitrate,
+        video_bitrate: topLadderRate,
+        n_audio: nAudio
+      }
+    });
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/ladder_specs",
+      metadata: ladderSpecs
+    });
+
+    yield this.client.FinalizeContentObject({
+      libraryId,
+      objectId,
+      writeToken,
+      commitMessage: "Update ladder_specs",
+      awaitCommitConfirmation: true
+    });
   });
 
   FetchLiveRecordingCopies = flow(function * ({objectId, libraryId}) {
@@ -821,6 +967,26 @@ class StreamStore {
     }
   });
 
+  CreateAudioStreamsConfig = ({audioData={}}) => {
+    let audioStreams = {};
+
+    for(let i = 0; i < Object.keys(audioData).length; i++) {
+      const audioIndex = Object.keys(audioData)[i];
+      const audio = audioData[audioIndex];
+
+      audioStreams[audioIndex] = {
+        recordingBitrate: audio.recording_bitrate || 192000,
+        recordingChannels: audio.recording_channels || 2,
+      };
+
+      if(audio.playout) {
+        audioStreams[audioIndex].playoutLabel = audio.playout_label || `Audio ${audioIndex}`;
+      }
+    }
+
+    return audioStreams;
+  };
+
   UpdateStreamAudioSettings = flow(function * ({objectId, audioData}) {
     const libraryId = yield this.client.ContentObjectLibraryId({objectId});
     const {writeToken} = yield this.client.EditContentObject({
@@ -836,11 +1002,26 @@ class StreamStore {
       metadata: audioData
     });
 
+    // const audioStreams = this.CreateAudioStreamsConfig({audioData});
+    // const audioIndexMeta = [];
+    //
+    // for(let i =0; i < Object.keys(audioStreams).length; i ++) {
+    //   audioIndexMeta[i] = parseInt(Object.keys(audioStreams || {})[i]);
+    // }
+    //
+    // yield this.client.ReplaceMetadata({
+    //   libraryId,
+    //   objectId,
+    //   writeToken,
+    //   metadataSubtree: "live_recording/recording_config/recording_params/xc_params/audio_index",
+    //   metadata: audioIndexMeta
+    // });
+
     yield this.client.FinalizeContentObject({
       libraryId,
       objectId,
       writeToken,
-      commitMessage: "Update metadata",
+      commitMessage: "Update audio settings",
       awaitCommitConfirmation: true
     });
   });

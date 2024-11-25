@@ -2,8 +2,7 @@ import {observer} from "mobx-react-lite";
 import {Checkbox, Text, TextInput} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
 import {AudioBitrateReadable} from "@/utils/helpers";
-import {Select} from "@/components/Inputs.jsx";
-import {RECORDING_BITRATE_OPTIONS, AudioCodec} from "@/utils/constants";
+import {AudioCodec} from "@/utils/constants";
 
 const AudioTracksTable = observer(({
   records,
@@ -86,26 +85,26 @@ const AudioTracksTable = observer(({
                 );
               }
             },
-            {
-              accessor: "output_bitrate",
-              title: "Bitrate",
-              render: item => (
-                <Select
-                  label=""
-                  style={{minWidth: "125px"}}
-                  options={RECORDING_BITRATE_OPTIONS}
-                  disabled={disabled}
-                  onChange={(event) => {
-                    HandleFormChange({
-                      index: item.stream_index,
-                      key: "recording_bitrate",
-                      value: parseInt(event.target.value)
-                    });
-                  }}
-                  value={audioFormData[item.stream_index].recording_bitrate}
-                />
-              )
-            },
+            // {
+            //   accessor: "output_bitrate",
+            //   title: "Bitrate",
+            //   render: item => (
+            //     <Select
+            //       label=""
+            //       style={{minWidth: "125px"}}
+            //       options={RECORDING_BITRATE_OPTIONS}
+            //       disabled={disabled}
+            //       onChange={(event) => {
+            //         HandleFormChange({
+            //           index: item.stream_index,
+            //           key: "recording_bitrate",
+            //           value: parseInt(event.target.value)
+            //         });
+            //       }}
+            //       value={audioFormData[item.stream_index].recording_bitrate}
+            //     />
+            //   )
+            // },
             {
               accessor: "action_record",
               title: "Record",

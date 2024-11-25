@@ -18,6 +18,7 @@ class DataStore {
   siteId;
   siteLibraryId;
   liveStreamUrls;
+  ladderProfiles;
 
   constructor(rootStore) {
     makeAutoObservable(this);
@@ -41,6 +42,7 @@ class DataStore {
       this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
     }
 
+    yield this.LoadLadderProfiles();
     yield this.LoadStreams();
     yield streamStore.AllStreamsStatus(reload);
   });
@@ -92,6 +94,23 @@ class DataStore {
       // eslint-disable-next-line no-console
       console.error(error);
       throw Error(`Unable to load sites for tenant ${tenantContractId}.`);
+    }
+  });
+
+  LoadLadderProfiles = flow(function * () {
+    try {
+      const profiles = yield this.client.ContentObjectMetadata({
+        libraryId: yield this.client.ContentObjectLibraryId({objectId: this.siteId}),
+        objectId: this.siteId,
+        metadataSubtree: "public/asset_metadata/profiles"
+      });
+
+      this.UpdateLadderProfiles({profiles});
+
+      return profiles;
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error("Unable to load ladder profiles from site object", error);
     }
   });
 
@@ -244,7 +263,8 @@ class DataStore {
           "public/description",
           "public/name",
           "public/asset_metadata/display_title",
-          "live_recording_config/part_ttl"
+          "live_recording_config/part_ttl",
+          "live_recording_config/playout_ladder_profile"
         ]
       });
       let probeMeta = streamMeta?.live_recording_config?.probe_info;
@@ -283,6 +303,7 @@ class DataStore {
         imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
         originUrl: streamMeta?.live_recording?.recording_config?.recording_params?.origin_url || streamMeta?.live_recording_config?.url,
         partTtl: streamMeta?.live_recording_config?.part_ttl,
+        playoutLadderProfile: streamMeta?.live_recording_config?.playout_ladder_profile,
         reconnectionTimeout: streamMeta?.live_recording?.recording_config?.recording_params?.reconnect_timeout,
         referenceUrl: streamMeta?.live_recording_config?.reference_url,
         simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
@@ -403,13 +424,19 @@ class DataStore {
 
       if(!edgeWriteToken) { return {}; }
 
-      const metadata = yield this.client.ContentObjectMetadata({
-        libraryId,
-        objectId,
-        writeToken: edgeWriteToken,
-        metadataSubtree: "live_recording",
-        select: ["recordings", "recording_config"]
-      });
+      let metadata;
+      try {
+        metadata = yield this.client.ContentObjectMetadata({
+          libraryId,
+          objectId,
+          writeToken: edgeWriteToken,
+          metadataSubtree: "live_recording",
+          select: ["recordings", "recording_config"]
+        });
+      } catch(error) {
+        // eslint-disable-next-line no-console
+        console.error("Unable to load edge write token metadata", error);
+      }
 
       return {
         // First stream recording start time
@@ -499,6 +526,10 @@ class DataStore {
       return "";
     }
   });
+
+  UpdateLadderProfiles = ({profiles}) => {
+    this.ladderProfiles = profiles;
+  };
 
   UpdateStreamUrls = ({urls}) => {
     this.liveStreamUrls = urls;

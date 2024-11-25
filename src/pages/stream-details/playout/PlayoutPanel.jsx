@@ -6,12 +6,13 @@ import {ActionIcon, Box, Checkbox, FileButton, Flex, Group, Menu, Paper, Text, T
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
-import {editStore, streamStore} from "@/stores";
+import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
 import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
 import {EditIcon, TrashIcon} from "@/assets/icons";
+import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
 
 const WatermarkBox = ({type, value, actions=[]}) => {
   if(value === undefined) { return null; }
@@ -52,10 +53,11 @@ const PlayoutPanel = observer(({
   title,
   currentDvrEnabled,
   currentDvrMaxDuration,
-  currentDvrStartTime
+  currentDvrStartTime,
+  currentPlayoutProfile
 }) => {
   const [drm, setDrm] = useState(currentDrm);
-  // const [formDrm, setFormDrm] = useState(currentDrm ? currentDrm : undefined);
+  const [playoutProfile, setPlayoutProfile] = useState(currentPlayoutProfile || "");
   const [formWatermarks, setFormWatermarks] = useState(
     {
       image: imageWatermark ? imageWatermark : undefined,
@@ -70,6 +72,17 @@ const PlayoutPanel = observer(({
   const [applyingChanges, setApplyingChanges] = useState(false);
   const resetRef = useRef(null);
   const params = useParams();
+
+  const defaultOption = dataStore.ladderProfiles?.default ?
+    {
+      label: dataStore.ladderProfiles.default.name,
+      value: dataStore.ladderProfiles.default.name
+    } : {};
+  const ladderProfilesData = dataStore.ladderProfiles ?
+    [
+      defaultOption,
+      ...dataStore.ladderProfiles.custom.map(item => ({label: item.name, value: item.name}))
+    ] : [];
 
   const ClearImageWatermark = () => {
     const value = {
@@ -118,7 +131,14 @@ const PlayoutPanel = observer(({
         slug,
         dvrEnabled,
         dvrMaxDuration,
-        dvrStartTime
+        dvrStartTime,
+        playoutProfile
+      });
+
+      await streamStore.UpdateLadderSpecs({
+        objectId,
+        slug,
+        profile: playoutProfile
       });
 
       notifications.show({
@@ -140,32 +160,57 @@ const PlayoutPanel = observer(({
   };
 
   return (
-    <>
-      <Box data-disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)} mb="24px" maw="50%" className={classes.box}>
-        <div className="form__section-header">Playout</div>
-        <Select
-          label="DRM"
-          formName="playbackEncryption"
-          options={ENCRYPTION_OPTIONS}
-          style={{width: "100%"}}
-          defaultOption={{
-            value: "",
-            label: "Select DRM"
-          }}
-          value={drm}
-          onChange={(event) => setDrm(event.target.value)}
-          tooltip={
-            ENCRYPTION_OPTIONS.map(({label, title, value}) =>
-              <div key={`encryption-info-${value}`} className="form__tooltip-item">
-                <div className="form__tooltip-item__encryption-title">{label}:</div>
-                <div>{title}</div>
-              </div>
-            )
-          }
-        />
-      </Box>
+    <Box w="700px">
+      <div className="form__section-header">Playout</div>
+      <DisabledTooltipWrapper
+        tooltipLabel="Playout Ladder configuration is diabled whent the stream is running"
+        disabled={[STATUS_MAP.RUNNING].includes(status)}
+      >
+        <Box mb={24}>
+          <Select
+            label="Playout Ladder"
+            formName="playoutLadder"
+            options={ladderProfilesData}
+            defaultOption={{
+              value: "",
+              label: "Select Ladder Profile"
+            }}
+            style={{width: "100%"}}
+            helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+            value={playoutProfile}
+            onChange={(event) => setPlayoutProfile(event.target.value)}
+          />
+        </Box>
+      </DisabledTooltipWrapper>
+      <DisabledTooltipWrapper
+        tooltipLabel="DRM configuration is disabled when the stream is active"
+        disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.UNINITIALIZED].includes(status)}
+      >
+        <Box mb={24}>
+          <Select
+            label="DRM"
+            formName="playbackEncryption"
+            options={ENCRYPTION_OPTIONS}
+            style={{width: "100%"}}
+            defaultOption={{
+              value: "",
+              label: "Select DRM"
+            }}
+            value={drm}
+            onChange={(event) => setDrm(event.target.value)}
+            tooltip={
+              ENCRYPTION_OPTIONS.map(({label, title, value}) =>
+                <div key={`encryption-info-${value}`} className="form__tooltip-item">
+                  <div className="form__tooltip-item__encryption-title">{label}:</div>
+                  <div>{title}</div>
+                </div>
+              )
+            }
+          />
+        </Box>
+      </DisabledTooltipWrapper>
 
-      <Box data-disabled={status !== STATUS_MAP.STOPPED} mb={24} maw="50%" className={classes.box}>
+      <DisabledTooltipWrapper tooltipLabel="DVR configuration is disabled while the stream is running" disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}>
         <div className="form__section-header">DVR</div>
 
         <Box mb={24}>
@@ -176,8 +221,6 @@ const PlayoutPanel = observer(({
               onChange={(event) => setDvrEnabled(event.target.checked)}
             />
         </Box>
-
-
         {
           dvrEnabled &&
           <>
@@ -203,25 +246,28 @@ const PlayoutPanel = observer(({
                 withSeconds
               />
             </Box>
-            <Select
-              label="Max Duration"
-              labelDescription="Users are only able to seek back this many minutes. Useful for 24/7 streams and long events."
-              formName="maxDuration"
-              options={DVR_DURATION_OPTIONS}
-              style={{width: "100%"}}
-              defaultOption={{
-                value: "",
-                label: "Select Max Duration"
-              }}
-              value={dvrMaxDuration}
-              onChange={(event) => setDvrMaxDuration(event.target.value)}
-              disabled={!dvrEnabled}
-            />
+            <Box mb={24}>
+              <Select
+                label="Max Duration"
+                labelDescription="Users are only able to seek back this many minutes. Useful for 24/7 streams and long events."
+                formName="maxDuration"
+                options={DVR_DURATION_OPTIONS}
+                style={{width: "100%"}}
+                defaultOption={{
+                  value: "",
+                  label: "Select Max Duration"
+                }}
+                value={dvrMaxDuration}
+                onChange={(event) => setDvrMaxDuration(event.target.value)}
+                disabled={!dvrEnabled}
+              />
+            </Box>
           </>
         }
-      </Box>
+      </DisabledTooltipWrapper>
 
-      <Box mb="24px" maw="50%">
+
+      <Box mb="24px">
         <Group mb={16}>
           <div className="form__section-header">Visible Watermark</div>
         </Group>
@@ -352,7 +398,7 @@ const PlayoutPanel = observer(({
       >
         {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
       </button>
-    </>
+    </Box>
   );
 });
 
