@@ -119,7 +119,12 @@ class StreamStore {
             profileData = allProfiles.custom.find(item => item.name === liveRecordingConfig.playout_ladder_profile);
           }
 
-          customSettings["ladder_profile"] = profileData.ladder_specs;
+          if(profileData) {
+            customSettings["ladder_profile"] = profileData.ladder_specs;
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn(`Ladder profile ${liveRecordingConfig.playout_ladder_profile} not found. Defaulting to the built-in profile.`);
+          }
         }
       }
 
