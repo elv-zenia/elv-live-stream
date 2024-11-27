@@ -156,7 +156,7 @@ const AudioTracksTable = observer(({
                   onClick={() => {
                     HandleToggleDefault({index: item.stream_index, value: !audioFormData[item.stream_index].default});
                   }}
-                  disabled={!audioFormData[item.stream_index].record || disabled}
+                  disabled={!audioFormData[item.stream_index].record || !audioFormData[item.stream_index].playout || disabled}
                 >
                   {
                     audioFormData[item.stream_index].default ?

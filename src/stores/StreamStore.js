@@ -684,6 +684,64 @@ class StreamStore {
     }
   });
 
+  UpdateAudioLadderSpecs = flow(function * ({objectId, libraryId, ladderSpecs, audioData}) {
+    let globalAudioBitrate = 0;
+    let nAudio = 0;
+    const audioLadderSpecs = [];
+
+    if(!audioData) {
+      audioData = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording_config/audio"
+      });
+    }
+
+    const audioStreams = this.CreateAudioStreamsConfig({audioData});
+    Object.keys(audioStreams || {}).forEach((stream, i) => {
+      let audioLadderSpec = {};
+      const audioIndex = Object.keys(audioStreams)[i];
+      const audio = audioStreams[audioIndex];
+
+      if(!audioData[audioIndex].record) { return; }
+
+      for(let j = 0; j < ladderSpecs.audio.length; j++) {
+        let element = ladderSpecs.audio[j];
+        if(element.channels === audio.recordingChannels) {
+          audioLadderSpec = {...element};
+          break;
+        }
+      }
+
+      if(Object.keys(audioLadderSpec).length === 0) {
+        audioLadderSpec = {...ladderSpecs.audio[0]};
+      }
+
+      audioLadderSpec.representation = `audioaudio_aac@${audioLadderSpec.bit_rate}`;
+      audioLadderSpec.channels = audio.recordingChannels;
+      audioLadderSpec.stream_index = parseInt(audioIndex);
+      audioLadderSpec.stream_name = `audio_${audioIndex}`;
+      audioLadderSpec.stream_label = audioData[audioIndex].playout ? audioData[audioIndex].playout_label : null;
+      audioLadderSpec.media_type = 2;
+      audioLadderSpec.lang = audioData[audioIndex].lang;
+      audioLadderSpec.default = audioData[audioIndex].default;
+
+      audioLadderSpecs.push(audioLadderSpec);
+
+      if(audio.recordingBitrate > globalAudioBitrate) {
+        globalAudioBitrate = audio.recordingBitrate;
+      }
+
+      nAudio++;
+    });
+
+    return {
+      nAudio,
+      globalAudioBitrate,
+      audioLadderSpecs
+    };
+  });
+
   UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
     let profileData;
     let topLadderRate = 0;
@@ -1020,40 +1078,45 @@ class StreamStore {
     });
 
     const ladderSpecsPath = "live_recording/recording_config/recording_params/ladder_specs";
-    let ladderSpecsMeta = yield this.client.ContentObjectMetadata({
+    const ladderSpecsMeta = yield this.client.ContentObjectMetadata({
       libraryId,
       objectId,
       metadataSubtree: ladderSpecsPath
     });
 
-    ladderSpecsMeta = ladderSpecsMeta.map(spec => {
-      const audioDataByIndex = audioData[spec.stream_index];
-      if(spec.stream_name.includes("audio") && audioDataByIndex) {
-        if(audioDataByIndex.playout) {
-          spec.stream_label = audioDataByIndex.playout_label;
-        } else {
-          delete spec.stream_label;
-        }
-
-        if(audioDataByIndex.lang) {
-          spec.lang = audioDataByIndex.lang;
-        }
-
-        spec.default = audioDataByIndex.default;
-      }
-
-      return {
-        ...spec
-      };
+    const {nAudio, globalAudioBitrate, audioLadderSpecs} = yield this.UpdateAudioLadderSpecs({
+      libraryId,
+      objectId,
+      ladderSpecs: {audio: ladderSpecsMeta},
+      audioData
     });
+
+    const videoLadderSpecs = ladderSpecsMeta.filter(spec => spec.stream_name.includes("video"));
+
+    const newLadderSpecs = [
+      ...videoLadderSpecs,
+      ...audioLadderSpecs
+    ];
 
     yield this.client.ReplaceMetadata({
       libraryId,
       objectId,
       writeToken,
       metadataSubtree: ladderSpecsPath,
-      metadata: ladderSpecsMeta
+      metadata: newLadderSpecs
     });
+
+    yield this.client.MergeMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/xc_params",
+      metadata: {
+        audio_bitrate: globalAudioBitrate,
+        n_audio: nAudio
+      }
+    });
+
 
     // const audioStreams = this.CreateAudioStreamsConfig({audioData});
     // const audioIndexMeta = [];
