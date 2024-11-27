@@ -51,7 +51,7 @@ class DataStore {
     try {
       if(!this.tenantId) {
         const wallet = yield this.client.userProfileClient.UserWalletObjectInfo();
-        let tenantId = yield this.client.TenantContractId({objectId: wallet.objectId});
+        let tenantId = yield this.client.userProfileClient.TenantContractId();
 
         if(!tenantId) {
           tenantId = yield this.client.ContentObjectMetadata({
