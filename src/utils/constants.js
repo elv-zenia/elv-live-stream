@@ -32,6 +32,17 @@ export const DEFAULT_WATERMARK_TEXT = {
   "y": "h-(4*lh)"
 };
 
+export const DEFAULT_WATERMARK_FORENSIC = {
+  "algo": 6,
+  "forensic_duration": 0,
+  "forensic_start": "",
+  "image_a": "",
+  "image_b": "",
+  "is_stub": true,
+  "payload_bit_nb": 23,
+  "wm_enabled": true
+};
+
 export const DRM_MAP = {
   ALL: ["hls-sample-aes", "hls-aes128", "hls-fairplay", "hls-widevine-cenc", "hls-playready-cenc"],
   PUBLIC: ["hls-sample-aes", "hls-aes128"],

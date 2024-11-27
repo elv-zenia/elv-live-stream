@@ -504,6 +504,8 @@ class StreamStore {
         delete streamDetails.imageWatermark;
       } else if(type === "text") {
         delete streamDetails.simpleWatermark;
+      } else if(type === "forensic") {
+        delete streamDetails.forensicWatermark;
       }
     });
 
@@ -514,7 +516,8 @@ class StreamStore {
     objectId,
     slug,
     textWatermark,
-    imageWatermarkFile
+    imageWatermarkFile,
+    forensicWatermark
   }){
     const payload = {
       objectId,
@@ -553,10 +556,10 @@ class StreamStore {
       };
 
       payload["imageWatermark"] = imageWatermark;
-    }
-
-    if(textWatermark) {
+    } else if(textWatermark) {
       payload["simpleWatermark"] = textWatermark;
+    } else if(forensicWatermark) {
+      payload["forensicWatermark"] = forensicWatermark;
     }
 
     const response = yield this.client.StreamAddWatermark(payload);
@@ -565,16 +568,19 @@ class StreamStore {
       key: slug,
       value: {
         imageWatermark: response.imageWatermark,
-        simpleWatermark: response.textWatermark
+        simpleWatermark: response.textWatermark,
+        forensicWatermark: response.forensicWatermark
       }
     });
   });
 
   WatermarkConfiguration = flow(function * ({
     textWatermark,
-    existingTextWatermark,
     imageWatermark,
+    forensicWatermark,
+    existingTextWatermark,
     existingImageWatermark,
+    existingForensicWatermark,
     objectId,
     slug
   }) {
@@ -596,7 +602,13 @@ class StreamStore {
       payload["imageWatermarkFile"] = imageWatermark;
     }
 
-    if(imageWatermark || textWatermark) {
+    if(existingForensicWatermark && !forensicWatermark) {
+      removeTypes.push("forensic");
+    } else if(forensicWatermark) {
+      payload["forensicWatermark"] = forensicWatermark ? JSON.parse(forensicWatermark) : null;
+    }
+
+    if(imageWatermark || textWatermark || forensicWatermark) {
       yield this.AddWatermark(payload);
     }
 

@@ -173,6 +173,7 @@ const StreamDetailsPage = observer(() => {
                   currentDrm={stream.drm}
                   simpleWatermark={stream.simpleWatermark}
                   imageWatermark={stream.imageWatermark}
+                  forensicWatermark={stream.forensicWatermark}
                   title={stream.title}
                   embedUrl={stream.embedUrl}
                   url={stream.originUrl}
@@ -185,6 +186,7 @@ const StreamDetailsPage = observer(() => {
                   currentDvrStartTime={stream.dvrStartTime}
                   currentPlayoutProfile={stream.playoutLadderProfile}
                   libraryId={stream.libraryId}
+                  currentWatermarkType={stream.watermarkType}
                 /> : <Loader />
               }
             </Tabs.Panel>
