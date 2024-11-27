@@ -1045,8 +1045,8 @@ class StreamStore {
   CreateAudioStreamsConfig = ({audioData={}}) => {
     let audioStreams = {};
 
-    for(let i = 0; i < Object.keys(audioData).length; i++) {
-      const audioIndex = Object.keys(audioData)[i];
+    for(let i = 0; i < Object.keys(audioData || {}).length; i++) {
+      const audioIndex = Object.keys(audioData || {})[i];
       const audio = audioData[audioIndex];
 
       audioStreams[audioIndex] = {

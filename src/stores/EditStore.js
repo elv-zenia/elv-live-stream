@@ -540,6 +540,7 @@ class EditStore {
     retention,
     connectionTimeout,
     reconnectionTimeout,
+    skipDvrSection=false,
     dvrEnabled,
     dvrStartTime,
     dvrMaxDuration,
@@ -612,43 +613,45 @@ class EditStore {
       updateValue.reconnectionTimeout = parseInt(reconnectionTimeout);
     }
 
-    if(dvrEnabled !== undefined) {
-      const playoutMeta = yield this.client.ContentObjectMetadata({
-        libraryId,
-        objectId,
-        metadataSubtree: "live_recording/playout_config"
-      });
+    if(!skipDvrSection) {
+      if(dvrEnabled !== undefined) {
+        const playoutMeta = yield this.client.ContentObjectMetadata({
+          libraryId,
+          objectId,
+          metadataSubtree: "live_recording/playout_config"
+        });
 
-      if(dvrEnabled === true) {
-        playoutMeta.dvr_enabled = dvrEnabled;
-        if(![undefined, null].includes(dvrStartTime)) {
-          playoutMeta.dvr_start_time = dvrStartTime.toISOString();
-        } else {
+        if(dvrEnabled === true) {
+          playoutMeta.dvr_enabled = dvrEnabled;
+          if(![undefined, null].includes(dvrStartTime)) {
+            playoutMeta.dvr_start_time = dvrStartTime.toISOString();
+          } else {
+            delete playoutMeta.dvr_start_time;
+          }
+
+          if(![undefined, null].includes(dvrMaxDuration)) {
+            playoutMeta.dvr_max_duration = parseInt(dvrMaxDuration);
+          } else {
+            delete playoutMeta.dvr_max_duration;
+          }
+        } else if(dvrEnabled === false) {
+          playoutMeta.dvr_enabled = dvrEnabled;
+          delete playoutMeta.dvr_max_duration;
           delete playoutMeta.dvr_start_time;
         }
 
-        if(![undefined, null].includes(dvrMaxDuration)) {
-          playoutMeta.dvr_max_duration = parseInt(dvrMaxDuration);
-        } else {
-          delete playoutMeta.dvr_max_duration;
-        }
-      } else if(dvrEnabled === false) {
-        playoutMeta.dvr_enabled = dvrEnabled;
-        delete playoutMeta.dvr_max_duration;
-        delete playoutMeta.dvr_start_time;
+        yield this.client.ReplaceMetadata({
+          libraryId,
+          objectId,
+          writeToken,
+          metadataSubtree: "live_recording/playout_config",
+          metadata: playoutMeta
+        });
+
+        updateValue.dvrEnabled = dvrEnabled;
+        updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : parseInt(dvrMaxDuration);
+        updateValue.dvrStartTime = dvrStartTime ? dvrStartTime.toISOString() : undefined;
       }
-
-      yield this.client.ReplaceMetadata({
-        libraryId,
-        objectId,
-        writeToken,
-        metadataSubtree: "live_recording/playout_config",
-        metadata: playoutMeta
-      });
-
-      updateValue.dvrEnabled = dvrEnabled;
-      updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : parseInt(dvrMaxDuration);
-      updateValue.dvrStartTime = dvrStartTime ? dvrStartTime.toISOString() : undefined;
     }
 
     yield this.client.FinalizeContentObject({
