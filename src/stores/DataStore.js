@@ -51,7 +51,17 @@ class DataStore {
     try {
       if(!this.tenantId) {
         const wallet = yield this.client.userProfileClient.UserWalletObjectInfo();
-        this.tenantId = yield this.client.TenantContractId({objectId: wallet.objectId});
+        let tenantId = yield this.client.TenantContractId({objectId: wallet.objectId});
+
+        if(!tenantId) {
+          tenantId = yield this.client.ContentObjectMetadata({
+            libraryId: yield this.client.ContentObjectLibraryId({objectId: wallet.objectId}),
+            objectId: wallet.objectId,
+            metadataSubtree: "tenantContractId",
+          });
+        }
+
+        this.tenantId = tenantId;
 
         if(!this.tenantId) {
           throw "Tenant ID not found";
