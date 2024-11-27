@@ -1019,6 +1019,36 @@ class StreamStore {
       metadata: audioData
     });
 
+    const ladderSpecsPath = "live_recording/recording_config/recording_params/ladder_specs";
+    let ladderSpecsMeta = yield this.client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: ladderSpecsPath
+    });
+
+    ladderSpecsMeta = ladderSpecsMeta.map(spec => {
+      const audioDataByIndex = audioData[spec.stream_index];
+      if(spec.stream_name.includes("audio") && audioDataByIndex) {
+        if(audioDataByIndex.playout) {
+          spec.stream_label = audioDataByIndex.playout_label;
+        } else {
+          delete spec.stream_label;
+        }
+      }
+
+      return {
+        ...spec
+      };
+    });
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: ladderSpecsPath,
+      metadata: ladderSpecsMeta
+    });
+
     // const audioStreams = this.CreateAudioStreamsConfig({audioData});
     // const audioIndexMeta = [];
     //
