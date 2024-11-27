@@ -85,6 +85,25 @@ const AudioTracksTable = observer(({
                 );
               }
             },
+            {
+              accessor: "language",
+              title: "Language",
+              render: item => {
+                return (
+                  <TextInput
+                    value={audioFormData[item.stream_index].language}
+                    disabled={disabled}
+                    onChange={(event) => {
+                      HandleFormChange({
+                        index: item.stream_index,
+                        key: "language",
+                        value: event.target.value
+                      });
+                    }}
+                  />
+                );
+              }
+            },
             // {
             //   accessor: "output_bitrate",
             //   title: "Bitrate",
