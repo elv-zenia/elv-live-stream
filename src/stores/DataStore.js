@@ -291,9 +291,9 @@ class DataStore {
 
       const videoStream = (probeMeta?.streams || []).find(stream => stream.codec_type === "video");
       const audioStreamCount = probeMeta?.streams ? (probeMeta?.streams || []).filter(stream => stream.codec_type === "audio").length : undefined;
-      const simpleWatermark = streamMeta?.live_recording?.playout_config.simple_watermark;
-      const imageWatermark = streamMeta?.live_recording?.playout_config.image_watermark;
-      const forensicWatermark = streamMeta?.live_recording?.playout_config.forensic_watermark;
+      const simpleWatermark = streamMeta?.live_recording?.playout_config?.simple_watermark;
+      const imageWatermark = streamMeta?.live_recording?.playout_config?.image_watermark;
+      const forensicWatermark = streamMeta?.live_recording?.playout_config?.forensic_watermark;
 
       return {
         codecName: videoStream?.codec_name,
