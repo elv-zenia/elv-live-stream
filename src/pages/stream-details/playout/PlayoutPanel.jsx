@@ -6,7 +6,7 @@ import {Box, Checkbox, FileButton, Group, Text, Textarea} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_FORENSIC, DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
-import {dataStore, streamStore} from "@/stores";
+import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
@@ -74,27 +74,27 @@ const PlayoutPanel = observer(({
         status
       });
 
-      // await streamStore.DrmConfiguration({
-      //   objectId,
-      //   slug,
-      //   existingDrmType: currentDrm,
-      //   drmType: drm
-      // });
-      //
-      // await editStore.UpdateConfigMetadata({
-      //   objectId,
-      //   slug,
-      //   dvrEnabled,
-      //   dvrMaxDuration,
-      //   dvrStartTime,
-      //   playoutProfile
-      // });
-      //
-      // await streamStore.UpdateLadderSpecs({
-      //   objectId,
-      //   slug,
-      //   profile: playoutProfile
-      // });
+      await streamStore.DrmConfiguration({
+        objectId,
+        slug,
+        existingDrmType: currentDrm,
+        drmType: drm
+      });
+
+      await editStore.UpdateConfigMetadata({
+        objectId,
+        slug,
+        dvrEnabled,
+        dvrMaxDuration,
+        dvrStartTime,
+        playoutProfile
+      });
+
+      await streamStore.UpdateLadderSpecs({
+        objectId,
+        slug,
+        profile: playoutProfile
+      });
 
       notifications.show({
         title: `${title || params.id} updated`,
