@@ -517,7 +517,7 @@ class DataStore {
       const audioData = {};
       audioStreams.forEach(spec => {
         const audioConfigForIndex = audioConfig && audioConfig[spec.stream_index] ? audioConfig[spec.stream_index] : {};
-        const recordingParamsForIndex = recordingParamsMetadata && (recordingParamsMetadata.ladder_specs).find(i => i.stream_index === spec.stream_index);
+        const ladderSpecsForIndex = recordingParamsMetadata && (recordingParamsMetadata.ladder_specs).find(i => i.stream_index === spec.stream_index);
 
         const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(spec.bit_rate) ? spec.bit_rate : 192000;
 
@@ -529,7 +529,8 @@ class DataStore {
           recording_channels: spec.channels,
           playout: Object.hasOwn(audioConfigForIndex, "playout") ? audioConfigForIndex.playout : true,
           playout_label: audioConfigForIndex.playout_label || `Audio ${spec.stream_index}`,
-          language: recordingParamsForIndex?.tags?.language
+          lang: ladderSpecsForIndex?.lang,
+          default: ladderSpecsForIndex?.default
         };
       });
 

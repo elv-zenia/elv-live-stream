@@ -1035,11 +1035,11 @@ class StreamStore {
           delete spec.stream_label;
         }
 
-        if(audioDataByIndex.language) {
-          spec.tags = {
-            language: audioDataByIndex.language
-          };
+        if(audioDataByIndex.lang) {
+          spec.lang = audioDataByIndex.lang;
         }
+
+        spec.default = audioDataByIndex.default;
       }
 
       return {

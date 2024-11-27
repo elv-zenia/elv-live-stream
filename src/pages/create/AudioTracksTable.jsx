@@ -1,8 +1,9 @@
 import {observer} from "mobx-react-lite";
-import {Checkbox, Text, TextInput} from "@mantine/core";
+import {ActionIcon, Checkbox, Text, TextInput} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
 import {AudioBitrateReadable} from "@/utils/helpers";
 import {AudioCodec} from "@/utils/constants";
+import {IconCircleCheck, IconCircleCheckFilled} from "@tabler/icons-react";
 
 const AudioTracksTable = observer(({
   records,
@@ -18,6 +19,27 @@ const AudioTracksTable = observer(({
       ...audioFormData,
       [index]: audioIndexSpecific
     });
+  };
+
+  const HandleToggleDefault = ({index, value}) => {
+    const newData = Object.assign({}, audioFormData);
+
+    if(value === true) {
+      // Reset other values
+      Object.keys(newData).forEach(key => {
+        newData[key] = {
+          ...newData[key],
+          default: false
+        };
+      });
+    }
+
+    newData[index] = {
+      ...newData[index],
+      default: value
+    };
+
+    setAudioFormData(newData);
   };
 
   return (
@@ -91,12 +113,12 @@ const AudioTracksTable = observer(({
               render: item => {
                 return (
                   <TextInput
-                    value={audioFormData[item.stream_index].language}
+                    value={audioFormData[item.stream_index].lang}
                     disabled={disabled}
                     onChange={(event) => {
                       HandleFormChange({
                         index: item.stream_index,
-                        key: "language",
+                        key: "lang",
                         value: event.target.value
                       });
                     }}
@@ -124,6 +146,26 @@ const AudioTracksTable = observer(({
             //     />
             //   )
             // },
+            {
+              accessor: "action_default",
+              title: "Default",
+              width: 75,
+              render: item => (
+                <ActionIcon
+                  variant="subtle"
+                  onClick={() => {
+                    HandleToggleDefault({index: item.stream_index, value: !audioFormData[item.stream_index].default});
+                  }}
+                  disabled={!audioFormData[item.stream_index].record || disabled}
+                >
+                  {
+                    audioFormData[item.stream_index].default ?
+                    <IconCircleCheckFilled /> :
+                    <IconCircleCheck color="var(--mantine-color-elv-gray-5)" />
+                  }
+                </ActionIcon>
+              )
+            },
             {
               accessor: "action_record",
               title: "Record",
