@@ -750,7 +750,7 @@ class StreamStore {
   UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
     let profileData;
     let topLadderRate = 0;
-    const ladderSpecs = [];
+    let ladderSpecs = [];
 
     if(!libraryId) {
       libraryId = yield this.client.ContentObjectLibraryId({objectId});
@@ -802,43 +802,14 @@ class StreamStore {
       ladderSpecs.push(videoSpec);
     });
 
-    // Add fully-formed audio specs
-    let globalAudioBitrate = 0;
-    let nAudio = 0;
-
-    const audioStreams = this.CreateAudioStreamsConfig({audioData});
-    Object.keys(audioStreams || {}).forEach((stream, i) => {
-      let audioLadderSpec = {};
-      const audioIndex = Object.keys(audioStreams)[i];
-      const audio = audioStreams[audioIndex];
-
-      for(let j = 0; j < profileData.ladder_specs.audio.length; j++) {
-        let element = profileData.ladder_specs.audio[j];
-        if(element.channels === audio.recordingChannels) {
-          audioLadderSpec = {...element};
-          break;
-        }
-      }
-
-      if(Object.keys(audioLadderSpec).length === 0) {
-        audioLadderSpec = {...profileData.ladder_specs.audio[0]};
-      }
-
-      audioLadderSpec.representation = `audioaudio_aac@${audioLadderSpec.bit_rate}`;
-      audioLadderSpec.channels = audio.recordingChannels;
-      audioLadderSpec.stream_index = parseInt(audioIndex);
-      audioLadderSpec.stream_name = `audio_${audioIndex}`;
-      audioLadderSpec.stream_label = audio.playoutLabel ? audio.playoutLabel : null;
-      audioLadderSpec.media_type = 2;
-
-      ladderSpecs.push(audioLadderSpec);
-
-      if(audio.recordingBitrate > globalAudioBitrate) {
-        globalAudioBitrate = audio.recordingBitrate;
-      }
-
-      nAudio++;
+    const {nAudio, globalAudioBitrate, audioLadderSpecs} = yield this.UpdateAudioLadderSpecs({
+      libraryId,
+      objectId,
+      ladderSpecs: profileData.ladder_specs,
+      audioData
     });
+
+    ladderSpecs = ladderSpecs.concat(audioLadderSpecs);
 
     yield this.client.MergeMetadata({
       libraryId,
