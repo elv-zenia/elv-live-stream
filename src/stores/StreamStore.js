@@ -763,11 +763,17 @@ class StreamStore {
 
     const ladderProfiles = yield dataStore.LoadLadderProfiles();
 
-    const audioData = yield this.client.ContentObjectMetadata({
+    let audioData = yield this.client.ContentObjectMetadata({
       libraryId,
       objectId,
       metadataSubtree: "live_recording_config/audio"
     });
+
+    if(!audioData) {
+      ({audioData} = yield dataStore.LoadStreamProbeData({
+        objectId
+      }));
+    }
 
     if(!ladderProfiles) {
       throw Error("Unable to update ladder specs. No profiles were found.");
