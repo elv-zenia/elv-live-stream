@@ -497,19 +497,22 @@ class StreamStore {
       finalize: true
     });
 
-    const streamDetails = this.streams[slug];
+    const updateValue = {};
 
     types.forEach(type => {
       if(type === "image") {
-        delete streamDetails.imageWatermark;
+        updateValue.imageWatermark = undefined;
       } else if(type === "text") {
-        delete streamDetails.simpleWatermark;
+        updateValue.simpleWatermark = undefined;
       } else if(type === "forensic") {
-        delete streamDetails.forensicWatermark;
+        updateValue.forensicWatermark = undefined;
       }
     });
 
-    this.streams[slug] = streamDetails;
+    this.UpdateStream({
+      key: slug,
+      value: updateValue
+    });
   });
 
   AddWatermark = flow(function * ({
@@ -581,6 +584,7 @@ class StreamStore {
     existingTextWatermark,
     existingImageWatermark,
     existingForensicWatermark,
+    watermarkType,
     objectId,
     slug
   }) {
@@ -627,7 +631,8 @@ class StreamStore {
     this.UpdateStream({
       key: slug,
       value: {
-        status: statusResponse.state
+        status: statusResponse.state,
+        watermarkType
       }
     });
   });

@@ -63,12 +63,13 @@ const PlayoutPanel = observer(({
     try {
       setApplyingChanges(true);
       await streamStore.WatermarkConfiguration({
+        textWatermark: watermarkType ? formWatermarks.text : null,
+        imageWatermark: watermarkType ? formWatermarks.image : null,
+        forensicWatermark: watermarkType ? formWatermarks.forensic : null,
         existingTextWatermark: simpleWatermark,
-        textWatermark: formWatermarks.text,
         existingImageWatermark: imageWatermark,
-        imageWatermark: formWatermarks.image,
         existingForensicWatermark: forensicWatermark,
-        forensicWatermark: formWatermarks.forensic,
+        watermarkType,
         objectId,
         slug,
         status
