@@ -4,6 +4,15 @@ import {viteStaticCopy} from "vite-plugin-static-copy";
 import {fileURLToPath, URL} from "url";
 
 export default defineConfig({
+  css: {
+    preprocessorOptions: {
+      scss: {
+        sassOptions: {
+          quietDeps: true
+        }
+      }
+    }
+  },
   plugins: [
     viteStaticCopy({
       targets: [

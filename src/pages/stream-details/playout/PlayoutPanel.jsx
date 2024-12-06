@@ -1,48 +1,18 @@
-import {cloneElement, useRef, useState} from "react";
+import {useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import path from "path";
 import {observer} from "mobx-react-lite";
-import {ActionIcon, Box, Checkbox, FileButton, Flex, Group, Menu, Paper, Text, Textarea} from "@mantine/core";
+import {Box, Checkbox, FileButton, Group, Text, Textarea} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
-import {DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
+import {DEFAULT_WATERMARK_FORENSIC, DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
 import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
-import {EditIcon, TrashIcon} from "@/assets/icons";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
 
-const WatermarkBox = ({type, value, actions=[]}) => {
-  if(value === undefined) { return null; }
-
-  const placeholderText = (type === "Image" && !value) ? "No file selected" : undefined;
-
-  return (
-    <Paper shadow="none" withBorder p="10px 16px" mb={16} mt={16}>
-      <Group>
-        <Flex direction="column" mr={48}>
-          <Text c="dimmed" size="xs">Watermark Type</Text>
-          <Text lh={1.125}>{type}</Text>
-        </Flex>
-        <Flex direction="column" maw={300}>
-          <Text c="dimmed" size="xs">Watermark Content</Text>
-          <Text lh={1.125} truncate="end">
-            {placeholderText || value}
-          </Text>
-        </Flex>
-        <Group ml="auto">
-          {
-            actions.map(({id, Component}) => (
-              cloneElement(Component, {key: id})
-            ))
-          }
-        </Group>
-      </Group>
-    </Paper>
-  );
-};
 
 const PlayoutPanel = observer(({
   status,
@@ -50,6 +20,8 @@ const PlayoutPanel = observer(({
   currentDrm,
   simpleWatermark,
   imageWatermark,
+  forensicWatermark,
+  currentWatermarkType,
   title,
   currentDvrEnabled,
   currentDvrMaxDuration,
@@ -61,10 +33,11 @@ const PlayoutPanel = observer(({
   const [formWatermarks, setFormWatermarks] = useState(
     {
       image: imageWatermark ? imageWatermark : undefined,
-      text: simpleWatermark ? JSON.stringify(simpleWatermark, null, 2) : undefined
+      text: simpleWatermark ? JSON.stringify(simpleWatermark, null, 2) : undefined,
+      forensic: forensicWatermark ? JSON.stringify(forensicWatermark, null, 2) : undefined
     }
   );
-  const [showTextWatermarkInput, setShowTextWatermarkInput] = useState(false);
+  const [watermarkType, setWatermarkType] = useState(currentWatermarkType || "");
   const [dvrEnabled, setDvrEnabled] = useState(currentDvrEnabled || false);
   const [dvrStartTime, setDvrStartTime] = useState(currentDvrStartTime !== undefined ? new Date(currentDvrStartTime) : null);
   const [dvrMaxDuration, setDvrMaxDuration] = useState(currentDvrMaxDuration !== undefined ? currentDvrMaxDuration : 0);
@@ -84,36 +57,19 @@ const PlayoutPanel = observer(({
       ...dataStore.ladderProfiles.custom.map(item => ({label: item.name, value: item.name}))
     ] : [];
 
-  const ClearImageWatermark = () => {
-    const value = {
-      text: formWatermarks.text,
-      image: undefined
-    };
-
-    setFormWatermarks(value);
-    resetRef.current?.();
-  };
-
-  const ClearTextWatermark = () => {
-    const value = {
-      text: undefined,
-      image: formWatermarks.image
-    };
-
-    setFormWatermarks(value);
-    setShowTextWatermarkInput(false);
-  };
-
   const HandleSubmit = async () => {
     const objectId = params.id;
 
     try {
       setApplyingChanges(true);
       await streamStore.WatermarkConfiguration({
+        textWatermark: watermarkType ? formWatermarks.text : null,
+        imageWatermark: watermarkType ? formWatermarks.image : null,
+        forensicWatermark: watermarkType ? formWatermarks.forensic : null,
         existingTextWatermark: simpleWatermark,
-        textWatermark: formWatermarks.text,
         existingImageWatermark: imageWatermark,
-        imageWatermark: formWatermarks.image,
+        existingForensicWatermark: forensicWatermark,
+        watermarkType,
         objectId,
         slug,
         status
@@ -132,7 +88,8 @@ const PlayoutPanel = observer(({
         dvrEnabled,
         dvrMaxDuration,
         dvrStartTime,
-        playoutProfile
+        playoutProfile,
+        skipDvrSection: ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)
       });
 
       await streamStore.UpdateLadderSpecs({
@@ -272,123 +229,90 @@ const PlayoutPanel = observer(({
           <div className="form__section-header">Visible Watermark</div>
         </Group>
 
-        {/* Add WM button */}
-        <Menu>
-          <Menu.Target>
-            <button type="button" className="button__secondary">Add Watermark</button>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item onClick={() => {
-              setFormWatermarks({
-                text: formWatermarks.text,
-                image: ""
-              });
-            }}>
-              Image Watermark
-            </Menu.Item>
-            <Menu.Item onClick={() => {
-              setFormWatermarks({
-                text: JSON.stringify(DEFAULT_WATERMARK_TEXT, null, 2),
-                image: formWatermarks.image
-              });
-            }}>
-              Text Watermark
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
+        <Box mb={24}>
+          <Select
+            label="Watermark Type"
+            formName="watermarkType"
+            options={[
+              {label: "None", value: ""},
+              {label: "Image", value: "IMAGE"},
+              {label: "Text", value: "TEXT"},
+              {label: "Forensic", value: "FORENSIC"}
+            ]}
+            value={watermarkType}
+            onChange={(event) => {
+              const {value} = event.target;
+              setWatermarkType(value);
 
-        <WatermarkBox
-          value={formWatermarks.text ? formWatermarks.text : undefined}
-          type="Text"
-          actions={[
-            {
-              id: "text-edit",
-              Component: (
-                <ActionIcon
-                  size={20}
-                  variant="transparent"
-                  color="gray"
-                  onClick={() => setShowTextWatermarkInput(!showTextWatermarkInput)}
-                >
-                  <EditIcon />
-                </ActionIcon>
-              )
-            },
-            {
-              id: "text-delete",
-              Component: (
-                <ActionIcon
-                  size={20}
-                  variant="transparent"
-                  color="gray"
-                  onClick={ClearTextWatermark}
-                >
-                  <TrashIcon />
-                </ActionIcon>
-              )
-            }
-          ]}
-        />
+              if(value === "TEXT") {
+                setFormWatermarks({
+                  text: JSON.stringify(DEFAULT_WATERMARK_TEXT, null, 2)
+                });
+              } else if(value === "FORENSIC") {
+                setFormWatermarks({
+                  forensic: JSON.stringify(DEFAULT_WATERMARK_FORENSIC, null, 2)
+                });
+              }
+            }}
+            style={{width: "100%"}}
+          />
+        </Box>
         {
-          showTextWatermarkInput &&
+          ["FORENSIC", "TEXT"].includes(watermarkType) &&
           <Textarea
             mb={16}
-            value={formWatermarks.text}
+            value={watermarkType === "TEXT" ? formWatermarks.text : watermarkType === "FORENSIC" ? formWatermarks.forensic : ""}
             size="md"
             rows={10}
             onChange={(event) => {
               const value = {
-                image: formWatermarks.image,
-                text: event.target.value
+                ...formWatermarks
               };
+
+              if(watermarkType === "TEXT") {
+                value["text"] = event.target.value;
+              } else if(watermarkType === "FORENSIC") {
+                value["forensic"] = event.target.value;
+              }
 
               setFormWatermarks(value);
             }}
           />
         }
-        <WatermarkBox
-          type="Image"
-          value={formWatermarks.image === undefined ? undefined : (formWatermarks?.image === "" ? "" : path.basename(formWatermarks?.image?.name || formWatermarks?.image?.image?.["/"]))}
-          actions={[
-            {
-              id: "image-edit",
-              Component: (
-                <FileButton
-                  onChange={(file) => {
-                    if(!file) { return; }
-                    const value = {
-                      ...formWatermarks,
-                      image: file
-                    };
+        {
+          watermarkType === "IMAGE" &&
+          <>
+            <FileButton
+              onChange={(file) => {
+                if(!file) { return; }
+                const value = {
+                  ...formWatermarks,
+                  image: file
+                };
 
-                    setFormWatermarks(value);
-                  }}
-                  accept="image/*"
-                  resetRef={resetRef}
-                >
-                  {(props) => (
-                    <ActionIcon size={20} variant="transparent" color="gray" {...props}>
-                      <EditIcon />
-                    </ActionIcon>
-                  )}
-                </FileButton>
-              )
-            },
-            {
-              id: "image-delete",
-              Component: (
-                <ActionIcon
-                  size={20}
-                  variant="transparent"
-                  color="gray"
-                  onClick={ClearImageWatermark}
-                >
-                  <TrashIcon />
-                </ActionIcon>
-              )
-            }
-          ]}
-        />
+                setFormWatermarks(value);
+              }}
+              accept="image/*"
+              resetRef={resetRef}
+            >
+              {(props) => (
+                <button type="button" className="button__secondary" {...props}>Upload image</button>
+              )}
+            </FileButton>
+              {
+                formWatermarks?.image ?
+                  (
+                    <Group mb={16} mt={16}>
+                      Selected File:
+                      <Text>
+                        { path.basename(formWatermarks?.image?.name || formWatermarks?.image?.image?.["/"]) }
+                      </Text>
+                    </Group>
+                  )
+                  : null
+              }
+          </>
+        }
       </Box>
       <button
         type="button"

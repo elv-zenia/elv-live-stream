@@ -119,7 +119,12 @@ class StreamStore {
             profileData = allProfiles.custom.find(item => item.name === liveRecordingConfig.playout_ladder_profile);
           }
 
-          customSettings["ladder_profile"] = profileData.ladder_specs;
+          if(profileData) {
+            customSettings["ladder_profile"] = profileData.ladder_specs;
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn(`Ladder profile ${liveRecordingConfig.playout_ladder_profile} not found. Defaulting to the built-in profile.`);
+          }
         }
       }
 
@@ -492,24 +497,30 @@ class StreamStore {
       finalize: true
     });
 
-    const streamDetails = this.streams[slug];
+    const updateValue = {};
 
     types.forEach(type => {
       if(type === "image") {
-        delete streamDetails.imageWatermark;
+        updateValue.imageWatermark = undefined;
       } else if(type === "text") {
-        delete streamDetails.simpleWatermark;
+        updateValue.simpleWatermark = undefined;
+      } else if(type === "forensic") {
+        updateValue.forensicWatermark = undefined;
       }
     });
 
-    this.streams[slug] = streamDetails;
+    this.UpdateStream({
+      key: slug,
+      value: updateValue
+    });
   });
 
   AddWatermark = flow(function * ({
     objectId,
     slug,
     textWatermark,
-    imageWatermarkFile
+    imageWatermarkFile,
+    forensicWatermark
   }){
     const payload = {
       objectId,
@@ -548,10 +559,10 @@ class StreamStore {
       };
 
       payload["imageWatermark"] = imageWatermark;
-    }
-
-    if(textWatermark) {
+    } else if(textWatermark) {
       payload["simpleWatermark"] = textWatermark;
+    } else if(forensicWatermark) {
+      payload["forensicWatermark"] = forensicWatermark;
     }
 
     const response = yield this.client.StreamAddWatermark(payload);
@@ -560,16 +571,20 @@ class StreamStore {
       key: slug,
       value: {
         imageWatermark: response.imageWatermark,
-        simpleWatermark: response.textWatermark
+        simpleWatermark: response.textWatermark,
+        forensicWatermark: response.forensicWatermark
       }
     });
   });
 
   WatermarkConfiguration = flow(function * ({
     textWatermark,
-    existingTextWatermark,
     imageWatermark,
+    forensicWatermark,
+    existingTextWatermark,
     existingImageWatermark,
+    existingForensicWatermark,
+    watermarkType,
     objectId,
     slug
   }) {
@@ -591,7 +606,13 @@ class StreamStore {
       payload["imageWatermarkFile"] = imageWatermark;
     }
 
-    if(imageWatermark || textWatermark) {
+    if(existingForensicWatermark && !forensicWatermark) {
+      removeTypes.push("forensic");
+    } else if(forensicWatermark) {
+      payload["forensicWatermark"] = forensicWatermark ? JSON.parse(forensicWatermark) : null;
+    }
+
+    if(imageWatermark || textWatermark || forensicWatermark) {
       yield this.AddWatermark(payload);
     }
 
@@ -610,7 +631,8 @@ class StreamStore {
     this.UpdateStream({
       key: slug,
       value: {
-        status: statusResponse.state
+        status: statusResponse.state,
+        watermarkType
       }
     });
   });
@@ -667,10 +689,68 @@ class StreamStore {
     }
   });
 
+  UpdateAudioLadderSpecs = flow(function * ({objectId, libraryId, ladderSpecs, audioData}) {
+    let globalAudioBitrate = 0;
+    let nAudio = 0;
+    const audioLadderSpecs = [];
+
+    if(!audioData) {
+      audioData = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording_config/audio"
+      });
+    }
+
+    const audioStreams = this.CreateAudioStreamsConfig({audioData});
+    Object.keys(audioStreams || {}).forEach((stream, i) => {
+      let audioLadderSpec = {};
+      const audioIndex = Object.keys(audioStreams)[i];
+      const audio = audioStreams[audioIndex];
+
+      if(!audioData[audioIndex].record) { return; }
+
+      for(let j = 0; j < ladderSpecs.audio.length; j++) {
+        let element = ladderSpecs.audio[j];
+        if(element.channels === audio.recordingChannels) {
+          audioLadderSpec = {...element};
+          break;
+        }
+      }
+
+      if(Object.keys(audioLadderSpec).length === 0) {
+        audioLadderSpec = {...ladderSpecs.audio[0]};
+      }
+
+      audioLadderSpec.representation = `audioaudio_aac@${audioLadderSpec.bit_rate}`;
+      audioLadderSpec.channels = audio.recordingChannels;
+      audioLadderSpec.stream_index = parseInt(audioIndex);
+      audioLadderSpec.stream_name = `audio_${audioIndex}`;
+      audioLadderSpec.stream_label = audioData[audioIndex].playout ? audioData[audioIndex].playout_label : null;
+      audioLadderSpec.media_type = 2;
+      audioLadderSpec.lang = audioData[audioIndex].lang;
+      audioLadderSpec.default = audioData[audioIndex].default;
+
+      audioLadderSpecs.push(audioLadderSpec);
+
+      if(audio.recordingBitrate > globalAudioBitrate) {
+        globalAudioBitrate = audio.recordingBitrate;
+      }
+
+      nAudio++;
+    });
+
+    return {
+      nAudio,
+      globalAudioBitrate,
+      audioLadderSpecs
+    };
+  });
+
   UpdateLadderSpecs = flow(function * ({objectId, libraryId, profile=""}) {
     let profileData;
     let topLadderRate = 0;
-    const ladderSpecs = [];
+    let ladderSpecs = [];
 
     if(!libraryId) {
       libraryId = yield this.client.ContentObjectLibraryId({objectId});
@@ -683,11 +763,17 @@ class StreamStore {
 
     const ladderProfiles = yield dataStore.LoadLadderProfiles();
 
-    const audioData = yield this.client.ContentObjectMetadata({
+    let audioData = yield this.client.ContentObjectMetadata({
       libraryId,
       objectId,
       metadataSubtree: "live_recording_config/audio"
     });
+
+    if(!audioData) {
+      ({audioData} = yield dataStore.LoadStreamProbeData({
+        objectId
+      }));
+    }
 
     if(!ladderProfiles) {
       throw Error("Unable to update ladder specs. No profiles were found.");
@@ -716,43 +802,14 @@ class StreamStore {
       ladderSpecs.push(videoSpec);
     });
 
-    // Add fully-formed audio specs
-    let globalAudioBitrate = 0;
-    let nAudio = 0;
-
-    const audioStreams = this.CreateAudioStreamsConfig({audioData});
-    Object.keys(audioStreams || {}).forEach((stream, i) => {
-      let audioLadderSpec = {};
-      const audioIndex = Object.keys(audioStreams)[i];
-      const audio = audioStreams[audioIndex];
-
-      for(let j = 0; j < profileData.ladder_specs.audio.length; j++) {
-        let element = profileData.ladder_specs.audio[j];
-        if(element.channels === audio.recordingChannels) {
-          audioLadderSpec = {...element};
-          break;
-        }
-      }
-
-      if(Object.keys(audioLadderSpec).length === 0) {
-        audioLadderSpec = {...profileData.ladder_specs.audio[0]};
-      }
-
-      audioLadderSpec.representation = `audioaudio_aac@${audioLadderSpec.bit_rate}`;
-      audioLadderSpec.channels = audio.recordingChannels;
-      audioLadderSpec.stream_index = parseInt(audioIndex);
-      audioLadderSpec.stream_name = `audio_${audioIndex}`;
-      audioLadderSpec.stream_label = audio.playoutLabel ? audio.playoutLabel : null;
-      audioLadderSpec.media_type = 2;
-
-      ladderSpecs.push(audioLadderSpec);
-
-      if(audio.recordingBitrate > globalAudioBitrate) {
-        globalAudioBitrate = audio.recordingBitrate;
-      }
-
-      nAudio++;
+    const {nAudio, globalAudioBitrate, audioLadderSpecs} = yield this.UpdateAudioLadderSpecs({
+      libraryId,
+      objectId,
+      ladderSpecs: profileData.ladder_specs,
+      audioData
     });
+
+    ladderSpecs = ladderSpecs.concat(audioLadderSpecs);
 
     yield this.client.MergeMetadata({
       libraryId,
@@ -970,8 +1027,8 @@ class StreamStore {
   CreateAudioStreamsConfig = ({audioData={}}) => {
     let audioStreams = {};
 
-    for(let i = 0; i < Object.keys(audioData).length; i++) {
-      const audioIndex = Object.keys(audioData)[i];
+    for(let i = 0; i < Object.keys(audioData || {}).length; i++) {
+      const audioIndex = Object.keys(audioData || {})[i];
       const audio = audioData[audioIndex];
 
       audioStreams[audioIndex] = {
@@ -1001,6 +1058,47 @@ class StreamStore {
       metadataSubtree: "live_recording_config/audio",
       metadata: audioData
     });
+
+    const ladderSpecsPath = "live_recording/recording_config/recording_params/ladder_specs";
+    const ladderSpecsMeta = yield this.client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      metadataSubtree: ladderSpecsPath
+    });
+
+    const {nAudio, globalAudioBitrate, audioLadderSpecs} = yield this.UpdateAudioLadderSpecs({
+      libraryId,
+      objectId,
+      ladderSpecs: {audio: ladderSpecsMeta},
+      audioData
+    });
+
+    const videoLadderSpecs = ladderSpecsMeta.filter(spec => spec.stream_name.includes("video"));
+
+    const newLadderSpecs = [
+      ...videoLadderSpecs,
+      ...audioLadderSpecs
+    ];
+
+    yield this.client.ReplaceMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: ladderSpecsPath,
+      metadata: newLadderSpecs
+    });
+
+    yield this.client.MergeMetadata({
+      libraryId,
+      objectId,
+      writeToken,
+      metadataSubtree: "live_recording/recording_config/recording_params/xc_params",
+      metadata: {
+        audio_bitrate: globalAudioBitrate,
+        n_audio: nAudio
+      }
+    });
+
 
     // const audioStreams = this.CreateAudioStreamsConfig({audioData});
     // const audioIndexMeta = [];

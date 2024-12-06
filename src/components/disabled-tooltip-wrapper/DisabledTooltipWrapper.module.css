@@ -4,7 +4,8 @@
 
     input,
     select,
-    button {
+    button,
+    label {
       pointer-events: none;
     }
   }

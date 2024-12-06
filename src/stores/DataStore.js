@@ -50,7 +50,18 @@ class DataStore {
   LoadTenantInfo = flow(function * () {
     try {
       if(!this.tenantId) {
-        this.tenantId = yield this.client.userProfileClient.TenantContractId();
+        const wallet = yield this.client.userProfileClient.UserWalletObjectInfo();
+        let tenantId = yield this.client.userProfileClient.TenantContractId();
+
+        if(!tenantId) {
+          tenantId = yield this.client.ContentObjectMetadata({
+            libraryId: yield this.client.ContentObjectLibraryId({objectId: wallet.objectId}),
+            objectId: wallet.objectId,
+            metadataSubtree: "tenantContractId",
+          });
+        }
+
+        this.tenantId = tenantId;
 
         if(!this.tenantId) {
           throw "Tenant ID not found";
@@ -250,8 +261,9 @@ class DataStore {
           "live_recording_config/probe_info/format/filename",
           "live_recording_config/probe_info/streams",
           "live_recording/recording_config/recording_params/origin_url",
-          "live_recording/recording_config/recording_params/simple_watermark",
-          "live_recording/recording_config/recording_params/image_watermark",
+          "live_recording/playout_config/simple_watermark",
+          "live_recording/playout_config/image_watermark",
+          "live_recording/playout_config/forensic_watermark",
           "live_recording/recording_config/recording_params/xc_params/connection_timeout",
           "live_recording/recording_config/recording_params/reconnect_timeout",
           "live_recording/playout_config/dvr_enabled",
@@ -289,6 +301,9 @@ class DataStore {
 
       const videoStream = (probeMeta?.streams || []).find(stream => stream.codec_type === "video");
       const audioStreamCount = probeMeta?.streams ? (probeMeta?.streams || []).filter(stream => stream.codec_type === "audio").length : undefined;
+      const simpleWatermark = streamMeta?.live_recording?.playout_config?.simple_watermark;
+      const imageWatermark = streamMeta?.live_recording?.playout_config?.image_watermark;
+      const forensicWatermark = streamMeta?.live_recording?.playout_config?.forensic_watermark;
 
       return {
         codecName: videoStream?.codec_name,
@@ -299,17 +314,19 @@ class DataStore {
         dvrEnabled: streamMeta?.live_recording?.playout_config?.dvr_enabled,
         dvrStartTime: streamMeta?.live_recording?.playout_config?.dvr_start_time,
         dvrMaxDuration: streamMeta?.live_recording?.playout_config?.dvr_max_duration,
+        forensicWatermark,
         format: probeType,
-        imageWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.image_watermark,
+        imageWatermark,
         originUrl: streamMeta?.live_recording?.recording_config?.recording_params?.origin_url || streamMeta?.live_recording_config?.url,
         partTtl: streamMeta?.live_recording_config?.part_ttl,
         playoutLadderProfile: streamMeta?.live_recording_config?.playout_ladder_profile,
         reconnectionTimeout: streamMeta?.live_recording?.recording_config?.recording_params?.reconnect_timeout,
         referenceUrl: streamMeta?.live_recording_config?.reference_url,
-        simpleWatermark: streamMeta?.live_recording?.recording_config?.recording_params?.simple_watermark,
+        simpleWatermark,
         title: streamMeta?.public?.name,
         videoBitrate: videoStream?.bit_rate,
-        audioStreamCount
+        audioStreamCount,
+        watermarkType: simpleWatermark ? "TEXT" : imageWatermark ? "IMAGE" : forensicWatermark ? "FORENSIC" : ""
       };
     } catch(error) {
       // eslint-disable-next-line no-console
@@ -478,6 +495,15 @@ class DataStore {
         return {audioStreams: [], audioData: {}};
       }
 
+      const recordingParamsMetadata = yield this.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording/recording_config/recording_params",
+        select: [
+          "ladder_specs"
+        ]
+      });
+
       const audioConfig = yield this.client.ContentObjectMetadata({
         libraryId,
         objectId,
@@ -491,6 +517,7 @@ class DataStore {
       const audioData = {};
       audioStreams.forEach(spec => {
         const audioConfigForIndex = audioConfig && audioConfig[spec.stream_index] ? audioConfig[spec.stream_index] : {};
+        const ladderSpecsForIndex = recordingParamsMetadata && (recordingParamsMetadata.ladder_specs).find(i => i.stream_index === spec.stream_index);
 
         const initBitrate = RECORDING_BITRATE_OPTIONS.map(option => option.value).includes(spec.bit_rate) ? spec.bit_rate : 192000;
 
@@ -501,7 +528,9 @@ class DataStore {
           recording_bitrate: initBitrate,
           recording_channels: spec.channels,
           playout: Object.hasOwn(audioConfigForIndex, "playout") ? audioConfigForIndex.playout : true,
-          playout_label: audioConfigForIndex.playout_label || `Audio ${spec.stream_index}`
+          playout_label: audioConfigForIndex.playout_label || `Audio ${spec.stream_index}`,
+          lang: ladderSpecsForIndex?.lang,
+          default: ladderSpecsForIndex?.default
         };
       });
 

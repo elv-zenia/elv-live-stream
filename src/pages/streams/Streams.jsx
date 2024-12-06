@@ -129,10 +129,10 @@ const Streams = observer(() => {
           sortStatus={sortStatus}
           onSortStatusChange={setSortStatus}
           columns={[
-            { accessor: "title", title: "Name", sortable: true, render: record => (
+            { accessor: "title", title: "Name", sortable: true, width: 300, render: record => (
               <div className="table__multi-line">
                 <Link to={`/streams/${record.objectId || record.slug}`}>
-                  <Text fw={600}>{record.display_title || record.slug}</Text>
+                  <Text fw={600} lineClamp={1}>{record.display_title || record.slug}</Text>
                 </Link>
                 <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
