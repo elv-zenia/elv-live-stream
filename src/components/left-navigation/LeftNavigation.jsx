@@ -1,7 +1,7 @@
-import {VideoPlusIcon, StreamIcon, MediaIcon, SettingsIcon} from "@/assets/icons";
+import {VideoPlusIcon, StreamIcon, MediaIcon, SettingsIcon} from "@/assets/icons/index.js";
 import {AppShell, NavLink} from "@mantine/core";
 import {useLocation, useNavigate} from "react-router-dom";
-import classes from "@/assets/stylesheets/modules/Navbar.module.css";
+import classes from "@/components/left-navigation/LeftNavigation.module.css";
 
 const iconDimensions = {
   width: 22,

@@ -1,8 +1,8 @@
 import {observer} from "mobx-react-lite";
 import {ActionIcon, Checkbox, Text, TextInput} from "@mantine/core";
 import {DataTable} from "mantine-datatable";
-import {AudioBitrateReadable} from "@/utils/helpers";
-import {AudioCodec} from "@/utils/constants";
+import {AudioBitrateReadable} from "@/utils/helpers.js";
+import {AudioCodec} from "@/utils/constants.js";
 import {IconCircleCheck, IconCircleCheckFilled} from "@tabler/icons-react";
 
 const AudioTracksTable = observer(({

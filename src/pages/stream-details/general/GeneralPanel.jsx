@@ -1,5 +1,5 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex} from "@mantine/core";
+import {Box, Flex, Text} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
@@ -158,10 +158,16 @@ const GeneralPanel = observer(({slug}) => {
               formName="permission"
               tooltip={
                 Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
-                  <div key={`permission-info-${short}`} className="form__tooltip-item">
-                    <div className="form__tooltip-item__permission-title">{ short }:</div>
-                    <div>{ description }</div>
-                  </div>
+                  <Flex
+                    key={`permission-info-${short}`}
+                    gap="1rem"
+                    lh={1.25}
+                    pb={5}
+                    maw={500}
+                  >
+                    <Flex flex="0 0 25%">{ short }:</Flex>
+                    <Text fz="sm">{ description }</Text>
+                  </Flex>
                 )
               }
               value={formData.permission}

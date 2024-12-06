@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import {streamStore} from "@/stores";
+import {streamStore} from "@/stores/index.js";
 import {observer} from "mobx-react-lite";
 
 const DataWrapper = observer(({children}) => {

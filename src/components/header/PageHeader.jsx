@@ -3,7 +3,7 @@ import {Box, Flex, Group, Indicator, Text} from "@mantine/core";
 import HeaderSearchBar from "@/components/header/HeaderSearchBar.jsx";
 import HeaderTopActions from "@/components/header/HeaderTopActions";
 import {StatusIndicator} from "@/utils/helpers";
-import classes from "@/assets/stylesheets/modules/PageHeader.module.css";
+import classes from "@/components/header/PageHeader.module.css";
 import {QUALITY_MAP, STATUS_TEXT} from "@/utils/constants";
 import {IconAlertCircle} from "@tabler/icons-react";
 

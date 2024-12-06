@@ -8,7 +8,7 @@ import {PlusIcon} from "@/assets/icons/index.js";
 import {rootStore} from "@/stores/index.js";
 import {Loader} from "@/components/Loader.jsx";
 import {notifications} from "@mantine/notifications";
-import ConfirmModal from "@/components/ConfirmModal.jsx";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));

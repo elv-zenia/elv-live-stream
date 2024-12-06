@@ -2,7 +2,7 @@ import {useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import path from "path";
 import {observer} from "mobx-react-lite";
-import {Box, Checkbox, FileButton, Group, Text, Textarea} from "@mantine/core";
+import {Box, Checkbox, FileButton, Flex, Group, Text, Textarea} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_FORENSIC, DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
@@ -10,7 +10,7 @@ import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import {Loader} from "@/components/Loader.jsx";
-import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
+import classes from "@/pages/stream-details/playout/PlayoutPanel.module.css";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
 
 
@@ -157,10 +157,16 @@ const PlayoutPanel = observer(({
             onChange={(event) => setDrm(event.target.value)}
             tooltip={
               ENCRYPTION_OPTIONS.map(({label, title, value}) =>
-                <div key={`encryption-info-${value}`} className="form__tooltip-item">
-                  <div className="form__tooltip-item__encryption-title">{label}:</div>
-                  <div>{title}</div>
-                </div>
+                <Flex
+                  key={`encryption-value-${value}`}
+                  gap="1rem"
+                  lh={1.25}
+                  pb={5}
+                  maw={500}
+                >
+                  <Flex flex="0 0 25%">{ label }:</Flex>
+                  <Text fz="sm">{ title }</Text>
+                </Flex>
               )
             }
           />

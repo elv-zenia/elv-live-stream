@@ -1,6 +1,6 @@
 import {useState} from "react";
-import Tooltip from "@/components/Tooltip.jsx";
-import {Text} from "@mantine/core";
+import {Flex, Text, Tooltip} from "@mantine/core";
+import {CircleInfoIcon} from "@/assets/icons/index.js";
 
 export const Select = ({
   options,
@@ -28,14 +28,18 @@ export const Select = ({
           {
             tooltip ?
               <Tooltip
-                className="form__input-label-tooltip"
-                message={tooltip}
+                label={tooltip}
+                multiline
                 side="bottom"
                 sideOffset={0}
                 alignOffest={-12}
                 align="start"
                 maxWidth={"500px"}
-              /> : null
+              >
+                <Flex w={16}>
+                  <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+                </Flex>
+              </Tooltip> : null
           }
         </label>
         {

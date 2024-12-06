@@ -3,9 +3,9 @@ import {observer} from "mobx-react-lite";
 import {streamStore} from "@/stores/index.js";
 import {ActionIcon, AspectRatio, Box} from "@mantine/core";
 import {PlayCircleIcon as PlayIcon} from "@/assets/icons/index.js";
-import Video from "@/components/Video.jsx";
+import Video from "@/components/video/Video.jsx";
 import {IconX} from "@tabler/icons-react";
-import classes from "@/assets/stylesheets/modules/VideoContainer.module.css";
+import classes from "@/components/video-container/VideoContainer.module.css";
 
 export const VideoContainer = observer(({slug, index, showPreview, allowClose=true}) => {
   const [play, setPlay] = useState(false);

@@ -6,7 +6,7 @@ import {DateFormat, SortTable} from "@/utils/helpers";
 import {editStore, streamStore} from "@/stores";
 import {IconExternalLink, IconTrash} from "@tabler/icons-react";
 import {useDisclosure} from "@mantine/hooks";
-import ConfirmModal from "@/components/ConfirmModal";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
 

@@ -2,15 +2,14 @@ import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
 import {Radio, Select, TextInput} from "@/components/Inputs.jsx";
-import Accordion from "@/components/Accordion.jsx";
 import {useNavigate} from "react-router-dom";
 import {Loader} from "@/components/Loader.jsx";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Alert, Box, Button, Flex, Text} from "@mantine/core";
+import {Accordion, Alert, Box, Button, Flex, Text} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
-import AudioTracksTable from "@/pages/create/AudioTracksTable";
+import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
-import classes from "@/assets/stylesheets/modules/CreatePage.module.css";
+import classes from "./Create.module.css";
 import ProbeConfirmation from "@/pages/ProbeConfirmation";
 
 const FORM_KEYS = {
@@ -28,10 +27,16 @@ const Permissions = observer(({permission, UpdateCallback}) => {
       labelDescription="Set a permission level."
       tooltip={
         Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
-          <div key={`permission-info-${short}`} className="form__tooltip-item">
-            <div className="form__tooltip-item__permission-title">{ short }:</div>
-            <div>{ description }</div>
-          </div>
+          <Flex
+            key={`permission-info-${short}`}
+            gap="1rem"
+            lh={1.25}
+            pb={5}
+            maw={500}
+          >
+            <Flex flex="0 0 25%">{ short }:</Flex>
+            <Text fz="sm">{ description }</Text>
+          </Flex>
         )
       }
       value={permission}
@@ -65,10 +70,16 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
       onChange={event => UpdateCallback({event, key: "encryption"})}
       tooltip={
         options.map(({label, title, id}) =>
-          <div key={`encryption-info-${id}`} className="form__tooltip-item">
-            <div className="form__tooltip-item__encryption-title">{ label }:</div>
-            <div>{ title }</div>
-          </div>
+          <Flex
+            key={`encryption-info-${id}`}
+            gap="1rem"
+            lh={1.25}
+            pb={5}
+            maw={500}
+          >
+            <Flex flex="0 0 25%">{ label }:</Flex>
+            <Text fz="sm">{ title }</Text>
+          </Flex>
         )
       }
     />
@@ -96,89 +107,89 @@ const AdvancedSection = observer(({
   return (
     <>
       <Accordion
-        title="Advanced Settings"
-        id="advanced-section"
         value={useAdvancedSettings}
         onValueChange={AdvancedSettingsCallback}
       >
-        {
-          useAdvancedSettings &&
-          <>
-            <Select
-              label="Retention"
-              labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-              formName="retention"
-              options={RETENTION_OPTIONS}
-              value={advancedData.retention}
-              onChange={event => AdvancedUpdateCallback({
-                key: "retention",
-                event
-              })
-              }
-            />
-
-            <Box mb={16}>
+        <Accordion.Item value="advanced-item">
+          <Accordion.Control>Advanced Settings</Accordion.Control>
+          <Accordion.Panel>
+            <>
               <Select
-                label="Playout Ladder"
-                formName="playoutLadder"
-                options={ladderProfilesData}
-                defaultOption={{
-                  value: "",
-                  label: "Select Ladder Profile"
-                }}
-                style={{width: "100%", marginBottom: "0"}}
-                helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
-                value={playoutProfile}
-                onChange={(event) => setPlayoutProfile(event.target.value)}
+                label="Retention"
+                labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+                formName="retention"
+                options={RETENTION_OPTIONS}
+                value={advancedData.retention}
+                onChange={event => AdvancedUpdateCallback({
+                  key: "retention",
+                  event
+                })
+                }
               />
-            </Box>
 
-            <PlaybackEncryption
-              drmFormData={drmFormData}
-              UpdateCallback={({event, key}) => DrmUpdateCallback({
-                key,
-                event
-              })}
-            />
+              <Box mb={16}>
+                <Select
+                  label="Playout Ladder"
+                  formName="playoutLadder"
+                  options={ladderProfilesData}
+                  defaultOption={{
+                    value: "",
+                    label: "Select Ladder Profile"
+                  }}
+                  style={{width: "100%", marginBottom: "0"}}
+                  helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+                  value={playoutProfile}
+                  onChange={(event) => setPlayoutProfile(event.target.value)}
+                />
+              </Box>
 
-            {
-              !objectProbed &&
-              <Alert
-                variant="light"
-                color="blue"
-                mt={24}
-                mb={24}
-                icon={<IconAlertCircle/>}
-                classNames={{
-                  wrapper: classes.alertRoot
-                }}
-              >
-                <Flex justify="space-between" align="center">
-                  <Text>
-                    To apply audio stream settings, object must be probed first.
-                  </Text>
-                  <Button
-                    variant="subtle"
-                    onClick={() => setShowProbeConfirmation(true)}
-                    disabled={
-                      objectData !== null ||
-                      DisableProbeButton()
-                    }
-                  >
-                    Probe
-                  </Button>
-                </Flex>
-              </Alert>
-            }
-            <div className="form__section-header">Audio</div>
-            <AudioTracksTable
-              records={audioTracks}
-              audioFormData={audioFormData}
-              setAudioFormData={setAudioFormData}
-              disabled={!objectProbed}
-            />
-          </>
-        }
+              <PlaybackEncryption
+                drmFormData={drmFormData}
+                UpdateCallback={({event, key}) => DrmUpdateCallback({
+                  key,
+                  event
+                })}
+              />
+
+              {
+                !objectProbed &&
+                <Alert
+                  variant="light"
+                  color="blue"
+                  mt={24}
+                  mb={24}
+                  icon={<IconAlertCircle/>}
+                  classNames={{
+                    wrapper: classes.alertRoot
+                  }}
+                >
+                  <Flex justify="space-between" align="center">
+                    <Text>
+                      To apply audio stream settings, object must be probed first.
+                    </Text>
+                    <Button
+                      variant="subtle"
+                      onClick={() => setShowProbeConfirmation(true)}
+                      disabled={
+                        objectData !== null ||
+                        DisableProbeButton()
+                      }
+                    >
+                      Probe
+                    </Button>
+                  </Flex>
+                </Alert>
+              }
+              <div className="form__section-header">Audio</div>
+              <AudioTracksTable
+                records={audioTracks}
+                audioFormData={audioFormData}
+                setAudioFormData={setAudioFormData}
+                disabled={!objectProbed}
+              />
+            </>
+          </Accordion.Panel>
+        </Accordion.Item>
       </Accordion>
     </>
   );
