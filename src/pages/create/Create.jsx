@@ -3,9 +3,8 @@ import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
 import {Radio, Select, TextInput} from "@/components/Inputs.jsx";
 import {useNavigate} from "react-router-dom";
-import {Loader} from "@/components/Loader.jsx";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Accordion, Alert, Box, Button, Flex, Text} from "@mantine/core";
+import {Accordion, Alert, Box, Button, Flex, Loader, Text} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
@@ -537,7 +536,7 @@ const Create = observer(() => {
         />
 
         <div style={{maxWidth: "200px"}}>
-          { loading ? <Loader /> : null }
+          { loading ? <Flex mt={8}><Loader size="md" /></Flex> : null }
         </div>
 
         <div className="form__actions">

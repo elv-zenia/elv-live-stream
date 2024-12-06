@@ -1,10 +1,9 @@
 import {observer} from "mobx-react-lite";
 import {useParams, Link} from "react-router-dom";
 import {IconArrowBackUp} from "@tabler/icons-react";
-import {ActionIcon} from "@mantine/core";
+import {ActionIcon, Loader} from "@mantine/core";
 import {rootStore, streamStore} from "@/stores/index.js";
 import AppFrame from "@/components/app-frame/AppFrame.jsx";
-import {Loader} from "@/components/Loader.jsx";
 import styles from "./StreamPreview.module.css";
 
 const StreamPreview = observer(() => {

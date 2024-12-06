@@ -1,11 +1,10 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Text} from "@mantine/core";
+import {Box, Flex, Loader, Text} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {Select, TextInput} from "@/components/Inputs.jsx";
 import {notifications} from "@mantine/notifications";
-import {Loader} from "@/components/Loader.jsx";
 
 const GeneralPanel = observer(({slug}) => {
   const [formData, setFormData] = useState({
@@ -183,7 +182,7 @@ const GeneralPanel = observer(({slug}) => {
             />
           </Box>
           <button type="submit" className="button__primary" disabled={applyingChanges}>
-            {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Save"}
+            {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Save"}
           </button>
         </form>
       </Flex>

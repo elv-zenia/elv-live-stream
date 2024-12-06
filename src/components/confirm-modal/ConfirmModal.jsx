@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Flex, Modal, Text} from "@mantine/core";
-import {Loader} from "@/components/Loader.jsx";
+import {Flex, Loader, Modal, Text} from "@mantine/core";
 
 const ConfirmModal = observer(({
   message,
@@ -59,7 +58,7 @@ const ConfirmModal = observer(({
             }
           }}
         >
-          {loading ? <Loader loader="inline" className="modal__loader"/> : confirmText}
+          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : confirmText}
         </button>
       </Flex>
     </Modal>
