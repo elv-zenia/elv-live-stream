@@ -46,7 +46,7 @@ const StreamModal = observer(({
 });
 
 const Streams = observer(() => {
-  const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
+  const [sortStatus, setSortStatus] = useState({columnAccessor: "display_title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
 
@@ -70,7 +70,8 @@ const Streams = observer(() => {
     CloseCallback: null
   });
 
-  const records = Object.values(streamStore.streams || {})
+  const streamsCopy = Object.values(streamStore.streams || {});
+  const records = Object.values(streamsCopy || {})
     .filter(record => {
       return (
         !debouncedFilter ||
