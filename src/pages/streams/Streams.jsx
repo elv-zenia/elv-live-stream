@@ -134,12 +134,14 @@ const Streams = observer(() => {
             { accessor: "title", title: "Name", sortable: true, width: 300, render: record => (
               <div className="table__multi-line">
                 <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
-                  <Text fw={600} lineClamp={1}>{record.display_title || record.slug}</Text>
+                  <Text fw={600} lineClamp={1} title={record.display_title || record.slug}>
+                    {record.display_title || record.slug}
+                  </Text>
                 </Link>
                 <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
             )},
-            { accessor: "originUrl", title: "URL", render: record => <Text>{SanitizeUrl({url: record.originUrl})}</Text> },
+            { accessor: "originUrl", title: "URL", render: record => <Text title={SanitizeUrl({url: record.originUrl})}>{SanitizeUrl({url: record.originUrl})}</Text> },
             { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
             { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
             { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
