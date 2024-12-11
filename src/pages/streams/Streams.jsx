@@ -149,6 +149,7 @@ const Streams = observer(() => {
               accessor: "status",
               title: "Status",
               sortable: true,
+              width: 150,
               render: record => !record.status ? null :
                 <StatusText
                   status={record.status}
@@ -158,6 +159,7 @@ const Streams = observer(() => {
             {
               accessor: "actions",
               title: "",
+              width: 150,
               render: record => {
                 return (
                   <Group gap="xxs" justify="right">
