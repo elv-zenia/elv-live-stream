@@ -3,12 +3,11 @@ import PageHeader from "@/components/header/PageHeader";
 import {useNavigate, useParams} from "react-router-dom";
 import {streamStore, editStore, dataStore} from "@/stores";
 import {observer} from "mobx-react-lite";
-import {Tabs, Text} from "@mantine/core";
+import {Loader, Tabs, Text} from "@mantine/core";
 import {useDebouncedCallback, useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS, STATUS_MAP} from "@/utils/constants";
-import classes from "@/assets/stylesheets/modules/StreamDetails.module.css";
-import {Loader} from "@/components/Loader.jsx";
-import ConfirmModal from "@/components/ConfirmModal";
+import classes from "@/pages/stream-details/StreamDetails.module.css";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {StreamIsActive} from "@/utils/helpers";
 
 const StreamDetailsPage = observer(() => {

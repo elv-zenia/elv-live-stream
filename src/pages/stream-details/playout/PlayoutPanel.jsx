@@ -2,15 +2,14 @@ import {useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import path from "path";
 import {observer} from "mobx-react-lite";
-import {Box, Checkbox, FileButton, Group, Text, Textarea} from "@mantine/core";
+import {Box, Checkbox, FileButton, Flex, Group, Loader, Text, Textarea} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_FORENSIC, DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
-import {Loader} from "@/components/Loader.jsx";
-import classes from "@/assets/stylesheets/modules/PlayoutPanel.module.css";
+import classes from "@/pages/stream-details/playout/PlayoutPanel.module.css";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
 
 
@@ -120,7 +119,7 @@ const PlayoutPanel = observer(({
     <Box w="700px">
       <div className="form__section-header">Playout</div>
       <DisabledTooltipWrapper
-        tooltipLabel="Playout Ladder configuration is diabled whent the stream is running"
+        tooltipLabel="Playout Ladder configuration is disabled when the stream is running"
         disabled={[STATUS_MAP.RUNNING].includes(status)}
       >
         <Box mb={24}>
@@ -157,10 +156,16 @@ const PlayoutPanel = observer(({
             onChange={(event) => setDrm(event.target.value)}
             tooltip={
               ENCRYPTION_OPTIONS.map(({label, title, value}) =>
-                <div key={`encryption-info-${value}`} className="form__tooltip-item">
-                  <div className="form__tooltip-item__encryption-title">{label}:</div>
-                  <div>{title}</div>
-                </div>
+                <Flex
+                  key={`encryption-value-${value}`}
+                  gap="1rem"
+                  lh={1.25}
+                  pb={5}
+                  maw={500}
+                >
+                  <Flex flex="0 0 25%">{ label }:</Flex>
+                  <Text fz="sm">{ title }</Text>
+                </Flex>
               )
             }
           />
@@ -320,7 +325,7 @@ const PlayoutPanel = observer(({
         className="button__primary"
         onClick={HandleSubmit}
       >
-        {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+        {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Apply"}
       </button>
     </Box>
   );

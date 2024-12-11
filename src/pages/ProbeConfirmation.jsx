@@ -1,5 +1,5 @@
 import {observer} from "mobx-react-lite";
-import ConfirmModal from "@/components/ConfirmModal";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 
 const ProbeConfirmation = observer(({
   show,

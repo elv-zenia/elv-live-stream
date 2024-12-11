@@ -1,10 +1,9 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import AudioTracksTable from "@/pages/create/AudioTracksTable";
+import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Loader} from "@/components/Loader.jsx";
-import {Box} from "@mantine/core";
+import {Box, Loader} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {Select} from "@/components/Inputs.jsx";
 import {
@@ -152,7 +151,7 @@ const RecordingPanel = observer(({
             className="button__primary"
             disabled={applyingChanges || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           >
-            {applyingChanges ? <Loader loader="inline" className="modal__loader"/> : "Apply"}
+            {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Apply"}
           </button>
         </Box>
       </form>

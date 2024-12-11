@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {Root, Overlay, Content, Title, Description, Close} from "@radix-ui/react-dialog";
-import {Loader} from "@/components/Loader.jsx";
-import {Text} from "@mantine/core";
+import {Loader, Text} from "@mantine/core";
 
 const modalSizes = {
   "XS": "xs",
@@ -107,7 +106,7 @@ const Modal = ({
                   }
                 }}
               >
-                { loading ? <Loader loader="inline" className="modal__loader" /> : confirmText }
+                { loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : confirmText }
               </button>
             </div>
           </Content>

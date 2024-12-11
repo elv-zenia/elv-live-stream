@@ -138,16 +138,18 @@ export const SortTable = ({sortStatus, AdditionalCondition}) => {
       return AdditionalCondition(a, b);
     }
 
-    a = a[sortStatus.columnAccessor];
-    b = b[sortStatus.columnAccessor];
+    a = a[sortStatus.columnAccessor]?.trim();
+    b = b[sortStatus.columnAccessor]?.trim();
 
-    if(typeof a === "number") {
-      a = a || 0;
-      b = b || 0;
+    if(typeof a === "number" && typeof b === "number") {
+      a = isNaN(a) ? 0 : a;
+      b = isNaN(b) ? 0 : b;
     } else {
-      a = a?.toLowerCase?.() || a || "";
-      b = b?.toLowerCase?.() || b || "";
+      a = typeof a === "string" ? a.toLowerCase() : a ?? "";
+      b = typeof b === "string" ? b.toLowerCase() : b ?? "";
     }
+
+    if(a === b) { return 0; }
 
     return (a < b ? -1 : 1) * (sortStatus.direction === "asc" ? 1 : -1);
   };

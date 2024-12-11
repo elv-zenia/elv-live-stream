@@ -21,6 +21,7 @@ import {useDebouncedCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import PageHeader, {StatusText} from "@/components/header/PageHeader";
+import styles from "./Streams.module.css";
 
 const StreamModal = observer(({
   open,
@@ -45,7 +46,7 @@ const StreamModal = observer(({
 });
 
 const Streams = observer(() => {
-  const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
+  const [sortStatus, setSortStatus] = useState({columnAccessor: "display_title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
 
@@ -69,7 +70,8 @@ const Streams = observer(() => {
     CloseCallback: null
   });
 
-  const records = Object.values(streamStore.streams || {})
+  const streamsCopy = Object.values(streamStore.streams || {});
+  const records = Object.values(streamsCopy || {})
     .filter(record => {
       return (
         !debouncedFilter ||
@@ -113,8 +115,8 @@ const Streams = observer(() => {
           emptyState={
             // Mantine bug where empty state link still present underneath table rows
             !records &&
-            <div className="streams__empty-data-table">
-              <div className="streams__empty-data-table-text">
+            <div className={styles.emptyDataTable}>
+              <div className={styles.emptyDataTableText}>
                 No streams available
               </div>
               <Link className="button button__primary" to="/create">
@@ -131,13 +133,15 @@ const Streams = observer(() => {
           columns={[
             { accessor: "title", title: "Name", sortable: true, width: 300, render: record => (
               <div className="table__multi-line">
-                <Link to={`/streams/${record.objectId || record.slug}`}>
-                  <Text fw={600} lineClamp={1}>{record.display_title || record.slug}</Text>
+                <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
+                  <Text fw={600} lineClamp={1} title={record.display_title || record.slug}>
+                    {record.display_title || record.slug}
+                  </Text>
                 </Link>
                 <Text c="dimmed" fz="xs">{record.objectId}</Text>
               </div>
             )},
-            { accessor: "originUrl", title: "URL", render: record => <Text>{SanitizeUrl({url: record.originUrl})}</Text> },
+            { accessor: "originUrl", title: "URL", render: record => <Text title={SanitizeUrl({url: record.originUrl})}>{SanitizeUrl({url: record.originUrl})}</Text> },
             { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
             { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
             { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
@@ -145,6 +149,7 @@ const Streams = observer(() => {
               accessor: "status",
               title: "Status",
               sortable: true,
+              width: 150,
               render: record => !record.status ? null :
                 <StatusText
                   status={record.status}
@@ -154,6 +159,7 @@ const Streams = observer(() => {
             {
               accessor: "actions",
               title: "",
+              width: 150,
               render: record => {
                 return (
                   <Group gap="xxs" justify="right">

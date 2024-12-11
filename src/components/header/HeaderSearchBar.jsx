@@ -1,7 +1,7 @@
 import {Flex, TextInput} from "@mantine/core";
 import {useState} from "react";
 import {MagnifyingGlassIcon} from "@/assets/icons";
-import classes from "@/assets/stylesheets/modules/SearchBar.module.css";
+import classes from "@/components/header/SearchBar.module.css";
 
 const HeaderSearchBar = () => {
   const [value, setValue] = useState("");
