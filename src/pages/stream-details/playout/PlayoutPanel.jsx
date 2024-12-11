@@ -119,7 +119,7 @@ const PlayoutPanel = observer(({
     <Box w="700px">
       <div className="form__section-header">Playout</div>
       <DisabledTooltipWrapper
-        tooltipLabel="Playout Ladder configuration is diabled whent the stream is running"
+        tooltipLabel="Playout Ladder configuration is disabled when the stream is running"
         disabled={[STATUS_MAP.RUNNING].includes(status)}
       >
         <Box mb={24}>
