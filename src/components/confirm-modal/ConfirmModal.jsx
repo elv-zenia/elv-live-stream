@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Flex, Loader, Modal, Text} from "@mantine/core";
 
@@ -13,7 +13,11 @@ const ConfirmModal = observer(({
   confirmText="Confirm"
 }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setError(null);
+  }, [show]);
 
   return (
     <Modal
@@ -49,6 +53,7 @@ const ConfirmModal = observer(({
               setError(undefined);
               setLoading(true);
               await ConfirmCallback();
+              CloseCallback();
             } catch(error) {
               // eslint-disable-next-line no-console
               console.error(error);
@@ -58,7 +63,7 @@ const ConfirmModal = observer(({
             }
           }}
         >
-          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : confirmText}
+          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : confirmText}
         </button>
       </Flex>
     </Modal>

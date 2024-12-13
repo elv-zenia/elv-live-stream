@@ -11,7 +11,6 @@ import {
   IconCircleX
 } from "@tabler/icons-react";
 
-import Modal from "@/components/Modal.jsx";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {SanitizeUrl, SortTable, VideoBitrateReadable, StreamIsActive} from "@/utils/helpers";
 import {STATUS_MAP} from "@/utils/constants";
@@ -22,28 +21,7 @@ import {DataTable} from "mantine-datatable";
 import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
 import PageHeader, {StatusText} from "@/components/header/PageHeader";
 import styles from "./Streams.module.css";
-
-const StreamModal = observer(({
-  open,
-  onOpenChange,
-  ConfirmCallback,
-  title,
-  description,
-  loadingText
-}) => {
-  if(!open) { return null; }
-
-  return (
-    <Modal
-      title={title}
-      description={description}
-      loadingText={loadingText}
-      open={open}
-      onOpenChange={onOpenChange}
-      ConfirmCallback={ConfirmCallback}
-    />
-  );
-});
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 
 const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "display_title", direction: "asc"});
@@ -327,12 +305,12 @@ const Streams = observer(() => {
           ]}
         />
       </div>
-      <StreamModal
+      <ConfirmModal
         title={modalData.title}
-        description={modalData.description}
+        message={modalData.description}
         loadingText={modalData.loadingText}
-        open={modalData.showModal}
-        onOpenChange={modalData.CloseCallback}
+        show={modalData.showModal}
+        CloseCallback={modalData.CloseCallback}
         ConfirmCallback={modalData.ConfirmCallback}
       />
     </div>
