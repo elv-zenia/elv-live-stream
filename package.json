@@ -24,7 +24,6 @@
     "@mantine/dates": "7.13.1",
     "@mantine/hooks": "7.13.1",
     "@mantine/notifications": "7.13.1",
-    "@radix-ui/react-dialog": "^1.0.4",
     "@tabler/icons-react": "^2.34.0",
     "dayjs": "^1.11.13",
     "fraction.js": "^4.3.7",
