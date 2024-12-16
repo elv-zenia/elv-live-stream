@@ -8,6 +8,7 @@ import {PlusIcon} from "@/assets/icons/index.js";
 import {rootStore} from "@/stores/index.js";
 import {notifications} from "@mantine/notifications";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
@@ -136,12 +137,9 @@ const Settings = observer(() => {
   if(!rootStore.loaded) { return <Loader />; }
 
   return (
-    <>
-      <div className="page-header monitor__page-header">
-        <div>
-          Settings
-        </div>
-      </div>
+    <PageContainer
+      title="Settings"
+    >
       <Box>
         <Title order={4}>Playout Profiles</Title>
         <Button
@@ -197,7 +195,7 @@ const Settings = observer(() => {
           setShowModal(false);
         }}
       />
-    </>
+    </PageContainer>
   );
 });
 

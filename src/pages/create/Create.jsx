@@ -10,6 +10,7 @@ import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable
 import {notifications} from "@mantine/notifications";
 import classes from "./Create.module.css";
 import ProbeConfirmation from "@/pages/ProbeConfirmation";
+import PageContainer from "@/components/page-container/PageContainer.jsx";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -326,8 +327,11 @@ const Create = observer(() => {
   };
 
   return (
-    <div className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}>
-      <div className="page-header">Create Live Stream</div>
+    <PageContainer
+      title="Create Live Stream"
+      width="700px"
+      className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}
+    >
       <form className="form" onSubmit={HandleSubmit}>
         <Radio
           label="Protocol"
@@ -564,7 +568,7 @@ const Create = observer(() => {
           });
         }}
       />
-    </div>
+    </PageContainer>
   );
 });
 
