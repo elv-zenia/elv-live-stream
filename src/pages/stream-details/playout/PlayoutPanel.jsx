@@ -11,6 +11,7 @@ import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import {Select} from "@/components/Inputs.jsx";
 import classes from "@/pages/stream-details/playout/PlayoutPanel.module.css";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
+import ElvButton from "@/components/button/ElvButton.jsx";
 
 
 const PlayoutPanel = observer(({
@@ -301,7 +302,7 @@ const PlayoutPanel = observer(({
               resetRef={resetRef}
             >
               {(props) => (
-                <button type="button" className="button__secondary" {...props}>Upload image</button>
+                <ElvButton variant="outline" {...props}>Upload image</ElvButton>
               )}
             </FileButton>
               {
@@ -319,14 +320,13 @@ const PlayoutPanel = observer(({
           </>
         }
       </Box>
-      <button
-        type="button"
+      <ElvButton
         disabled={applyingChanges}
-        className="button__primary"
+        variant="filled"
         onClick={HandleSubmit}
       >
         {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Apply"}
-      </button>
+      </ElvButton>
     </Box>
   );
 });

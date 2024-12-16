@@ -11,6 +11,7 @@ import {notifications} from "@mantine/notifications";
 import classes from "./Create.module.css";
 import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
+import ElvButton from "@/components/button/ElvButton.jsx";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -540,12 +541,21 @@ const Create = observer(() => {
         />
 
         <div style={{maxWidth: "200px"}}>
-          { loading ? <Flex mt={8}><Loader size="md" /></Flex> : null }
+          {
+            loading ?
+              (
+                <Flex mt={8}>
+                  <Loader size="md" />
+                </Flex>
+              ) : null
+          }
         </div>
 
-        <div className="form__actions">
-          <input disabled={isCreating} type="submit" value={isCreating ? "Submitting..." : "Save"} />
-        </div>
+        <Box mt="2rem" mb="2.5rem">
+          <ElvButton disabled={isCreating} type="submit">
+            { isCreating ? "Submitting..." : "Save" }
+          </ElvButton>
+        </Box>
       </form>
       <ProbeConfirmation
         show={showProbeConfirmation}

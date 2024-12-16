@@ -3,6 +3,7 @@ import {observer} from "mobx-react-lite";
 import {Box, Flex, Loader, Modal, Text} from "@mantine/core";
 import {Select, TextInput} from "@/components/Inputs.jsx";
 import {dataStore} from "@/stores/index.js";
+import ElvButton from "@/components/button/ElvButton.jsx";
 
 const CopyToVodModal = observer(({
   show,
@@ -114,14 +115,12 @@ const CopyToVodModal = observer(({
             Error: { error }
           </div>
       }
-      <Flex direction="row" align="center" className="modal__actions">
-        <button type="button" className="button__secondary" onClick={close}>
+      <Flex direction="row" align="center" mt="1.5rem" justify="flex-end">
+        <ElvButton variant="outline" onClick={close} mr="0.5rem">
           Cancel
-        </button>
-        <button
-          type="button"
+        </ElvButton>
+        <ElvButton
           disabled={loading || !libraryId || !title}
-          className="button__primary"
           onClick={async () => {
             try {
               setError(undefined);
@@ -137,7 +136,7 @@ const CopyToVodModal = observer(({
           }}
         >
           {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Copy"}
-        </button>
+        </ElvButton>
       </Flex>
     </Modal>
   );

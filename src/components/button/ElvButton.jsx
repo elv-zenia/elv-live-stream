@@ -10,11 +10,11 @@ const ElvButton = ({
 }) => {
   return (
     <UnstyledButton
-      className={variant === "filled" ? styles.filled : styles.outline}
+      className={variant === "outline" ? styles.outline : styles.filled}
       leftSection={leftSection}
       {...rest}
     >
-      <Group>
+      <Group justify="center">
         {
           leftSection ? leftSection : null
         }

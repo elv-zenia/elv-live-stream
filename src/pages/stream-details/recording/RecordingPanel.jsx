@@ -12,6 +12,7 @@ import {
   RETENTION_OPTIONS, STATUS_MAP
 } from "@/utils/constants";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
+import ElvButton from "@/components/button/ElvButton.jsx";
 
 const RecordingPanel = observer(({
   title,
@@ -146,13 +147,12 @@ const RecordingPanel = observer(({
         </DisabledTooltipWrapper>
 
         <Box mt="24px">
-          <button
+          <ElvButton
             type="submit"
-            className="button__primary"
             disabled={applyingChanges || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           >
             {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Apply"}
-          </button>
+          </ElvButton>
         </Box>
       </form>
     </Box>

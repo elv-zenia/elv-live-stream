@@ -5,6 +5,7 @@ import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {Select, TextInput} from "@/components/Inputs.jsx";
 import {notifications} from "@mantine/notifications";
+import ElvButton from "@/components/button/ElvButton.jsx";
 
 const GeneralPanel = observer(({slug}) => {
   const [formData, setFormData] = useState({
@@ -181,9 +182,9 @@ const GeneralPanel = observer(({slug}) => {
               }
             />
           </Box>
-          <button type="submit" className="button__primary" disabled={applyingChanges}>
+          <ElvButton type="submit" disabled={applyingChanges}>
             {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Save"}
-          </button>
+          </ElvButton>
         </form>
       </Flex>
     </>

@@ -9,6 +9,7 @@ import {rootStore} from "@/stores/index.js";
 import {notifications} from "@mantine/notifications";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
+import ElvButton from "@/components/button/ElvButton.jsx";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
@@ -176,14 +177,13 @@ const Settings = observer(() => {
           ))
         }
       </Box>
-      <button
-        type="button"
-        className="button__primary"
+      <ElvButton
+        variant="filled"
         onClick={HandleSave}
         disabled={saving}
       >
         {saving ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Save"}
-      </button>
+      </ElvButton>
       <ConfirmModal
         title="Delete Profile"
         message="Are you sure you want to delete the profile? This action cannot be undone."
