@@ -18,7 +18,7 @@ import {CODEC_TEXT, FORMAT_TEXT} from "@/utils/constants";
 
 import {useDebouncedCallback, useDebouncedValue} from "@mantine/hooks";
 import {DataTable} from "mantine-datatable";
-import {Text, ActionIcon, Group, TextInput} from "@mantine/core";
+import {Text, ActionIcon, Group, TextInput, Stack} from "@mantine/core";
 import StatusText from "@/components/status-text/StatusText.jsx";
 import styles from "./Streams.module.css";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
@@ -109,14 +109,14 @@ const Streams = observer(() => {
         onSortStatusChange={setSortStatus}
         columns={[
           { accessor: "title", title: "Name", sortable: true, width: 300, render: record => (
-            <div className="table__multi-line">
+            <Stack gap={0}>
               <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
                 <Text fw={600} lineClamp={1} title={record.display_title || record.slug}>
                   {record.display_title || record.slug}
                 </Text>
               </Link>
               <Text c="dimmed" fz="xs">{record.objectId}</Text>
-            </div>
+            </Stack>
           )},
           { accessor: "originUrl", title: "URL", render: record => <Text title={SanitizeUrl({url: record.originUrl})}>{SanitizeUrl({url: record.originUrl})}</Text> },
           { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },

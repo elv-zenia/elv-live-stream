@@ -1,51 +1,3 @@
-html,
-body {
-  color: $black;
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 16px;
-  margin: 0;
-  padding: 0;
-}
-
-html,
-body,
-.app,
-.app-container {
-  background-color: $white;
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 100%;
-  width: 100%;
-}
-
-.app {
-  flex-direction: row;
-}
-
-main {
-  height: 100%;
-  overflow-y: auto;
-  width: 100%;
-}
-
-.main-content {
-  padding: 2rem;
-}
-
-.image-icon--svg {
-  height: 20px;
-}
-
-.page-header {
-  align-items: center;
-  display: flex;
-  font-size: 1.25rem;
-  gap: 10px;
-  margin-bottom: 2rem;
-}
-
 select {
   appearance: none;
   background-color: $white;
@@ -85,12 +37,5 @@ textarea {
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
-  }
-}
-
-.table {
-  &__multi-line {
-    display: flex;
-    flex-direction: column;
   }
 }

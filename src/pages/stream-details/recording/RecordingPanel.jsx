@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Box, Loader} from "@mantine/core";
+import {Box, Loader, Title} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {Select} from "@/components/Inputs.jsx";
 import {
@@ -91,7 +91,7 @@ const RecordingPanel = observer(({
           disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Retention Period configuration is disabled when the stream is running"
         >
-          <div className="form__section-header">Retention Period</div>
+          <Title order={3} c="elv-gray.8">Retention Period</Title>
           <Select
             labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
             formName="retention"
@@ -105,7 +105,7 @@ const RecordingPanel = observer(({
           disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Timeout configuration is disabled when the stream is running"
         >
-          <div className="form__section-header">Timeout</div>
+          <Title order={3} c="elv-gray.8">Timeout</Title>
           <Select
             label="Connection Timeout"
             labelDescription="The stream will remain active and wait for an input feed for this duration."
@@ -138,7 +138,7 @@ const RecordingPanel = observer(({
           disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Audio Track configuration is disabled when the stream is running"
         >
-          <div className="form__section-header">Audio Tracks</div>
+          <Title order={3} c="elv-gray.8">Audio Tracks</Title>
           <AudioTracksTable
             records={audioTracks}
             audioFormData={audioFormData}

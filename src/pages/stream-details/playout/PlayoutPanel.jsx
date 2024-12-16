@@ -2,7 +2,7 @@ import {useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import path from "path";
 import {observer} from "mobx-react-lite";
-import {Box, Checkbox, FileButton, Flex, Group, Loader, Text, Textarea} from "@mantine/core";
+import {Box, Checkbox, FileButton, Flex, Group, Loader, Text, Textarea, Title} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_FORENSIC, DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
@@ -118,7 +118,7 @@ const PlayoutPanel = observer(({
 
   return (
     <Box w="700px">
-      <div className="form__section-header">Playout</div>
+      <Title order={3} c="elv-gray.8">Playout</Title>
       <DisabledTooltipWrapper
         tooltipLabel="Playout Ladder configuration is disabled when the stream is running"
         disabled={[STATUS_MAP.RUNNING].includes(status)}
@@ -174,7 +174,7 @@ const PlayoutPanel = observer(({
       </DisabledTooltipWrapper>
 
       <DisabledTooltipWrapper tooltipLabel="DVR configuration is disabled while the stream is running" disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}>
-        <div className="form__section-header">DVR</div>
+        <Title order={3} c="elv-gray.8">DVR</Title>
 
         <Box mb={24}>
           <Checkbox
@@ -232,7 +232,7 @@ const PlayoutPanel = observer(({
 
       <Box mb="24px">
         <Group mb={16}>
-          <div className="form__section-header">Visible Watermark</div>
+          <Title order={3} c="elv-gray.8">Visible Watermark</Title>
         </Group>
 
         <Box mb={24}>

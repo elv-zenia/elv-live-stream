@@ -82,6 +82,7 @@ const TitleSection = ({title, subtitle, rightSection}) => {
 const PageContainer = ({
   title,
   subtitle,
+  className,
   children,
   width="100%",
   error,
@@ -91,7 +92,7 @@ const PageContainer = ({
   ...rest
 }) => {
   return (
-    <Box p="24 46 46" w={width} {...rest}>
+    <Box p="24 46 46" w={width} className={className} {...rest}>
       <AlertMessage error={error} />
       <TopActions showSearchBar={showSearchBar} actions={actions} />
       {

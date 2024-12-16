@@ -4,11 +4,11 @@ import {dataStore, editStore, streamStore, rootStore} from "@/stores";
 import {Radio, Select, TextInput} from "@/components/Inputs.jsx";
 import {useNavigate} from "react-router-dom";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Accordion, Alert, Box, Button, Flex, Loader, Text} from "@mantine/core";
+import {Accordion, Alert, Box, Button, Flex, Loader, Text, Title} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
-import classes from "./Create.module.css";
+import styles from "./Create.module.css";
 import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import ElvButton from "@/components/button/ElvButton.jsx";
@@ -161,7 +161,7 @@ const AdvancedSection = observer(({
                   mb={24}
                   icon={<IconAlertCircle/>}
                   classNames={{
-                    wrapper: classes.alertRoot
+                    wrapper: styles.alertRoot
                   }}
                 >
                   <Flex justify="space-between" align="center">
@@ -181,7 +181,7 @@ const AdvancedSection = observer(({
                   </Flex>
                 </Alert>
               }
-              <div className="form__section-header">Audio</div>
+              <Title order={3} c="elv-gray.8">Audio</Title>
               <AudioTracksTable
                 records={audioTracks}
                 audioFormData={audioFormData}
@@ -331,7 +331,7 @@ const Create = observer(() => {
     <PageContainer
       title="Create Live Stream"
       width="700px"
-      className={`create-form-container ${!dataStore.tenantId ? "create-form-container--disabled" : ""}`}
+      className={(dataStore.tenantId && !rootStore.errorMessage) ? "" : styles.disabledContainer}
     >
       <form className="form" onSubmit={HandleSubmit}>
         <Radio

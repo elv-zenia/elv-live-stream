@@ -1,17 +1,6 @@
-.create-form-container--disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 .form {
   line-height: 1.5;
   width: 700px;
-
-  &__section-header {
-    font-size: 1.5rem;
-    font-weight: 500;
-    padding-bottom: 1rem;
-  }
 
   &__input-label-container {
     margin-bottom: 0.5rem;
@@ -89,9 +78,5 @@
     &__encryption-title {
       flex: 0 0 35%;
     }
-  }
-
-  &__actions {
-    margin: 2rem 0 2.5rem;
   }
 }
