@@ -43,16 +43,13 @@
     margin-top: 0.25rem;
   }
 
-  input[type="text"],
   input[type="number"],
   textarea,
   select {
     width: 100%;
   }
 
-  input[type="text"],
   textarea,
-  &__radio-container,
   select:not(:last-child) {
     margin-bottom: 1rem;
   }

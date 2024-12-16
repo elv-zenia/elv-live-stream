@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Loader, Modal, Text} from "@mantine/core";
-import {Select, TextInput} from "@/components/Inputs.jsx";
+import {Box, Flex, Loader, Modal, Text, TextInput} from "@mantine/core";
+import {Select} from "@/components/Inputs.jsx";
 import {dataStore} from "@/stores/index.js";
 import ElvButton from "@/components/button/ElvButton.jsx";
 
@@ -102,6 +102,7 @@ const CopyToVodModal = observer(({
 
         <TextInput
           label="Enter a title for the VoD"
+          name="title"
           required={true}
           value={title}
           onChange={event => setTitle(event.target.value)}

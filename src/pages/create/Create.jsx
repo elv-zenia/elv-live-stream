@@ -1,10 +1,10 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
-import {Radio, Select, TextInput} from "@/components/Inputs.jsx";
+import {Select} from "@/components/Inputs.jsx";
 import {useNavigate} from "react-router-dom";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Accordion, Alert, Box, Button, Flex, Loader, Text, Title} from "@mantine/core";
+import {Accordion, Alert, Box, Button, Flex, Loader, Radio, Stack, Text, TextInput, Title} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
@@ -334,59 +334,48 @@ const Create = observer(() => {
       className={(dataStore.tenantId && !rootStore.errorMessage) ? "" : styles.disabledContainer}
     >
       <form className="form" onSubmit={HandleSubmit}>
-        <Radio
-          label="Protocol"
-          options={[
-            {
-              optionLabel: "MPEGTS",
-              id: "mpegts",
-              value: "mpegts",
-              checked: basicFormData.protocol === "mpegts",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            },
-            {
-              optionLabel: "RTMP",
-              id: "rtmp",
-              value: "rtmp",
-              checked: basicFormData.protocol === "rtmp",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            },
-            {
-              optionLabel: "SRT",
-              id: "srt",
-              value: "srt",
-              checked: basicFormData.protocol === "srt",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            },
-            {
-              optionLabel: "Custom",
-              id: "customProtocol",
-              value: "custom",
-              checked: basicFormData.protocol === "custom",
-              onChange: event => UpdateFormData({
-                key: "protocol",
-                value: event.target.value,
-                formKey: FORM_KEYS.BASIC
-              })
-            }
-          ]}
-        />
+        <Radio.Group
+          name="protocol"
+          label="Streaming Protocol"
+          description="Select a protocol to see available pre-allocated URLs."
+          mb={16}
+          value={basicFormData.protocol}
+          onChange={(value) => {
+            UpdateFormData({
+              key: "protocol",
+              value,
+              formKey: FORM_KEYS.BASIC
+            });
+          }}
+        >
+          <Stack mt="xs">
+            <Radio
+              value="mpegts"
+              label="MPEG-TS"
+              description="Reliable for stable broadcasts, ensuring high-quality video and audio transmission."
+            />
+            <Radio
+              value="rtmp"
+              label="RTMP"
+              description="Perfect for low-latency and interactive streams, widely used in live broadcasting applications."
+            />
+            <Radio
+              value="srt"
+              label="SRT"
+              description="Secure and adaptive, ideal for streaming over unpredictable networks with error recovery features."
+            />
+            <Radio
+              value="custom"
+              label="Custom"
+              description="Enter a custom URL."
+            />
+          </Stack>
+        </Radio.Group>
         {
           basicFormData.protocol === "custom" &&
           <TextInput
             label="URL"
+            name="url"
             required={basicFormData.protocol === "custom"}
             value={basicFormData.url}
             disabled={objectData !== null}
@@ -423,8 +412,10 @@ const Create = observer(() => {
         }
         <TextInput
           label="Name"
+          name="name"
           required={true}
           value={basicFormData.name}
+          mb={16}
           onChange={event => UpdateFormData({
             key: "name",
             value: event.target.value,
@@ -433,7 +424,9 @@ const Create = observer(() => {
         />
         <TextInput
           label="Description"
+          name="description"
           value={basicFormData.description}
+          mb={16}
           onChange={event => UpdateFormData({
             key: "description",
             value: event.target.value,
@@ -442,7 +435,9 @@ const Create = observer(() => {
         />
         <TextInput
           label="Display Title"
+          name="displayTitle"
           value={basicFormData.displayTitle}
+          mb={16}
           onChange={event => UpdateFormData({
             key: "displayTitle",
             value: event.target.value,

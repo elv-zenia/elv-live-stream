@@ -1,9 +1,9 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Loader, Text} from "@mantine/core";
+import {Box, Flex, Loader, Text, TextInput} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Select, TextInput} from "@/components/Inputs.jsx";
+import {Select} from "@/components/Inputs.jsx";
 import {notifications} from "@mantine/notifications";
 import ElvButton from "@/components/button/ElvButton.jsx";
 
@@ -113,25 +113,28 @@ const GeneralPanel = observer(({slug}) => {
     <>
       <Flex direction="column" style={{flexGrow: "1"}}>
         <form className="form" onSubmit={HandleSubmit}>
-          <Box mb="24px" maw="70%">
+          <Box mb="24px" w="700px">
             <TextInput
               label="Name"
-              formName="name"
+              name="name"
               required={true}
               value={formData.name}
               onChange={HandleFormChange}
+              mb={16}
             />
             <TextInput
               label="Display Title"
-              formName="displayTitle"
+              name="displayTitle"
               value={formData.displayTitle}
               onChange={HandleFormChange}
+              mb={16}
             />
             <TextInput
               label="Description"
-              formName="description"
+              name="description"
               value={formData.description}
               onChange={HandleFormChange}
+              mb={16}
             />
             <Select
               label="Access Group"
