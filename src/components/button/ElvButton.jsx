@@ -10,15 +10,15 @@ const ElvButton = ({
 }) => {
   return (
     <UnstyledButton
+      p="0 12px"
       className={variant === "outline" ? styles.outline : styles.filled}
-      leftSection={leftSection}
       {...rest}
     >
-      <Group justify="center">
+      <Group justify="center" gap={4}>
         {
           leftSection ? leftSection : null
         }
-        <Text fz="sm">
+        <Text fz="sm" pr={leftSection ? "4px" : 0}>
           { children }
         </Text>
       </Group>

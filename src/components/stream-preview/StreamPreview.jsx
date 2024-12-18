@@ -49,7 +49,7 @@ const StreamPreview = observer(() => {
       actions={[
         {
           label: "All Streams",
-          leftSection: <IconChevronLeft />,
+          leftSection: <IconChevronLeft height={18} />,
           variant: "filled",
           onClick: () => navigate("/streams")
         }
