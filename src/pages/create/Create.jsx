@@ -352,12 +352,12 @@ const Create = observer(() => {
             <Radio
               value="mpegts"
               label="MPEG-TS"
-              description="Reliable for stable broadcasts, ensuring high-quality video and audio transmission."
+              description="Perfect for low-latency and interactive streams, widely used in live broadcasting applications."
             />
             <Radio
               value="rtmp"
               label="RTMP"
-              description="Perfect for low-latency and interactive streams, widely used in live broadcasting applications."
+              description="Reliable for stable broadcasts, ensuring high-quality video and audio transmission."
             />
             <Radio
               value="srt"
