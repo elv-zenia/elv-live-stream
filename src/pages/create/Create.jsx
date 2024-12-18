@@ -114,7 +114,7 @@ const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
       description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
       name="playbackEncryption"
       data={ENCRYPTION_OPTIONS}
-      placeholder="Selet Encryption"
+      placeholder="Select Encryption"
       mb={16}
       value={drmFormData.encryption}
       onChange={value => UpdateCallback({event: {target: value}, key: "encryption"})}
@@ -170,7 +170,7 @@ const AdvancedSection = observer(({
                   label="Playout Ladder"
                   name="playoutLadder"
                   data={ladderProfilesData}
-                  placeholder="Selet Ladder Profile"
+                  placeholder="Select Ladder Profile"
                   mb={16}
                   // style={{width: "100%", marginBottom: "0"}}
                   description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}

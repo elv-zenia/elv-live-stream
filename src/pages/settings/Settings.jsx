@@ -13,7 +13,7 @@ import ElvButton from "@/components/button/ElvButton.jsx";
 
 const Settings = observer(() => {
   const [profileFormData, setProfileFormData] = useState(({default: JSON.stringify({}, null, 2), custom: []}));
-  // For displaying values while user potentionally edits name
+  // For displaying values while user potentially edits name
   const [customProfileNames, setCustomProfileNames] = useState([]);
   const [deleteIndex, setDeleteIndex] = useState(-1);
   const [saving, setSaving] = useState(false);
