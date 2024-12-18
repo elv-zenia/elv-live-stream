@@ -779,7 +779,7 @@ class StreamStore {
       throw Error("Unable to update ladder specs. No profiles were found.");
     }
 
-    if(profile.toLowerCase() !== "default") {
+    if(!!profile && profile.toLowerCase() !== "default") {
       profileData = ladderProfiles.custom.find(item => item.name === profile);
     } else {
       profileData = ladderProfiles.default;
