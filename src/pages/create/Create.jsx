@@ -1,10 +1,23 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {dataStore, editStore, streamStore, rootStore} from "@/stores";
-import {Select} from "@/components/Inputs.jsx";
 import {useNavigate} from "react-router-dom";
 import {ENCRYPTION_OPTIONS, RETENTION_OPTIONS} from "@/utils/constants";
-import {Accordion, Alert, Box, Button, Flex, Loader, Radio, Stack, Text, TextInput, Title} from "@mantine/core";
+import {
+  Accordion,
+  Alert,
+  Box,
+  Button,
+  Flex,
+  Loader,
+  Radio,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+  Tooltip
+} from "@mantine/core";
 import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
@@ -12,6 +25,7 @@ import styles from "./Create.module.css";
 import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import ElvButton from "@/components/button/ElvButton.jsx";
+import {CircleInfoIcon} from "@/assets/icons/index.js";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -24,25 +38,38 @@ const Permissions = observer(({permission, UpdateCallback}) => {
 
   return (
     <Select
-      label="Permission"
-      labelDescription="Set a permission level."
-      tooltip={
-        Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
-          <Flex
-            key={`permission-info-${short}`}
-            gap="1rem"
-            lh={1.25}
-            pb={5}
-            maw={500}
+      label={
+        <Flex align="center" gap={6}>
+          Permission
+          <Tooltip
+            multiline
+            w={460}
+            label={
+              Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
+                <Flex
+                  key={`permission-info-${short}`}
+                  gap="1rem"
+                  lh={1.25}
+                  pb={5}
+                >
+                  <Flex flex="0 0 25%">{ short }:</Flex>
+                  <Text fz="sm">{ description }</Text>
+                </Flex>
+              )
+            }
           >
-            <Flex flex="0 0 25%">{ short }:</Flex>
-            <Text fz="sm">{ description }</Text>
-          </Flex>
-        )
+            <Flex w={16}>
+              <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+            </Flex>
+          </Tooltip>
+        </Flex>
       }
+      description="Set a permission level."
+      name="permission"
+      placeholder="Select Permission"
       value={permission}
       onChange={UpdateCallback}
-      options={
+      data={
         Object.keys(permissionLevels || {}).map(permissionName => (
           {
             label: permissionLevels[permissionName].short,
@@ -50,39 +77,47 @@ const Permissions = observer(({permission, UpdateCallback}) => {
           }
         ))
       }
+      mb={16}
     />
   );
 });
 
 const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
-  const options = ENCRYPTION_OPTIONS;
-
   return (
     <Select
-      label="Playback Encryption"
-      labelDescription="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-      formName="playbackEncryption"
-      options={options}
-      defaultOption={{
-        value: "",
-        label: "Select Encryption"
-      }}
-      value={drmFormData.encryption}
-      onChange={event => UpdateCallback({event, key: "encryption"})}
-      tooltip={
-        options.map(({label, title, id}) =>
-          <Flex
-            key={`encryption-info-${id}`}
-            gap="1rem"
-            lh={1.25}
-            pb={5}
-            maw={500}
+      label={
+        <Flex align="center" gap={6}>
+          Playback Encryption
+          <Tooltip
+            multiline
+            w={460}
+            label={
+              ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+                <Flex
+                  key={`encryption-info-${id}`}
+                  gap="1rem"
+                  lh={1.25}
+                  pb={5}
+                >
+                  <Flex flex="0 0 35%">{ label }:</Flex>
+                  <Text fz="sm">{ title }</Text>
+                </Flex>
+              )
+            }
           >
-            <Flex flex="0 0 25%">{ label }:</Flex>
-            <Text fz="sm">{ title }</Text>
-          </Flex>
-        )
+            <Flex w={16}>
+              <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+            </Flex>
+          </Tooltip>
+        </Flex>
       }
+      description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+      name="playbackEncryption"
+      data={ENCRYPTION_OPTIONS}
+      placeholder="Selet Encryption"
+      mb={16}
+      value={drmFormData.encryption}
+      onChange={value => UpdateCallback({event: {target: value}, key: "encryption"})}
     />
   );
 });
@@ -117,30 +152,30 @@ const AdvancedSection = observer(({
             <>
               <Select
                 label="Retention"
-                labelDescription="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-                formName="retention"
-                options={RETENTION_OPTIONS}
+                description="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+                name="retention"
+                data={RETENTION_OPTIONS}
+                defaultValue="86400"
                 value={advancedData.retention}
-                onChange={event => AdvancedUpdateCallback({
+                onChange={value => AdvancedUpdateCallback({
                   key: "retention",
-                  event
+                  event: {target: value}
                 })
                 }
+                mb={16}
               />
 
               <Box mb={16}>
                 <Select
                   label="Playout Ladder"
-                  formName="playoutLadder"
-                  options={ladderProfilesData}
-                  defaultOption={{
-                    value: "",
-                    label: "Select Ladder Profile"
-                  }}
-                  style={{width: "100%", marginBottom: "0"}}
-                  helperText={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+                  name="playoutLadder"
+                  data={ladderProfilesData}
+                  placeholder="Selet Ladder Profile"
+                  mb={16}
+                  // style={{width: "100%", marginBottom: "0"}}
+                  description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
                   value={playoutProfile}
-                  onChange={(event) => setPlayoutProfile(event.target.value)}
+                  onChange={(value) => setPlayoutProfile(value)}
                 />
               </Box>
 
@@ -390,24 +425,23 @@ const Create = observer(() => {
           basicFormData.protocol !== "custom" &&
           <Select
             label="URL"
+            name="url"
             required={true}
             disabled={objectData !== null}
             defaultValue={urls[0]}
-            options={urls.map(url => (
+            data={urls.map(url => (
               {
                 label: url,
                 value: url
               }
             ))}
-            defaultOption={{
-              value: "",
-              label: "Select URL"
-            }}
-            onChange={event => UpdateFormData({
+            placeholder="Select URL"
+            onChange={value => UpdateFormData({
               key: "url",
-              value: event.target.value,
+              value,
               formKey: FORM_KEYS.BASIC
             })}
+            mb={16}
           />
         }
         <TextInput
@@ -447,9 +481,10 @@ const Create = observer(() => {
 
         <Select
           label="Access Group"
+          name="accessGroup"
           disabled={objectData !== null}
-          labelDescription="This is the Access Group that will manage your live stream object."
-          options={
+          description="This is the Access Group that will manage your live stream object."
+          data={
             Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
               {
                 label: accessGroupName,
@@ -457,32 +492,31 @@ const Create = observer(() => {
               }
             ))
           }
-          defaultOption={{
-            value: "",
-            label: "Select Access Group"
-          }}
-          onChange={event => UpdateFormData({
+          placeholder="Select Access Group"
+          onChange={value => UpdateFormData({
             key: "accessGroup",
-            value: event.target.value,
+            value,
             formKey: FORM_KEYS.BASIC
           })}
+          mb={16}
         />
 
         <Permissions
           permission={basicFormData.permission}
-          UpdateCallback={(event) => UpdateFormData({
+          UpdateCallback={(value) => UpdateFormData({
             key: "permission",
-            value: event.target.value,
+            value,
             formKey: FORM_KEYS.BASIC
           })}
         />
 
         <Select
           label="Library"
+          name="libraryId"
           disabled={objectData !== null}
-          labelDescription="This is the library where your live stream object will be created."
+          description="Select the library where your live stream object will be created."
           required={true}
-          options={
+          data={
             Object.keys(dataStore.libraries || {}).map(libraryId => (
               {
                 label: dataStore.libraries[libraryId].name || "",
@@ -490,16 +524,14 @@ const Create = observer(() => {
               }
             ))
           }
-          defaultOption={{
-            value: "",
-            label: "Select Library"
-          }}
+          placeholder="Select Library"
           value={basicFormData.libraryId}
-          onChange={event => UpdateFormData({
+          onChange={value => UpdateFormData({
             key: "libraryId",
-            value: event.target.value,
+            value,
             formKey: FORM_KEYS.BASIC
           })}
+          mb={16}
         />
 
         <AdvancedSection

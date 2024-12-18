@@ -54,7 +54,7 @@ class EditStore {
       url,
       encryption,
       playoutProfile,
-      retention,
+      retention: retention ? parseInt(retention) : undefined,
       referenceUrl: protocol === "custom" ? undefined : url
     });
 
