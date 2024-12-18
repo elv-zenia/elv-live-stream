@@ -317,7 +317,7 @@ class DataStore {
         drm: streamMeta?.live_recording_config?.drm_type,
         dvrEnabled: streamMeta?.live_recording?.playout_config?.dvr_enabled,
         dvrStartTime: streamMeta?.live_recording?.playout_config?.dvr_start_time,
-        dvrMaxDuration: dvrMaxDuration ? dvrMaxDuration.toString() : null,
+        dvrMaxDuration: dvrMaxDuration === undefined ? null : dvrMaxDuration.toString(),
         forensicWatermark,
         format: probeType,
         imageWatermark,

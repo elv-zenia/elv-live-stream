@@ -654,7 +654,7 @@ class EditStore {
         });
 
         updateValue.dvrEnabled = dvrEnabled;
-        updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : parseInt(dvrMaxDuration);
+        updateValue.dvrMaxDuration = [undefined, null].includes(dvrMaxDuration) ? undefined : (dvrMaxDuration);
         updateValue.dvrStartTime = dvrStartTime ? dvrStartTime.toISOString() : undefined;
       }
     }
