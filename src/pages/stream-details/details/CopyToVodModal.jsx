@@ -136,7 +136,7 @@ const CopyToVodModal = observer(({
             }
           }}
         >
-          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Copy"}
+          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Copy"}
         </ElvButton>
       </Flex>
     </Modal>

@@ -186,7 +186,7 @@ const GeneralPanel = observer(({slug}) => {
             />
           </Box>
           <ElvButton type="submit" disabled={applyingChanges}>
-            {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Save"}
+            {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Save"}
           </ElvButton>
         </form>
       </Flex>

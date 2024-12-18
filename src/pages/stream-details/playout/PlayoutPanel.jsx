@@ -325,7 +325,7 @@ const PlayoutPanel = observer(({
         variant="filled"
         onClick={HandleSubmit}
       >
-        {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Apply"}
+        {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Apply"}
       </ElvButton>
     </Box>
   );

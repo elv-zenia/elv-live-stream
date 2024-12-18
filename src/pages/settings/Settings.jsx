@@ -182,7 +182,7 @@ const Settings = observer(() => {
         onClick={HandleSave}
         disabled={saving}
       >
-        {saving ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} /> : "Save"}
+        {saving ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Save"}
       </ElvButton>
       <ConfirmModal
         title="Delete Profile"
