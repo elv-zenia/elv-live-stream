@@ -108,7 +108,7 @@ const Streams = observer(() => {
         sortStatus={sortStatus}
         onSortStatusChange={setSortStatus}
         columns={[
-          { accessor: "title", title: "Name", sortable: true, width: 300, render: record => (
+          { accessor: "title", title: "Name", sortable: true, render: record => (
             <Stack gap={0}>
               <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
                 <Text fw={600} lineClamp={1} title={record.display_title || record.slug}>
@@ -126,7 +126,6 @@ const Streams = observer(() => {
             accessor: "status",
             title: "Status",
             sortable: true,
-            width: 150,
             render: record => !record.status ? null :
               <StatusText
                 status={record.status}
@@ -136,7 +135,6 @@ const Streams = observer(() => {
           {
             accessor: "actions",
             title: "",
-            width: 150,
             render: record => {
               return (
                 <Group gap="xxs" justify="right">
