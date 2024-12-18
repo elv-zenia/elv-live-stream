@@ -1,11 +1,11 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Loader, Text, TextInput} from "@mantine/core";
+import {Box, Flex, Loader, Select, Text, TextInput, Tooltip} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Select} from "@/components/Inputs.jsx";
 import {notifications} from "@mantine/notifications";
 import ElvButton from "@/components/button/ElvButton.jsx";
+import {CircleInfoIcon} from "@/assets/icons/index.js";
 
 const GeneralPanel = observer(({slug}) => {
   const [formData, setFormData] = useState({
@@ -138,9 +138,9 @@ const GeneralPanel = observer(({slug}) => {
             />
             <Select
               label="Access Group"
-              labelDescription="This is the Access Group that will manage your live stream object."
-              formName="accessGroup"
-              options={
+              description="This is the Access Group that will manage your live stream object."
+              name="accessGroup"
+              data={
                 Object.keys(dataStore.accessGroups || {}).map(accessGroupName => (
                   {
                     label: accessGroupName,
@@ -149,33 +149,48 @@ const GeneralPanel = observer(({slug}) => {
                 ))
               }
               value={formData.accessGroup}
-              defaultOption={{
-                value: "",
-                label: "Select Access Group"
-              }}
-              onChange={HandleFormChange}
+              placeholder="Select Access Group"
+              onChange={(value) => HandleFormChange({
+                  target: {name: "accessGroup", value}
+                }
+              )}
+              mb={16}
             />
             <Select
-              label="Permission"
-              labelDescription="Set a permission level."
-              formName="permission"
-              tooltip={
-                Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
-                  <Flex
-                    key={`permission-info-${short}`}
-                    gap="1rem"
-                    lh={1.25}
-                    pb={5}
-                    maw={500}
+              label={
+                <Flex align="center" gap={6}>
+                  Permission
+                  <Tooltip
+                    multiline
+                    w={460}
+                    label={
+                      Object.values(rootStore.client.permissionLevels).map(({short, description}) =>
+                        <Flex
+                          key={`permission-info-${short}`}
+                          gap="1rem"
+                          lh={1.25}
+                          pb={5}
+                        >
+                          <Flex flex="0 0 25%">{ short }:</Flex>
+                          <Text fz="sm">{ description }</Text>
+                        </Flex>
+                      )
+                    }
                   >
-                    <Flex flex="0 0 25%">{ short }:</Flex>
-                    <Text fz="sm">{ description }</Text>
-                  </Flex>
-                )
+                    <Flex w={16}>
+                      <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+                    </Flex>
+                  </Tooltip>
+                </Flex>
               }
+              description="Set a permission level."
+              name="permission"
+              placeholder="Select Permission"
               value={formData.permission}
-              onChange={HandleFormChange}
-              options={
+              onChange={(value) => HandleFormChange({
+                target: {name: "permission", value}}
+              )}
+              data={
                 Object.keys(rootStore.client.permissionLevels || {}).map(permissionName => (
                   {
                     label: rootStore.client.permissionLevels[permissionName].short,
@@ -183,6 +198,7 @@ const GeneralPanel = observer(({slug}) => {
                   }
                 ))
               }
+              mb={16}
             />
           </Box>
           <ElvButton type="submit" disabled={applyingChanges}>
