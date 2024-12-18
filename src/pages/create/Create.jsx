@@ -155,8 +155,8 @@ const AdvancedSection = observer(({
                 description="Select a retention period for how long stream parts will exist until they are removed from the fabric."
                 name="retention"
                 data={RETENTION_OPTIONS}
-                defaultValue="86400"
                 value={advancedData.retention}
+                placeholder="Select Retention"
                 onChange={value => AdvancedUpdateCallback({
                   key: "retention",
                   event: {target: value}
@@ -255,13 +255,13 @@ const Create = observer(() => {
   });
 
   const [advancedData, setAdvancedData] = useState({
-    retention: 86400
+    retention: "86400"
   });
 
   const [useAdvancedSettings, setUseAdvancedSettings] = useState();
 
   const [drmFormData, setDrmFormData] = useState({
-    encryption: ""
+    encryption: "clear"
   });
 
   const [audioFormData, setAudioFormData] = useState(null);
