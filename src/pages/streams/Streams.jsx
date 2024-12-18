@@ -25,7 +25,7 @@ import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 
 const Streams = observer(() => {
-  const [sortStatus, setSortStatus] = useState({columnAccessor: "display_title", direction: "asc"});
+  const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
 
@@ -111,8 +111,8 @@ const Streams = observer(() => {
           { accessor: "title", title: "Name", sortable: true, render: record => (
             <Stack gap={0}>
               <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
-                <Text fw={600} lineClamp={1} title={record.display_title || record.slug}>
-                  {record.display_title || record.slug}
+                <Text fw={600} lineClamp={1} title={record.title || record.slug}>
+                  {record.title || record.slug}
                 </Text>
               </Link>
               <Text c="dimmed" fz="xs">{record.objectId}</Text>
