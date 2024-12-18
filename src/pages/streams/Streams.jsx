@@ -11,7 +11,7 @@ import {
   IconCircleX
 } from "@tabler/icons-react";
 
-import {rootStore, dataStore, editStore, streamStore} from "@/stores";
+import {dataStore, editStore, streamStore} from "@/stores";
 import {SanitizeUrl, SortTable, VideoBitrateReadable, StreamIsActive} from "@/utils/helpers";
 import {STATUS_MAP} from "@/utils/constants";
 import {CODEC_TEXT, FORMAT_TEXT} from "@/utils/constants";
@@ -87,7 +87,7 @@ const Streams = observer(() => {
         highlightOnHover
         idAccessor="objectId"
         minHeight={!records || records.length === 0 ? 150 : 75}
-        fetching={!rootStore.loaded && dataStore.tenantId && !streamStore.streams}
+        fetching={!dataStore.loaded}
         records={records}
         emptyState={
           // Mantine bug where empty state link still present underneath table rows

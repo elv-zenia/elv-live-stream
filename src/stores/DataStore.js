@@ -10,6 +10,7 @@ configure({
 // Store for loading all the initial data
 class DataStore {
   rootStore;
+  loaded = false;
   tenantId;
   libraries;
   accessGroups;
@@ -33,18 +34,23 @@ class DataStore {
   }
 
   Initialize = flow(function * (reload=false) {
-    const tenantContractId = yield this.LoadTenantInfo();
-    if(!this.siteId) {
-      this.siteId = yield this.LoadTenantData({tenantContractId});
-    }
+    try {
+      const tenantContractId = yield this.LoadTenantInfo();
+      if(!this.siteId) {
+        this.siteId = yield this.LoadTenantData({tenantContractId});
+      }
 
-    if(!this.siteLibraryId) {
-      this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
-    }
+      if(!this.siteLibraryId) {
+        this.siteLibraryId = yield this.client.ContentObjectLibraryId({objectId: this.siteId});
+      }
 
-    yield this.LoadLadderProfiles();
-    yield this.LoadStreams();
-    yield streamStore.AllStreamsStatus(reload);
+      yield this.LoadLadderProfiles();
+      yield this.LoadStreams();
+      yield streamStore.AllStreamsStatus(reload);
+      this.loaded = true;
+    } catch(error) {
+      this.loaded = true;
+    }
   });
 
   LoadTenantInfo = flow(function * () {
