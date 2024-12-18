@@ -85,7 +85,7 @@ const RecordingPanel = observer(({
 
   return (
     <Box w="700px" mb={24}>
-      <form onSubmit={HandleSubmit} className="form">
+      <form onSubmit={HandleSubmit}>
         <DisabledTooltipWrapper
           disabled={![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           tooltipLabel="Retention Period configuration is disabled when the stream is running"

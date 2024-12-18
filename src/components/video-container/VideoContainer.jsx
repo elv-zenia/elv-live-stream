@@ -48,7 +48,7 @@ export const VideoContainer = observer(({slug, index, showPreview, allowClose=tr
   }, [frameKey, frameSegmentUrl]);
 
   return (
-    <div className={styles.videoWrapper}>
+    <Box className={styles.videoWrapper}>
       <AspectRatio ratio={16 / 9} mx="auto" pos="relative" h="100%">
         {
           !play ?
@@ -93,7 +93,7 @@ export const VideoContainer = observer(({slug, index, showPreview, allowClose=tr
             </>
         }
       </AspectRatio>
-    </div>
+    </Box>
   );
 });
 

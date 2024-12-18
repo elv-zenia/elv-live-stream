@@ -144,7 +144,7 @@ const AdvancedSection = observer(({
     <>
       <Accordion
         value={useAdvancedSettings}
-        onValueChange={AdvancedSettingsCallback}
+        onChange={AdvancedSettingsCallback}
       >
         <Accordion.Item value="advanced-item">
           <Accordion.Control>Advanced Settings</Accordion.Control>
@@ -382,7 +382,7 @@ const Create = observer(() => {
       width="700px"
       className={(dataStore.tenantId && !rootStore.errorMessage) ? "" : styles.disabledContainer}
     >
-      <form className="form" onSubmit={HandleSubmit}>
+      <form onSubmit={HandleSubmit}>
         <Radio.Group
           name="protocol"
           label="Streaming Protocol"

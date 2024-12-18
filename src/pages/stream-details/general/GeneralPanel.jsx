@@ -112,7 +112,7 @@ const GeneralPanel = observer(({slug}) => {
   return (
     <>
       <Flex direction="column" style={{flexGrow: "1"}}>
-        <form className="form" onSubmit={HandleSubmit}>
+        <form onSubmit={HandleSubmit}>
           <Box mb="24px" w="700px">
             <TextInput
               label="Name"
