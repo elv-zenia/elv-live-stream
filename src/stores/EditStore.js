@@ -27,15 +27,18 @@ class EditStore {
   }
 
   InitLiveStreamObject = flow(function * ({
-    basicFormData,
-    advancedData,
-    drmFormData,
-    playoutProfile
+    accessGroup,
+    description,
+    displayTitle,
+    encryption,
+    libraryId,
+    name,
+    permission,
+    playoutProfile,
+    protocol,
+    retention,
+    url
   }) {
-    const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
-    const {retention} = advancedData;
-    const {encryption} = drmFormData;
-
     const response = yield this.CreateContentObject({
       libraryId,
       permission
@@ -54,7 +57,7 @@ class EditStore {
       url,
       encryption,
       playoutProfile,
-      retention: retention ? parseInt(retention) : undefined,
+      retention,
       referenceUrl: protocol === "custom" ? undefined : url
     });
 
@@ -112,17 +115,19 @@ class EditStore {
   });
 
   UpdateLiveStreamObject = flow(function * ({
-    basicFormData,
-    advancedData,
-    drmFormData,
     audioFormData,
     objectId,
-    slug
+    slug,
+    accessGroup,
+    description,
+    displayTitle,
+    encryption,
+    libraryId,
+    name,
+    protocol,
+    retention,
+    url
   }) {
-    const {libraryId, url, name, description, displayTitle, accessGroup, protocol} = basicFormData;
-    const {retention} = advancedData;
-    const {encryption} = drmFormData;
-
     if(accessGroup) {
       this.AddAccessGroupPermission({
         objectId,

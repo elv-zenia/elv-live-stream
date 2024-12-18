@@ -332,17 +332,23 @@ const Create = observer(() => {
     setIsCreating(true);
 
     try {
-      const formData = {
-        basicFormData,
-        advancedData,
-        drmFormData,
-        playoutProfile
-      };
+      const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
+      const {retention} = advancedData;
+      const {encryption} = drmFormData;
       let objectId;
 
       if(objectData === null) {
         const response = await editStore.InitLiveStreamObject({
-          ...formData
+          accessGroup,
+          description,
+          displayTitle,
+          encryption,
+          libraryId,
+          name,
+          permission,
+          protocol,
+          retention: retention ? parseInt(retention) : null,
+          url
         });
 
         objectId = response.objectId;
@@ -352,7 +358,15 @@ const Create = observer(() => {
           objectId,
           slug: objectData.slug,
           audioFormData,
-          ...formData
+          accessGroup,
+          description,
+          displayTitle,
+          encryption,
+          libraryId,
+          name,
+          protocol,
+          retention: retention ? parseInt(retention) : null,
+          url
         });
       }
 
