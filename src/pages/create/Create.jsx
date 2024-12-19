@@ -82,19 +82,17 @@ const Permissions = observer(({permission, UpdateCallback}) => {
   );
 });
 
-const AdvancedSection = observer(({
+const AdvancedSettingsPanel = observer(({
   advancedData,
   AdvancedUpdateCallback,
   drmFormData,
   DrmUpdateCallback,
-  AdvancedSettingsCallback,
   objectProbed=false,
   audioTracks,
   audioFormData,
   setAudioFormData,
   setShowProbeConfirmation,
   objectData,
-  useAdvancedSettings,
   DisableProbeButton,
   ladderProfilesData,
   playoutProfile,
@@ -102,122 +100,110 @@ const AdvancedSection = observer(({
 }) => {
   return (
     <>
-      <Accordion
-        value={useAdvancedSettings}
-        onChange={AdvancedSettingsCallback}
-      >
-        <Accordion.Item value="advanced-item">
-          <Accordion.Control>Advanced Settings</Accordion.Control>
-          <Accordion.Panel>
-            <>
-              <Select
-                label="Retention"
-                description="Select a retention period for how long stream parts will exist until they are removed from the fabric."
-                name="retention"
-                data={RETENTION_OPTIONS}
-                value={advancedData.retention}
-                placeholder="Select Retention"
-                onChange={value => AdvancedUpdateCallback({
-                  key: "retention",
-                  value
-                })
-                }
-                mb={16}
-              />
+      <Select
+        label="Retention"
+        description="Select a retention period for how long stream parts will exist until they are removed from the fabric."
+        name="retention"
+        data={RETENTION_OPTIONS}
+        value={advancedData.retention}
+        placeholder="Select Retention"
+        onChange={value => AdvancedUpdateCallback({
+          key: "retention",
+          value
+        })
+        }
+        mb={16}
+      />
 
-              <Box mb={16}>
-                <Select
-                  label="Playout Ladder"
-                  name="playoutLadder"
-                  data={ladderProfilesData}
-                  placeholder="Select Ladder Profile"
-                  mb={16}
-                  // style={{width: "100%", marginBottom: "0"}}
-                  description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
-                  value={playoutProfile}
-                  onChange={(value) => setPlayoutProfile(value)}
-                />
-              </Box>
+      <Box mb={16}>
+        <Select
+          label="Playout Ladder"
+          name="playoutLadder"
+          data={ladderProfilesData}
+          placeholder="Select Ladder Profile"
+          mb={16}
+          // style={{width: "100%", marginBottom: "0"}}
+          description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+          value={playoutProfile}
+          onChange={(value) => setPlayoutProfile(value)}
+        />
+      </Box>
 
-              <Select
-                label={
-                  <Flex align="center" gap={6}>
-                    Playback Encryption
-                    <Tooltip
-                      multiline
-                      w={460}
-                      label={
-                        ENCRYPTION_OPTIONS.map(({label, title, id}) =>
-                          <Flex
-                            key={`encryption-info-${id}`}
-                            gap="1rem"
-                            lh={1.25}
-                            pb={5}
-                          >
-                            <Flex flex="0 0 35%">{ label }:</Flex>
-                            <Text fz="sm">{ title }</Text>
-                          </Flex>
-                        )
-                      }
-                    >
-                      <Flex w={16}>
-                        <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
-                      </Flex>
-                    </Tooltip>
+      <Select
+        label={
+          <Flex align="center" gap={6}>
+            Playback Encryption
+            <Tooltip
+              multiline
+              w={460}
+              label={
+                ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+                  <Flex
+                    key={`encryption-info-${id}`}
+                    gap="1rem"
+                    lh={1.25}
+                    pb={5}
+                  >
+                    <Flex flex="0 0 35%">{ label }:</Flex>
+                    <Text fz="sm">{ title }</Text>
                   </Flex>
-                }
-                description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-                name="playbackEncryption"
-                data={ENCRYPTION_OPTIONS}
-                placeholder="Select Encryption"
-                mb={16}
-                value={drmFormData.encryption}
-                onChange={value => DrmUpdateCallback({
-                  value,
-                  key: "encryption"
-                })}
-              />
-
-              {
-                !objectProbed &&
-                <Alert
-                  variant="light"
-                  color="blue"
-                  mt={24}
-                  mb={24}
-                  icon={<IconAlertCircle/>}
-                  classNames={{
-                    wrapper: styles.alertRoot
-                  }}
-                >
-                  <Flex justify="space-between" align="center">
-                    <Text>
-                      To apply audio stream settings, object must be probed first.
-                    </Text>
-                    <Button
-                      variant="subtle"
-                      onClick={() => setShowProbeConfirmation(true)}
-                      disabled={
-                        objectData !== null ||
-                        DisableProbeButton()
-                      }
-                    >
-                      Probe
-                    </Button>
-                  </Flex>
-                </Alert>
+                )
               }
-              <Title order={3} c="elv-gray.8">Audio</Title>
-              <AudioTracksTable
-                records={audioTracks}
-                audioFormData={audioFormData}
-                setAudioFormData={setAudioFormData}
-                disabled={!objectProbed}
-              />
-            </>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
+            >
+              <Flex w={16}>
+                <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+              </Flex>
+            </Tooltip>
+          </Flex>
+        }
+        description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+        name="playbackEncryption"
+        data={ENCRYPTION_OPTIONS}
+        placeholder="Select Encryption"
+        mb={16}
+        value={drmFormData.encryption}
+        onChange={value => DrmUpdateCallback({
+          value,
+          key: "encryption"
+        })}
+      />
+
+      {
+        !objectProbed &&
+        <Alert
+          variant="light"
+          color="blue"
+          mt={24}
+          mb={24}
+          icon={<IconAlertCircle/>}
+          classNames={{
+            wrapper: styles.alertRoot
+          }}
+        >
+          <Flex justify="space-between" align="center">
+            <Text>
+              To apply audio stream settings, object must be probed first.
+            </Text>
+            <Button
+              variant="subtle"
+              onClick={() => setShowProbeConfirmation(true)}
+              disabled={
+                objectData !== null ||
+                DisableProbeButton()
+              }
+            >
+              Probe
+            </Button>
+          </Flex>
+        </Alert>
+      }
+      <Title order={3} c="elv-gray.8">Audio</Title>
+      <AudioTracksTable
+        records={audioTracks}
+        audioFormData={audioFormData}
+        setAudioFormData={setAudioFormData}
+        disabled={!objectProbed}
+      />
     </>
   );
 });
@@ -547,38 +533,48 @@ const Create = observer(() => {
           mb={16}
         />
 
-        <AdvancedSection
-          advancedData={advancedData}
-          drmFormData={drmFormData}
-          useAdvancedSettings={useAdvancedSettings}
-          DrmUpdateCallback={({value, key}) => UpdateFormData({
-            key,
-            value,
-            formKey: FORM_KEYS.DRM
-          })}
-          AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
-            key,
-            value: value ? value : event?.target?.value,
-            formKey: FORM_KEYS.ADVANCED
-          })}
-          AdvancedSettingsCallback={setUseAdvancedSettings}
-          objectProbed={objectData !== null}
-          audioTracks={audioTracks}
-          audioFormData={audioFormData}
-          setAudioFormData={setAudioFormData}
-          setShowProbeConfirmation={setShowProbeConfirmation}
-          objectData={objectData}
-          ladderProfilesData={ladderProfilesData}
-          playoutProfile={playoutProfile}
-          setPlayoutProfile={setPlayoutProfile}
-          DisableProbeButton={() => {
-            return !(
-              basicFormData.url &&
-              basicFormData.name &&
-              basicFormData.libraryId
-            );
-          }}
-        />
+        <Accordion
+          value={useAdvancedSettings}
+          onChange={setUseAdvancedSettings}
+        >
+          <Accordion.Item value="advanced-item">
+            <Accordion.Control>Advanced Settings</Accordion.Control>
+            <Accordion.Panel>
+            <AdvancedSettingsPanel
+              advancedData={advancedData}
+              drmFormData={drmFormData}
+              useAdvancedSettings={useAdvancedSettings}
+              DrmUpdateCallback={({value, key}) => UpdateFormData({
+                key,
+                value,
+                formKey: FORM_KEYS.DRM
+              })}
+              AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
+                key,
+                value: value ? value : event?.target?.value,
+                formKey: FORM_KEYS.ADVANCED
+              })}
+              AdvancedSettingsCallback={setUseAdvancedSettings}
+              objectProbed={objectData !== null}
+              audioTracks={audioTracks}
+              audioFormData={audioFormData}
+              setAudioFormData={setAudioFormData}
+              setShowProbeConfirmation={setShowProbeConfirmation}
+              objectData={objectData}
+              ladderProfilesData={ladderProfilesData}
+              playoutProfile={playoutProfile}
+              setPlayoutProfile={setPlayoutProfile}
+              DisableProbeButton={() => {
+                return !(
+                  basicFormData.url &&
+                  basicFormData.name &&
+                  basicFormData.libraryId
+                );
+              }}
+            />
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
 
         <div style={{maxWidth: "200px"}}>
           {
