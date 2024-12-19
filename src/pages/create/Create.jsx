@@ -22,10 +22,10 @@ import {IconAlertCircle} from "@tabler/icons-react";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {notifications} from "@mantine/notifications";
 import styles from "./Create.module.css";
-import ProbeConfirmation from "@/pages/ProbeConfirmation";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import ElvButton from "@/components/button/ElvButton.jsx";
 import {CircleInfoIcon} from "@/assets/icons/index.js";
+import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 
 const FORM_KEYS = {
   BASIC: "BASIC",
@@ -311,6 +311,34 @@ const Create = observer(() => {
     callback(newData);
   };
 
+  const HandleProbeConfirm = async() => {
+    const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
+    const {retention} = advancedData;
+    const {encryption} = drmFormData;
+
+    const {objectId, slug} = await editStore.InitLiveStreamObject({
+      accessGroup,
+      description,
+      displayTitle,
+      encryption,
+      libraryId,
+      name,
+      permission,
+      protocol,
+      retention: retention ? parseInt(retention) : null,
+      url
+    });
+
+    await streamStore.ConfigureStream({objectId, slug});
+
+    setObjectData({objectId, slug});
+
+    notifications.show({
+      title: "Probed stream",
+      message: "Stream object was successfully created and probed"
+    });
+  };
+
   const HandleSubmit = async (event) => {
     event.preventDefault();
     setIsCreating(true);
@@ -593,36 +621,22 @@ const Create = observer(() => {
           </ElvButton>
         </Box>
       </form>
-      <ProbeConfirmation
+
+      <ConfirmModal
         show={showProbeConfirmation}
-        url={basicFormData.url}
         CloseCallback={() => setShowProbeConfirmation(false)}
+        title="Create and Probe Stream"
+        message="Are you sure you want to probe the stream? This will also create the content object."
+        loadingText={`Please send your stream to ${basicFormData.url || "the URL you specified"}.`}
         ConfirmCallback={async () => {
-          const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
-          const {retention} = advancedData;
-          const {encryption} = drmFormData;
-
-          const {objectId, slug} = await editStore.InitLiveStreamObject({
-            accessGroup,
-            description,
-            displayTitle,
-            encryption,
-            libraryId,
-            name,
-            permission,
-            protocol,
-            retention: retention ? parseInt(retention) : null,
-            url
-          });
-
-          await streamStore.ConfigureStream({objectId, slug});
-
-          setObjectData({objectId, slug});
-
-          notifications.show({
-            title: "Probed stream",
-            message: "Stream object was successfully created and probed"
-          });
+          try {
+            await HandleProbeConfirm();
+            setShowProbeConfirmation(false);
+          } catch(error) {
+            // eslint-disable-next-line no-console
+            console.error("Unable to probe stream", error);
+            throw Error(error);
+          }
         }}
       />
     </PageContainer>
