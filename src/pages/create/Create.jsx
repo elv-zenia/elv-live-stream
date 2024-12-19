@@ -305,6 +305,13 @@ const Create = observer(() => {
     }
   }, [objectData, streamStore.streams]);
 
+  useEffect(() => {
+    setBasicFormData({
+      ...basicFormData,
+      url: ""
+    });
+  }, [basicFormData.protocol]);
+
   const UpdateFormData = ({formKey, key, value}) => {
     const FORM_MAP = {
       "BASIC": {
@@ -390,11 +397,11 @@ const Create = observer(() => {
           mb={16}
           value={basicFormData.protocol}
           onChange={(value) => {
-            UpdateFormData({
-              key: "protocol",
-              value,
-              formKey: FORM_KEYS.BASIC
-            });
+            const formData = {...basicFormData};
+
+            formData.url = "";
+            formData.protocol = value;
+            setBasicFormData(formData);
           }}
         >
           <Stack mt="xs">
@@ -438,11 +445,11 @@ const Create = observer(() => {
         {
           basicFormData.protocol !== "custom" &&
           <Select
+            key={basicFormData.protocol}
             label="URL"
             name="url"
             required={true}
             disabled={objectData !== null}
-            defaultValue={urls[0]}
             data={urls.map(url => (
               {
                 label: url,
@@ -450,6 +457,7 @@ const Create = observer(() => {
               }
             ))}
             placeholder="Select URL"
+            value={basicFormData.url}
             onChange={value => UpdateFormData({
               key: "url",
               value,
