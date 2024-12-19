@@ -165,7 +165,7 @@ const StreamDetailsPage = observer(() => {
   return (
     <PageContainer
       key={`stream-details-${pageVersion}`}
-      title={`Edit ${streamStore.streams?.[streamSlug]?.display_title || streamStore.streams?.[streamSlug]?.title || stream.objectId}`}
+      title={`Edit ${streamStore.streams?.[streamSlug]?.title || stream.objectId}`}
       subtitle={stream.objectId}
       titleRightSection={
         <StatusText

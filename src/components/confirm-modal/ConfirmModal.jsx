@@ -29,6 +29,7 @@ const ConfirmModal = observer(({
       radius="6px"
       size="lg"
       centered
+      closeOnClickOutside={false}
     >
       <Text>{message}</Text>
       {

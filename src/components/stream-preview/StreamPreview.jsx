@@ -45,7 +45,7 @@ const StreamPreview = observer(() => {
 
   return (
     <PageContainer
-      title={`Preview ${streamObject.display_title || streamObject.title || streamObject.objectId}`}
+      title={`Preview ${streamObject.title || streamObject.objectId}`}
       actions={[
         {
           label: "All Streams",
