@@ -439,6 +439,7 @@ const Create = observer(() => {
               value: event.target.value,
               formKey: FORM_KEYS.BASIC
             })}
+            mb={16}
           />
         }
         {
