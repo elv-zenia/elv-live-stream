@@ -82,46 +82,6 @@ const Permissions = observer(({permission, UpdateCallback}) => {
   );
 });
 
-const PlaybackEncryption = observer(({drmFormData, UpdateCallback}) => {
-  return (
-    <Select
-      label={
-        <Flex align="center" gap={6}>
-          Playback Encryption
-          <Tooltip
-            multiline
-            w={460}
-            label={
-              ENCRYPTION_OPTIONS.map(({label, title, id}) =>
-                <Flex
-                  key={`encryption-info-${id}`}
-                  gap="1rem"
-                  lh={1.25}
-                  pb={5}
-                >
-                  <Flex flex="0 0 35%">{ label }:</Flex>
-                  <Text fz="sm">{ title }</Text>
-                </Flex>
-              )
-            }
-          >
-            <Flex w={16}>
-              <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
-            </Flex>
-          </Tooltip>
-        </Flex>
-      }
-      description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
-      name="playbackEncryption"
-      data={ENCRYPTION_OPTIONS}
-      placeholder="Select Encryption"
-      mb={16}
-      value={drmFormData.encryption}
-      onChange={value => UpdateCallback({event: {target: value}, key: "encryption"})}
-    />
-  );
-});
-
 const AdvancedSection = observer(({
   advancedData,
   AdvancedUpdateCallback,
@@ -159,7 +119,7 @@ const AdvancedSection = observer(({
                 placeholder="Select Retention"
                 onChange={value => AdvancedUpdateCallback({
                   key: "retention",
-                  event: {target: value}
+                  value
                 })
                 }
                 mb={16}
@@ -179,11 +139,42 @@ const AdvancedSection = observer(({
                 />
               </Box>
 
-              <PlaybackEncryption
-                drmFormData={drmFormData}
-                UpdateCallback={({event, key}) => DrmUpdateCallback({
-                  key,
-                  event
+              <Select
+                label={
+                  <Flex align="center" gap={6}>
+                    Playback Encryption
+                    <Tooltip
+                      multiline
+                      w={460}
+                      label={
+                        ENCRYPTION_OPTIONS.map(({label, title, id}) =>
+                          <Flex
+                            key={`encryption-info-${id}`}
+                            gap="1rem"
+                            lh={1.25}
+                            pb={5}
+                          >
+                            <Flex flex="0 0 35%">{ label }:</Flex>
+                            <Text fz="sm">{ title }</Text>
+                          </Flex>
+                        )
+                      }
+                    >
+                      <Flex w={16}>
+                        <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+                      </Flex>
+                    </Tooltip>
+                  </Flex>
+                }
+                description="Select a playback encryption option. Enable Clear or Digital Rights Management (DRM) copy protection during playback."
+                name="playbackEncryption"
+                data={ENCRYPTION_OPTIONS}
+                placeholder="Select Encryption"
+                mb={16}
+                value={drmFormData.encryption}
+                onChange={value => DrmUpdateCallback({
+                  value,
+                  key: "encryption"
                 })}
               />
 
@@ -448,7 +439,7 @@ const Create = observer(() => {
             key={basicFormData.protocol}
             label="URL"
             name="url"
-            required={true}
+            required={basicFormData.protocol !== "custom"}
             disabled={objectData !== null}
             data={urls.map(url => (
               {
@@ -560,9 +551,9 @@ const Create = observer(() => {
           advancedData={advancedData}
           drmFormData={drmFormData}
           useAdvancedSettings={useAdvancedSettings}
-          DrmUpdateCallback={({event, key}) => UpdateFormData({
+          DrmUpdateCallback={({value, key}) => UpdateFormData({
             key,
-            value: event.target.value,
+            value,
             formKey: FORM_KEYS.DRM
           })}
           AdvancedUpdateCallback={({event, key, value}) => UpdateFormData({
