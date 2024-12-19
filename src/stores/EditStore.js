@@ -124,6 +124,7 @@ class EditStore {
     encryption,
     libraryId,
     name,
+    playoutProfile,
     protocol,
     retention,
     url
@@ -145,6 +146,7 @@ class EditStore {
     const config = ParseLiveConfigData({
       url,
       encryption,
+      playoutProfile,
       retention,
       referenceUrl: protocol === "custom" ? undefined : url,
       audioFormData
@@ -159,9 +161,10 @@ class EditStore {
       config
     });
 
-    yield streamStore.ConfigureStream({
+    yield streamStore.UpdateStreamAudioSettings({
       objectId,
-      slug
+      slug,
+      audioData: audioFormData
     });
   });
 

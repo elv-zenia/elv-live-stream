@@ -72,7 +72,7 @@ const Permissions = observer(({form}) => {
         ))
       }
       mb={16}
-      {...form.getInputProps("permissions")}
+      {...form.getInputProps("permission")}
     />
   );
 });
@@ -322,6 +322,7 @@ const Create = observer(() => {
       const {accessGroup, description, displayTitle, encryption, libraryId, name, permission, playoutProfile, protocol, retention} = form.getValues();
 
       if(objectData === null) {
+        // Stream hasn't been created
         const response = await editStore.InitLiveStreamObject({
           accessGroup,
           description,
@@ -338,6 +339,7 @@ const Create = observer(() => {
 
         objectId = response.objectId;
       } else {
+        // Stream has already been created and probed
         objectId = objectData.objectId;
         await editStore.UpdateLiveStreamObject({
           objectId,
@@ -349,6 +351,7 @@ const Create = observer(() => {
           encryption,
           libraryId,
           name,
+          playoutProfile,
           protocol,
           retention: retention ? parseInt(retention) : null,
           url
