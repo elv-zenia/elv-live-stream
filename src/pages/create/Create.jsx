@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   Flex,
-  Loader,
   Radio,
   Select,
   Stack,
@@ -87,7 +86,8 @@ const AdvancedSettingsPanel = observer(({
   objectData,
   DisableProbeButton,
   ladderProfilesData,
-  form
+  form,
+  loading
 }) => {
   return (
     <>
@@ -106,11 +106,11 @@ const AdvancedSettingsPanel = observer(({
           label="Playout Ladder"
           name="playoutProfile"
           data={ladderProfilesData}
-          placeholder="Select Ladder Profile"
+          placeholder={loading ? "Loading Options..." : "Select Ladder Profile"}
           mb={16}
           description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
           {...form.getInputProps("playoutProfile")}
-          // value={form.values.playoutProfile}
+          value={form.values.playoutProfile}
         />
       </Box>
 
@@ -129,14 +129,14 @@ const AdvancedSettingsPanel = observer(({
                     lh={1.25}
                     pb={5}
                   >
-                    <Flex flex="0 0 35%">{ label }:</Flex>
-                    <Text fz="sm">{ title }</Text>
+                    <Flex flex="0 0 35%">{label}:</Flex>
+                    <Text fz="sm">{title}</Text>
                   </Flex>
                 )
               }
             >
               <Flex w={16}>
-                <CircleInfoIcon color="var(--mantine-color-elv-gray-8)" />
+                <CircleInfoIcon color="var(--mantine-color-elv-gray-8)"/>
               </Flex>
             </Tooltip>
           </Flex>
@@ -522,6 +522,7 @@ const Create = observer(() => {
               setShowProbeConfirmation={setShowProbeConfirmation}
               objectData={objectData}
               ladderProfilesData={ladderProfilesData}
+              loading={loading}
               DisableProbeButton={() => {
                 const {libraryId, name} = form.getValues();
 
@@ -535,17 +536,6 @@ const Create = observer(() => {
             </Accordion.Panel>
           </Accordion.Item>
         </Accordion>
-
-        <div style={{maxWidth: "200px"}}>
-          {
-            loading ?
-              (
-                <Flex mt={8}>
-                  <Loader size="md" />
-                </Flex>
-              ) : null
-          }
-        </div>
 
         <Box mt="2rem" mb="2.5rem">
           <ElvButton disabled={isCreating} type="submit">
