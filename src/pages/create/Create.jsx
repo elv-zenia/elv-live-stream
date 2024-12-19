@@ -610,10 +610,21 @@ const Create = observer(() => {
         url={basicFormData.url}
         CloseCallback={() => setShowProbeConfirmation(false)}
         ConfirmCallback={async () => {
+          const {libraryId, url, name, description, displayTitle, accessGroup, permission, protocol} = basicFormData;
+          const {retention} = advancedData;
+          const {encryption} = drmFormData;
+
           const {objectId, slug} = await editStore.InitLiveStreamObject({
-            basicFormData,
-            advancedData,
-            drmFormData
+            accessGroup,
+            description,
+            displayTitle,
+            encryption,
+            libraryId,
+            name,
+            permission,
+            protocol,
+            retention: retention ? parseInt(retention) : null,
+            url
           });
 
           await streamStore.ConfigureStream({objectId, slug});
