@@ -53,7 +53,7 @@ const Video = observer(({
                 autoplay: EluvioPlayerParameters.autoplay.OFF,
                 controls: EluvioPlayerParameters.controls.AUTO_HIDE,
                 loop: EluvioPlayerParameters.loop.OFF,
-                playerProfile: EluvioPlayerParameters.playerProfile.LOW_LATENCY,
+                // playerProfile: EluvioPlayerParameters.playerProfile.LOW_LATENCY,
                 ...playerOptions
               }
             }

@@ -38,7 +38,7 @@ const StreamPreview = observer(() => {
     libraryId,
     objectId: id,
     action: "display",
-    playerProfile: "live"
+    // playerProfile: "live"
   };
   // eslint-disable-next-line no-undef
   const appUrl = EluvioConfiguration.displayAppUrl;
