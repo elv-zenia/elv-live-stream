@@ -103,12 +103,13 @@ const AdvancedSettingsPanel = observer(({
 
       <Box mb={16}>
         <Select
+          key={ladderProfilesData}
           label="Playout Ladder"
           name="playoutProfile"
           data={ladderProfilesData}
           placeholder={loading ? "Loading Options..." : "Select Ladder Profile"}
           mb={16}
-          description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
+          description={(ladderProfilesData.length > 0 && !loading) ? null : "No profiles are configured. Create a profile in Settings."}
           {...form.getInputProps("playoutProfile")}
         />
       </Box>
