@@ -110,7 +110,6 @@ const AdvancedSettingsPanel = observer(({
           mb={16}
           description={ladderProfilesData.length > 0 ? null : "No profiles are configured. Create a profile in Settings."}
           {...form.getInputProps("playoutProfile")}
-          value={form.values.playoutProfile}
         />
       </Box>
 
