@@ -126,6 +126,13 @@ const AppFrame = observer(({
 }) => {
   const appRef = useRef();
 
+  useEffect(() => {
+    return () => {
+      // App might have set custom node(s), ensure state is reset when unmounting
+      rootStore.client.ResetRegion();
+    }
+  }, []);
+
   const AppUrl = () => {
     // Inject any query parameters into the given URL
     if(queryParams) {
