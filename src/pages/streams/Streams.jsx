@@ -36,7 +36,8 @@ const Streams = observer(() => {
       title: "",
       description: "",
       objectId: "",
-      ConfirmCallback: null
+      ConfirmCallback: null,
+      danger: false
     });
   };
 
@@ -47,7 +48,8 @@ const Streams = observer(() => {
     loadingText: "",
     objectId: "",
     ConfirmCallback: null,
-    CloseCallback: null
+    CloseCallback: null,
+    danger: false
   });
 
   const streamsCopy = Object.values(streamStore.streams || {});
@@ -219,7 +221,8 @@ const Streams = observer(() => {
                                 objectId: record.objectId
                               });
                             },
-                            CloseCallback: () => ResetModal()
+                            CloseCallback: () => ResetModal(),
+                            danger: true
                           });
                         }}
                       >
@@ -292,7 +295,8 @@ const Streams = observer(() => {
                         ConfirmCallback: async () => {
                           await editStore.DeleteStream({objectId: record.objectId});
                         },
-                        CloseCallback: () => ResetModal()
+                        CloseCallback: () => ResetModal(),
+                        danger: true
                       });
                     }}
                   >
@@ -311,6 +315,7 @@ const Streams = observer(() => {
         show={modalData.showModal}
         CloseCallback={modalData.CloseCallback}
         ConfirmCallback={modalData.ConfirmCallback}
+        danger={modalData.danger}
       />
     </PageContainer>
   );

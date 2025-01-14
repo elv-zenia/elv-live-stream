@@ -121,6 +121,7 @@ const RecordingCopiesTable = observer(({liveRecordingCopies, DeleteCallback}) =>
         title="Delete Live Recording Copy"
         confirmText="Delete"
         message="Are you sure you want to delete the live recording copy? This action cannot be undone."
+        danger
         ConfirmCallback={async () => {
           await streamStore.DeleteLiveRecordingCopy({streamId: params.id, recordingCopyId: deleteId});
 

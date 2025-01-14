@@ -91,6 +91,7 @@ const StreamDetailsPage = observer(() => {
           title: "Delete Stream",
           message: "Are you sure you want to delete the stream? This action cannot be undone.",
           confirmText: "Delete",
+          danger: true,
           ConfirmCallback: async () => {
             try {
               await editStore.DeleteStream({objectId: stream.objectId});
@@ -226,6 +227,7 @@ const StreamDetailsPage = observer(() => {
         show={showModal}
         CloseCallback={close}
         ConfirmCallback={modalData.ConfirmCallback}
+        danger={modalData.danger}
       />
     </PageContainer>
   );

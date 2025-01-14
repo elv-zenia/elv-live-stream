@@ -10,7 +10,8 @@ const ConfirmModal = observer(({
   show,
   loadingText,
   cancelText="Cancel",
-  confirmText="Confirm"
+  confirmText="Confirm",
+  danger=false
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -42,12 +43,13 @@ const ConfirmModal = observer(({
           </div>
       }
       <Flex direction="row" align="center" mt="1.5rem" justify="flex-end">
-        <Button type="button" variant="outline" onClick={CloseCallback} mr="0.5rem">
+        <Button type="button" variant="outline" onClick={CloseCallback} mr="0.5rem" color={danger ? "elv-red.7" : "elv-violet"}>
           {cancelText}
         </Button>
         <Button
           disabled={loading}
           variant="filled"
+          color={danger ? "elv-red.7" : "elv-violet"}
           onClick={async () => {
             try {
               setError(undefined);

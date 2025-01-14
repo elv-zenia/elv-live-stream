@@ -187,6 +187,7 @@ const Settings = observer(() => {
         title="Delete Profile"
         message="Are you sure you want to delete the profile? This action cannot be undone."
         confirmText="Delete"
+        danger
         show={showModal}
         CloseCallback={() => setShowModal(false)}
         ConfirmCallback={async() => {
