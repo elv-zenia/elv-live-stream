@@ -1,8 +1,7 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Loader, Modal, Select, Text, TextInput} from "@mantine/core";
+import {Box, Button, Flex, Loader, Modal, Select, Text, TextInput} from "@mantine/core";
 import {dataStore} from "@/stores/index.js";
-import ElvButton from "@/components/button/ElvButton.jsx";
 
 const CopyToVodModal = observer(({
   show,
@@ -110,10 +109,10 @@ const CopyToVodModal = observer(({
           </div>
       }
       <Flex direction="row" align="center" mt="1.5rem" justify="flex-end">
-        <ElvButton variant="outline" onClick={close} mr="0.5rem">
+        <Button variant="outline" onClick={close} mr="0.5rem">
           Cancel
-        </ElvButton>
-        <ElvButton
+        </Button>
+        <Button
           disabled={loading || !libraryId || !title}
           onClick={async () => {
             try {
@@ -129,8 +128,8 @@ const CopyToVodModal = observer(({
             }
           }}
         >
-          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Copy"}
-        </ElvButton>
+          {loading ? <Loader type="dots" size="xs" color="white" /> : "Copy"}
+        </Button>
       </Flex>
     </Modal>
   );

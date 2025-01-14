@@ -23,7 +23,6 @@ import {IconAlertCircle} from "@tabler/icons-react";
 
 import {CircleInfoIcon} from "@/assets/icons/index.js";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
-import ElvButton from "@/components/button/ElvButton.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import styles from "./Create.module.css";
@@ -543,9 +542,9 @@ const Create = observer(() => {
         </Accordion>
 
         <Box mt="2rem" mb="2.5rem">
-          <ElvButton disabled={isCreating} type="submit">
+          <Button disabled={isCreating} type="submit">
             { isCreating ? "Submitting..." : "Save" }
-          </ElvButton>
+          </Button>
         </Box>
       </form>
 

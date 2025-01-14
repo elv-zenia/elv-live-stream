@@ -2,14 +2,26 @@ import {useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import path from "path";
 import {observer} from "mobx-react-lite";
-import {Box, Checkbox, FileButton, Flex, Group, Loader, Select, Text, Textarea, Title, Tooltip} from "@mantine/core";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FileButton,
+  Flex,
+  Group,
+  Loader,
+  Select,
+  Text,
+  Textarea,
+  Title,
+  Tooltip
+} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {DateTimePicker} from "@mantine/dates";
 import {DEFAULT_WATERMARK_FORENSIC, DEFAULT_WATERMARK_TEXT, DVR_DURATION_OPTIONS, STATUS_MAP} from "@/utils/constants";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {ENCRYPTION_OPTIONS} from "@/utils/constants";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
-import ElvButton from "@/components/button/ElvButton.jsx";
 import {CircleInfoIcon} from "@/assets/icons/index.js";
 
 const PlayoutPanel = observer(({
@@ -291,7 +303,7 @@ const PlayoutPanel = observer(({
               resetRef={resetRef}
             >
               {(props) => (
-                <ElvButton variant="outline" {...props}>Upload image</ElvButton>
+                <Button variant="outline" {...props}>Upload image</Button>
               )}
             </FileButton>
               {
@@ -309,13 +321,13 @@ const PlayoutPanel = observer(({
           </>
         }
       </Box>
-      <ElvButton
+      <Button
         disabled={applyingChanges}
         variant="filled"
         onClick={HandleSubmit}
       >
-        {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Apply"}
-      </ElvButton>
+        {applyingChanges ? <Loader type="dots" size="xs" color="white" /> : "Apply"}
+      </Button>
     </Box>
   );
 });

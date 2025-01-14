@@ -1,10 +1,9 @@
-import {Box, Flex, Group, Text, TextInput, Title} from "@mantine/core";
+import {Box, Button, Flex, Group, Text, TextInput, Title} from "@mantine/core";
 import {useState} from "react";
 import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
 import titleSectionStyles from "./TitleSection.module.css";
 import searchBarStyles from "./SearchBar.module.css";
 import AlertMessage from "@/components/alert-message/AlertMessage.jsx";
-import ElvButton from "@/components/button/ElvButton.jsx";
 
 const SearchBar = () => {
   const [value, setValue] = useState("");
@@ -39,8 +38,7 @@ const TopActions = ({showSearchBar, actions=[]}) => {
             <Flex direction="row" gap="sm">
               {
                 actions.map(({label, variant="filled", onClick, disabled, leftSection}) => (
-                  <ElvButton
-                    type="button"
+                  <Button
                     onClick={onClick}
                     key={`top-action-${label}`}
                     disabled={disabled}
@@ -48,7 +46,7 @@ const TopActions = ({showSearchBar, actions=[]}) => {
                     variant={variant}
                   >
                     { label ? label : null }
-                  </ElvButton>
+                  </Button>
                 ))
               }
             </Flex>

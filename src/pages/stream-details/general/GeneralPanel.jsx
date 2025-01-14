@@ -1,10 +1,9 @@
 import {observer} from "mobx-react-lite";
-import {Box, Flex, Loader, Select, Text, TextInput, Tooltip} from "@mantine/core";
+import {Box, Button, Flex, Loader, Select, Text, TextInput, Tooltip} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {dataStore, editStore, rootStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
 import {notifications} from "@mantine/notifications";
-import ElvButton from "@/components/button/ElvButton.jsx";
 import {CircleInfoIcon} from "@/assets/icons/index.js";
 
 const GeneralPanel = observer(({slug}) => {
@@ -201,9 +200,9 @@ const GeneralPanel = observer(({slug}) => {
               mb={16}
             />
           </Box>
-          <ElvButton type="submit" disabled={applyingChanges}>
-            {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Save"}
-          </ElvButton>
+          <Button type="submit" disabled={applyingChanges}>
+            {applyingChanges ? <Loader type="dots" size="xs" color="white" /> : "Save"}
+          </Button>
         </form>
       </Flex>
     </>

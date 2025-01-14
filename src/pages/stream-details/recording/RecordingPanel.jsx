@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import AudioTracksTable from "@/pages/create/audio-tracks-table/AudioTracksTable.jsx";
 import {dataStore, editStore, streamStore} from "@/stores";
 import {useParams} from "react-router-dom";
-import {Box, Loader, Select, Title} from "@mantine/core";
+import {Box, Button, Loader, Select, Title} from "@mantine/core";
 import {notifications} from "@mantine/notifications";
 import {
   CONNECTION_TIMEOUT_OPTIONS,
@@ -11,7 +11,6 @@ import {
   RETENTION_OPTIONS, STATUS_MAP
 } from "@/utils/constants";
 import DisabledTooltipWrapper from "@/components/disabled-tooltip-wrapper/DisabledTooltipWrapper.jsx";
-import ElvButton from "@/components/button/ElvButton.jsx";
 
 const RecordingPanel = observer(({
   title,
@@ -142,12 +141,12 @@ const RecordingPanel = observer(({
         </DisabledTooltipWrapper>
 
         <Box mt="24px">
-          <ElvButton
+          <Button
             type="submit"
             disabled={applyingChanges || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           >
-            {applyingChanges ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : "Apply"}
-          </ElvButton>
+            {applyingChanges ? <Loader type="dots" size="xs" color="white" /> : "Apply"}
+          </Button>
         </Box>
       </form>
     </Box>

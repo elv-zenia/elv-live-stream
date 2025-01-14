@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Flex, Loader, Modal, Text} from "@mantine/core";
-import ElvButton from "@/components/button/ElvButton.jsx";
+import {Button, Flex, Loader, Modal, Text} from "@mantine/core";
 
 const ConfirmModal = observer(({
   message,
@@ -43,10 +42,10 @@ const ConfirmModal = observer(({
           </div>
       }
       <Flex direction="row" align="center" mt="1.5rem" justify="flex-end">
-        <ElvButton type="button" variant="outline" onClick={CloseCallback} mr="0.5rem">
+        <Button type="button" variant="outline" onClick={CloseCallback} mr="0.5rem">
           {cancelText}
-        </ElvButton>
-        <ElvButton
+        </Button>
+        <Button
           disabled={loading}
           variant="filled"
           onClick={async () => {
@@ -64,8 +63,8 @@ const ConfirmModal = observer(({
             }
           }}
         >
-          {loading ? <Loader type="dots" size="xs" style={{margin: "0 auto"}} color="white" /> : confirmText}
-        </ElvButton>
+          {loading ? <Loader type="dots" size="xs" color="white" /> : confirmText}
+        </Button>
       </Flex>
     </Modal>
   );
