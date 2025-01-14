@@ -111,17 +111,17 @@ const Streams = observer(() => {
           { accessor: "title", title: "Name", sortable: true, render: record => (
             <Stack gap={0}>
               <Link to={`/streams/${record.objectId || record.slug}`} className={styles.tableLink}>
-                <Text fw={600} lineClamp={1} title={record.title || record.slug}>
+                <Text fw={600} lineClamp={1} fz="sm" title={record.title || record.slug}>
                   {record.title || record.slug}
                 </Text>
               </Link>
               <Text c="dimmed" fz="xs">{record.objectId}</Text>
             </Stack>
           )},
-          { accessor: "originUrl", title: "URL", render: record => <Text title={SanitizeUrl({url: record.originUrl})}>{SanitizeUrl({url: record.originUrl})}</Text> },
-          { accessor: "format", title: "Format", render: record => <Text>{FORMAT_TEXT[record.format]}</Text> },
-          { accessor: "video", title: "Video", render: record => <Text>{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
-          { accessor: "audioStreams", title: "Audio", render: record => <Text>{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
+          { accessor: "originUrl", title: "URL", render: record => <Text title={SanitizeUrl({url: record.originUrl})} fz="sm">{SanitizeUrl({url: record.originUrl})}</Text> },
+          { accessor: "format", title: "Format", render: record => <Text fz="sm">{FORMAT_TEXT[record.format]}</Text> },
+          { accessor: "video", title: "Video", render: record => <Text fz="sm">{CODEC_TEXT[record.codecName]} {VideoBitrateReadable(record.videoBitrate)}</Text> },
+          { accessor: "audioStreams", title: "Audio", render: record => <Text fz="sm">{record.audioStreamCount ? `${record.audioStreamCount} ${record.audioStreamCount > 1 ? "streams" : "stream"}` : ""}</Text> },
           {
             accessor: "status",
             title: "Status",
