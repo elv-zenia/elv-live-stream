@@ -23,6 +23,7 @@ import StatusText from "@/components/status-text/StatusText.jsx";
 import styles from "./Streams.module.css";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
+import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
 
 const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
@@ -77,7 +78,9 @@ const Streams = observer(() => {
     >
       <TextInput
         maw={400}
+        classNames={{input: styles.searchBar}}
         placeholder="Search by object name or ID"
+        leftSection={<MagnifyingGlassIcon width={18} height={18} />}
         mb="md"
         value={filter}
         onChange={event => setFilter(event.target.value)}
