@@ -11,6 +11,7 @@ import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {StreamIsActive} from "@/utils/helpers";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import {notifications} from "@mantine/notifications";
+import {IconChevronLeft} from "@tabler/icons-react";
 
 const StreamDetailsPage = observer(() => {
   const navigate = useNavigate();
@@ -74,7 +75,8 @@ const StreamDetailsPage = observer(() => {
 
   const actions = [
     {
-      label: "Back",
+      label: "All Streams",
+      leftSection: <IconChevronLeft />,
       variant: "filled",
       uppercase: true,
       onClick: () => navigate(-1)
