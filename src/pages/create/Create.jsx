@@ -154,7 +154,6 @@ const AdvancedSettingsPanel = observer(({
         !objectProbed &&
         <Alert
           variant="light"
-          color="blue"
           mt={24}
           mb={24}
           icon={<IconAlertCircle/>}

@@ -8,9 +8,8 @@ const theme = createTheme({
   headings: {
     fontFamily: "Helvetica Neue, Helvetica, sans-serif"
   },
-  // TODO: Change primary color
-  // primaryColor: "elv-violet",
-  // primaryShade: 3,
+  primaryColor: "elv-violet",
+  primaryShade: 3,
   colors: {
     "elv-violet": [
       "#f9e9ff",
@@ -100,14 +99,6 @@ const theme = createTheme({
   },
   // Default styles for components that need styles across components
   components: {
-    Tabs: {
-      styles: () => ({
-        // list: {
-        //   "--tab-border-color": "var(--mantine-color-elv-neutral-4)",
-        //   "--tabs-list-border-size": "1px"
-        // }
-      })
-    },
     Anchor: {
       styles: () => ({
         root: {
@@ -129,13 +120,6 @@ const theme = createTheme({
         root: {
           "--mantine-spacing-xxs": "0.3125rem"
         }
-      })
-    },
-    Button: {
-      styles: () => ({
-        // root: {
-        //   "border": "2px solid var(--mantine-color-elv-violet-outline)"
-        // }
       })
     },
     Modal: {
