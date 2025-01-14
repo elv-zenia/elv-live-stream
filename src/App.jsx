@@ -20,7 +20,10 @@ const App = observer(() => {
   return (
     <MantineProvider withCSSVariables theme={MantineTheme}>
       <BrowserRouter>
-        <AppShell padding="0" withBorder={false} navbar={{width: 210, breakpoint: "sm"}}>
+        <AppShell
+          padding="0"
+          navbar={{width: 70, breakpoint: "sm"}}
+        >
           <LeftNavigation />
           <AppShell.Main>
             <ErrorBanner />

@@ -6,7 +6,7 @@ import {observer} from "mobx-react-lite";
 import {Loader, Tabs, Text} from "@mantine/core";
 import {useDebouncedCallback, useDisclosure} from "@mantine/hooks";
 import {DETAILS_TABS, STATUS_MAP} from "@/utils/constants";
-import classes from "@/pages/stream-details/StreamDetails.module.css";
+import styles from "@/pages/stream-details/StreamDetails.module.css";
 import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import {StreamIsActive} from "@/utils/helpers";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
@@ -176,11 +176,11 @@ const StreamDetailsPage = observer(() => {
       }
       actions={actions}
     >
-      <Tabs className={classes.root} value={activeTab} onChange={setActiveTab}>
-        <Tabs.List className={classes.list}>
+      <Tabs className={styles.root} value={activeTab} onChange={setActiveTab}>
+        <Tabs.List className={styles.list}>
           {
             DETAILS_TABS.map(tab => (
-              <Tabs.Tab value={tab.value} key={`details-tabs-${tab.value}`} className={classes.tab}>
+              <Tabs.Tab value={tab.value} key={`details-tabs-${tab.value}`} className={styles.tab}>
                 <Text fw="400" size="md">{tab.label}</Text>
               </Tabs.Tab>
             ))
