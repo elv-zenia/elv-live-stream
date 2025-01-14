@@ -34,6 +34,7 @@ class DataStore {
   }
 
   Initialize = flow(function * (reload=false) {
+    this.loaded = false;
     try {
       const tenantContractId = yield this.LoadTenantInfo();
       if(!this.siteId) {
@@ -46,8 +47,8 @@ class DataStore {
 
       yield this.LoadLadderProfiles();
       yield this.LoadStreams();
-      yield streamStore.AllStreamsStatus(reload);
       this.loaded = true;
+      yield streamStore.AllStreamsStatus(reload);
     } catch(error) {
       this.loaded = true;
     }
