@@ -1,4 +1,4 @@
-import {Box, Button, Flex, Group, Text, TextInput, Title} from "@mantine/core";
+import {ActionIcon, Box, Button, Flex, Group, Text, TextInput, Title} from "@mantine/core";
 import {useState} from "react";
 import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
 import titleSectionStyles from "./TitleSection.module.css";
@@ -37,16 +37,24 @@ const TopActions = ({showSearchBar, actions=[]}) => {
           (
             <Flex direction="row" gap="sm">
               {
-                actions.map(({label, variant="filled", onClick, disabled, leftSection}) => (
-                  <Button
-                    onClick={onClick}
-                    key={`top-action-${label}`}
-                    disabled={disabled}
-                    leftSection={leftSection}
-                    variant={variant}
-                  >
-                    { label ? label : null }
-                  </Button>
+                actions.map(({label, variant="filled", onClick, disabled, leftSection, iconOnly}, i) => (
+                  iconOnly ?
+                    (
+                      <ActionIcon key={`top-action-${i}`} variant={variant} size="36">
+                        { leftSection }
+                      </ActionIcon>
+                    ) :
+                    (
+                      <Button
+                        onClick={onClick}
+                        key={`top-action-${label}`}
+                        disabled={disabled}
+                        leftSection={leftSection}
+                        variant={variant}
+                      >
+                        { label ? label : null }
+                      </Button>
+                    )
                 ))
               }
             </Flex>
