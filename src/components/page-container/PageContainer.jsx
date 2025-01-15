@@ -78,7 +78,7 @@ const TitleSection = ({title, subtitle, rightSection}) => {
       <Box display="block">
         {
           subtitle &&
-          <Text size="sm" c="gray" mt={6}>{subtitle}</Text>
+          <Text size="sm" c="elv-gray.7" mt={6}>{subtitle}</Text>
         }
       </Box>
     </Flex>
