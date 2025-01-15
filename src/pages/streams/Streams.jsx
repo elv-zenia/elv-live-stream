@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {observer} from "mobx-react-lite";
 import {Link} from "react-router-dom";
 import {
@@ -27,14 +27,14 @@ import ConfirmModal from "@/components/confirm-modal/ConfirmModal.jsx";
 import PageContainer from "@/components/page-container/PageContainer.jsx";
 import {MagnifyingGlassIcon} from "@/assets/icons/index.js";
 
-const PAGE_SIZE = 25;
+// const PAGE_SIZE = 25;
 
 const Streams = observer(() => {
   const [sortStatus, setSortStatus] = useState({columnAccessor: "title", direction: "asc"});
   const [filter, setFilter] = useState("");
   const [debouncedFilter] = useDebouncedValue(filter, 200);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [records, setRecords] = useState([]);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [records, setRecords] = useState([]);
 
   const ResetModal = () => {
     setModalData({
@@ -59,27 +59,37 @@ const Streams = observer(() => {
   });
 
 
-  useEffect(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-
-    const newRecords = Object.values(streamStore.streams || {})
-      .filter(record => {
-        return (
-          !debouncedFilter ||
-          record.title.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
-          record.objectId.toLowerCase().includes(debouncedFilter.toLowerCase())
-        );
-      })
-      .sort(SortTable({sortStatus}))
-      .slice(start, end);
-
-    setRecords(newRecords);
-  }, [currentPage, streamStore.streams, debouncedFilter]);
+  // useEffect(() => {
+  //   const start = (currentPage - 1) * PAGE_SIZE;
+  //   const end = start + PAGE_SIZE;
+  //
+  //   const newRecords = Object.values(streamStore.streams || {})
+  //     .filter(record => {
+  //       return (
+  //         !debouncedFilter ||
+  //         record.title.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+  //         record.objectId.toLowerCase().includes(debouncedFilter.toLowerCase())
+  //       );
+  //     })
+  //     .sort(SortTable({sortStatus}))
+  //     // .slice(start, end);
+  //
+  //   setRecords(newRecords);
+  // }, [currentPage, streamStore.streams, debouncedFilter]);
 
   const DebouncedRefresh = useDebouncedCallback(async() => {
     await dataStore.Initialize(true);
   }, 500);
+
+  const records = Object.values(streamStore.streams || {})
+    .filter(record => {
+      return (
+        !debouncedFilter ||
+        record.title.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        record.objectId.toLowerCase().includes(debouncedFilter.toLowerCase())
+      );
+    })
+    .sort(SortTable({sortStatus}));
 
   return (
     <PageContainer
@@ -108,10 +118,10 @@ const Streams = observer(() => {
         minHeight={!records || records.length === 0 ? 150 : 75}
         fetching={!dataStore.loaded}
         records={records}
-        recordsPerPage={PAGE_SIZE}
-        totalRecords={filter ? records?.length : Object.keys(streamStore.streams || {}).length}
-        page={currentPage}
-        onPageChange={setCurrentPage}
+        // recordsPerPage={PAGE_SIZE}
+        // totalRecords={filter ? records?.length : Object.keys(streamStore.streams || {}).length}
+        // page={currentPage}
+        // onPageChange={setCurrentPage}
         emptyState={
           // Mantine bug where empty state link still present underneath table rows
           !records &&
