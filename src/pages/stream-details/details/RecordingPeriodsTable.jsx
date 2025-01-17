@@ -123,7 +123,7 @@ const RecordingPeriodsTable = observer(({
           style={{marginLeft: "auto"}}
           onClick={open}
         >
-          {copyingToVod ? <Loader type="dots" size="xs" color="white" /> : "Copy to VoD"}
+          {copyingToVod ? <Loader type="dots" size="xs" color="elv-gray.7" /> : "Copy to VoD"}
         </Button>
       </Flex>
       <DataTable

@@ -201,7 +201,7 @@ const GeneralPanel = observer(({slug}) => {
             />
           </Box>
           <Button type="submit" disabled={applyingChanges}>
-            {applyingChanges ? <Loader type="dots" size="xs" color="white" /> : "Save"}
+            {applyingChanges ? <Loader type="dots" size="xs" color="elv-gray.7" /> : "Save"}
           </Button>
         </form>
       </Flex>

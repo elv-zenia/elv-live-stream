@@ -145,7 +145,7 @@ const RecordingPanel = observer(({
             type="submit"
             disabled={applyingChanges || ![STATUS_MAP.INACTIVE, STATUS_MAP.STOPPED].includes(status)}
           >
-            {applyingChanges ? <Loader type="dots" size="xs" color="white" /> : "Apply"}
+            {applyingChanges ? <Loader type="dots" size="xs" color="elv-gray.7" /> : "Apply"}
           </Button>
         </Box>
       </form>

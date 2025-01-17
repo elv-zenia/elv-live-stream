@@ -65,7 +65,7 @@ const ConfirmModal = observer(({
             }
           }}
         >
-          {loading ? <Loader type="dots" size="xs" color="white" /> : confirmText}
+          {loading ? <Loader type="dots" size="xs" color="elv-gray.7" /> : confirmText}
         </Button>
       </Flex>
     </Modal>
